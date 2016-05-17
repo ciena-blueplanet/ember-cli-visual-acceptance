@@ -607,7 +607,6 @@
 
             module.exports = function(ownerDocument, containerDocument, width, height, options, x, y) {
                 var documentElement = cloneNode(ownerDocument.documentElement, options.javascriptEnabled);
-                console.log(containerDocument)
                 var container = containerDocument.createElement("iframe");
 
                 container.className = "html2canvas-container";
