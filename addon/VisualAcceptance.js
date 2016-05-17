@@ -4,11 +4,8 @@ function httpGet(theUrl) {
     xmlHttp.send(null)
     return xmlHttp.responseText
 }
-// import {
-//   assert
-// } from 'chai'
-export default function(imageName, height=null, width=null, misMatchPercentageMargin = 0.00, done) {
-    try {
+
+export default function(imageName, height=null, width=null, misMatchPercentageMargin = 0.00, callback) {
         html2canvas(document.getElementById('ember-testing-container'), {height: height, width: width}).then(function(canvas) {
             // Get test dummy image
             var image = canvas.toDataURL('image/png')
@@ -34,10 +31,12 @@ export default function(imageName, height=null, width=null, misMatchPercentageMa
                         name: imageName + '.png'
                     }
                 })
-                if (typeof done === "function") {
-                    done()
+                if (typeof callback === "function") {
+                    callback()
+                }else {
+                  return 'No passed image. Saving current test as base'
                 }
-                return 'No passed image. Saving current test as base'
+                
             } else {
                 // Passed image exists so compare to current
                 res.image = "data:image/png;base64," + res.image
@@ -66,7 +65,6 @@ export default function(imageName, height=null, width=null, misMatchPercentageMa
                                 name: imageName + '.png'
                             }
                         })
-                        // 
                     }
                     /* Resemblejs Output
                     {
@@ -76,15 +74,18 @@ export default function(imageName, height=null, width=null, misMatchPercentageMa
                       getImageDataUrl: function(){}
                     }
                     */
-                    if (typeof done === "function") {
-                        done()
+                    
+                    if (typeof callback === "function") {
+                        if (!result){
+                            callback("Image is above the mismatch percentage margin")
+                        }else{
+                            callback()
+                        }
+                    }else{
+                        return data
                     }
-                    // assert.isTrue(result, 'Image is above misMatchPercentageMargin')
-                    return data
+                    
                 })
             }
-        })
-    } catch (error) {
-        console.log(error)
-    }
+    })
 }
