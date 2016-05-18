@@ -74,7 +74,7 @@ export default function(imageName, height=null, width=null, misMatchPercentageMa
                       getImageDataUrl: function(){}
                     }
                     */
-                    
+                     expect(result).to.be.true  
                     if (typeof callback === "function") {
                         if (!result){
                             callback("Image is above the mismatch percentage margin")
