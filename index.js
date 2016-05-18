@@ -60,7 +60,7 @@ module.exports = {
       saveImage(req, res)
     })
 
-    app.post('/pass', function(req, res) {
+    app.post('/passed', function(req, res) {
       savePassedImage(req, res)
     })
     app.post('/fail', function(req, res) {

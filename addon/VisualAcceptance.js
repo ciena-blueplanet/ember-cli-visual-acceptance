@@ -54,6 +54,7 @@ export default function(imageName, height=null, width=null, misMatchPercentageMa
                             }
                         })
                         result = true
+                        return "No base Image. Saving Current"
                     } else {
                         // Fail
                         $.ajax({
@@ -75,15 +76,7 @@ export default function(imageName, height=null, width=null, misMatchPercentageMa
                     }
                     */
                     expect(result).to.be.true
-                    // if (typeof callback === "function") {
-                    //     if (!result){
-                    //         callback("Image is above the mismatch percentage margin")
-                    //     }else{
-                    //         callback()
-                    //     }
-                    // }else{
-                    //     return data
-                    // }
+                    return data
                     
                 })
             }
