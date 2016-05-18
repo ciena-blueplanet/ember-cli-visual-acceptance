@@ -43,6 +43,7 @@ export default function(imageName, height = null, width = null, misMatchPercenta
             var diff = resemble(image).compareTo(res.image).scaleToSameSize().onComplete(function(data) {
                 var result = false
                 if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
+                    console.log('passed')
                     // Passed
                     $.ajax({
                         type: 'POST',
@@ -66,6 +67,7 @@ export default function(imageName, height = null, width = null, misMatchPercenta
                             name: imageName + '.png'
                         }
                     })
+                    expect(result).to.be.true
                 }
                 /* Resemblejs Output
                 {
@@ -75,12 +77,12 @@ export default function(imageName, height = null, width = null, misMatchPercenta
                   getImageDataUrl: function(){}
                 }
                 */
-                expect(result).to.be.true
+                
                 return data
             })
         }
     }).catch(function(err) {
-        console.log(err)
+        // console.log(err)
        return err
     })
 }
