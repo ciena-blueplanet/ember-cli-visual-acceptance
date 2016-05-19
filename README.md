@@ -33,7 +33,7 @@ Integration: FrostSelectComponent selects the hovered item when enter is pressed
         AssertionError: Image is above mismatch threshold.: expected false to be true
 ```
 
-Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. Which shows in pink your visual differences.
+Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. Which shows in pink your visual differences. More info about visual diffs can be found here https://github.com/Huddle/Resemble.js. ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for ResembleJS
 
 ### Example Usage
 ```
