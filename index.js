@@ -52,6 +52,9 @@ module.exports = {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js')
       app.import('vendor/html2canvas.js')
     }
+    app.import('vendor/visual-acceptance-report.css', {
+          type: 'test'
+    });
   },
 
   middleware: function(app, options) {

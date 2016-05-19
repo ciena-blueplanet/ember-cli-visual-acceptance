@@ -9,6 +9,7 @@ import {
   expect
 } from 'chai'
 export default function(imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
+  $(document.getElementById('ember-testing')).css('zoom','normal')
   return html2canvas(document.getElementById('ember-testing-container'), {
     height: height,
     width: width
@@ -16,7 +17,16 @@ export default function(imageName, height = null, width = null, misMatchPercenta
     // Get test dummy image
     var imageDirectoryTrailingSlash = imageDirectory.replace(/\/$/, "") + '/'
     var image = canvas.toDataURL('image/png')
-
+    var visualAcceptanceContainer
+    if (document.getElementById("visual-acceptance") == null){
+      visualAcceptanceContainer = document.createElement("div")
+      visualAcceptanceContainer.setAttribute("id", "visual-acceptance");
+      visualAcceptanceContainer.innerHTML = `<h1> Visual Acceptance tests: </h1> <ul id="visual-acceptance-report"> </ul>`
+      document.body.appendChild(visualAcceptanceContainer)
+    }else{
+      visualAcceptanceContainer = document.getElementById("visual-acceptance")
+    }
+    var node = document.createElement("div")
     // Get passed image
     var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(imageDirectoryTrailingSlash) + imageName + '-passed.png'))
     if (res.error === 'File does not exist') {
@@ -52,6 +62,7 @@ export default function(imageName, height = null, width = null, misMatchPercenta
               }
             })
             result = true
+            node.innerHTML = '<div> Passed </div>'
           } else {
             // Fail
             $.ajax({
@@ -63,9 +74,13 @@ export default function(imageName, height = null, width = null, misMatchPercenta
                 name: imageDirectoryTrailingSlash + imageName + '.png'
               }
             })
+            node.innerHTML = `<li class="test fail"> <h2> Failed: ${imageName} </h2> <img src="${data.getImageDataUrl()}" /> </li>`
           }
+          $(document.getElementById('ember-testing')).removeAttr('style')
+          document.getElementById('visual-acceptance-report').appendChild(node)
           assert.isTrue(result, "Image is above mismatch threshold.")
           data ? resolve(data) : reject(data)
+          
         })
       })
     }
