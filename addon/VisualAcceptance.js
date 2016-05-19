@@ -50,7 +50,6 @@ export default function(imageName, height = null, width = null, misMatchPercenta
             }
           })
           result = true
-          return "No base Image. Saving Current"
         } else {
           // Fail
           $.ajax({
