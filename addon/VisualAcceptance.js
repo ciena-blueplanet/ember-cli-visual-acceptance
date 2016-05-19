@@ -36,47 +36,38 @@ export default function(imageName, height = null, width = null, misMatchPercenta
     } else {
       // Passed image exists so compare to current
       res.image = "data:image/png;base64," + res.image
-      var temp = null
-      var diff = resemble(image).compareTo(res.image).scaleToSameSize().onComplete(function(data) {
-        var result = false
-        
-        if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
-          // Passed
-          $.ajax({
-            type: 'POST',
-            async: false,
-            url: '/passed',
-            data: {
-              image: image,
-              name: imageDirectoryTrailingSlash + imageName + '.png'
-            }
-          })
-          result = true
-        } else {
-          // Fail
-          $.ajax({
-            type: 'POST',
-            async: false,
-            url: '/fail',
-            data: {
-              image: data.getImageDataUrl(),
-              name: imageDirectoryTrailingSlash + imageName + '.png'
-            }
-          })
-        }
-        /* Resemblejs Output
-        {
-          misMatchPercentage : 100, // %
-          isSameDimensions: true, // or false
-          dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
-          getImageDataUrl: function(){}
-        }
-        */
-        assert.isTrue(result, "Image is above mismatch threshold.")
-        temp = data;
-        // return data;
+      return new Promise(function(resolve, reject){
+        resemble(image).compareTo(res.image).scaleToSameSize().onComplete(function(data) {
+          var result = false
+
+          if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
+            // Passed
+            $.ajax({
+              type: 'POST',
+              async: false,
+              url: '/passed',
+              data: {
+                image: image,
+                name: imageDirectoryTrailingSlash + imageName + '.png'
+              }
+            })
+            result = true
+          } else {
+            // Fail
+            $.ajax({
+              type: 'POST',
+              async: false,
+              url: '/fail',
+              data: {
+                image: data.getImageDataUrl(),
+                name: imageDirectoryTrailingSlash + imageName + '.png'
+              }
+            })
+          }
+          assert.isTrue(result, "Image is above mismatch threshold.")
+          data ? resolve(data) : reject(data)
+        })
       })
-      return temp
     }
   });
 }
