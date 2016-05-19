@@ -1,10 +1,14 @@
 # Ember-cli-visual-acceptance
 
-This README outlines the details of collaborating on this Ember addon.
+## Installation
+Coming soon!
+Will be available on npm in future and installation process will be `ember install ember-cli-visual-acceptance`
 
 ## Usage
   * Import the library
     * `import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'`
+  * The first run of the visualAcceptance function will create your baseline image
+  * Be aware different browsers will produce different images. Either due to browser compatability or the library's, html2canvas, functionality 
   * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test 
 ```
 visualAcceptance('Boston', null, null, 0.00).catch(function (err) {
@@ -19,6 +23,20 @@ visualAcceptance('Boston', null, null, 0.00).catch(function (err) {
 | width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.                                                                                           |
 | misMatchPercentageMargin | float  | 0.00                | The maximum percentage ResembleJs is allowed to misMatch.                                                                                                                           |
 | imageDirectory           | string | 'visual-acceptance' | The location where the `-passed.png` and `-failed.png` images will be saved. *(Note: Cannot be within the `tests` folder as this will restart the test every time an image is save) |
+
+### Establishing a new baseline
+To establish a new baseline simply located the `-passed.png` of the image you wish to establish a new baseline for and delete it. The next run of `ember test` will create the new baseline.
+
+### What a failure looks like
+From ember test:
+```
+Integration: FrostSelectComponent selects the hovered item when enter is pressed
+    ✘ Image is above mismatch threshold.: expected false to be true
+        AssertionError: Image is above mismatch threshold.: expected false to be true
+```
+
+Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. Which shows in pink your visual differences. More info about visual diffs can be found here https://github.com/Huddle/Resemble.js. ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for ResembleJS
+
 ### Example Usage
 ```
 it('selects the hovered item when enter is pressed', function (done) {
