@@ -11,6 +11,10 @@ function saveImage(req, res) {
 }
 
 function savePassedImage(req, res) {
+  var imageDirectory = req.body.name.substring(0,req.body.name.lastIndexOf("\/")+1);
+  if (!fs.existsSync(imageDirectory)) {
+    fs.mkdirSync(imageDirectory);
+  }
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, "");
   var buff = new Buffer(req.body.image, 'base64');
   fs.writeFileSync(req.body.name.replace('\.', '-passed.'), buff)
@@ -25,14 +29,17 @@ function misMatchImage(req, res) {
 }
 
 function getImage(req, res) {
-  if (fs.existsSync(req.query.name)) {
-    var file = fs.readFileSync(req.query.name)
+  var decodedURI = decodeURIComponent(req.query.name)
+  if (fs.existsSync(decodedURI)) {
+    var file = fs.readFileSync(decodedURI)
     res.type('json')
     res.send({
       image: file.toString('base64')
     })
-  }else {
-    res.send({ error: 'File does not exist'})
+  } else {
+    res.send({
+      error: 'File does not exist'
+    })
   }
 
 }

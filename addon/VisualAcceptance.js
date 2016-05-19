@@ -36,8 +36,10 @@ export default function(imageName, height = null, width = null, misMatchPercenta
     } else {
       // Passed image exists so compare to current
       res.image = "data:image/png;base64," + res.image
+      var temp = null
       var diff = resemble(image).compareTo(res.image).scaleToSameSize().onComplete(function(data) {
         var result = false
+        
         if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
           // Passed
           $.ajax({
@@ -71,9 +73,10 @@ export default function(imageName, height = null, width = null, misMatchPercenta
         }
         */
         assert.isTrue(result, "Image is above mismatch threshold.")
-
-        return data
+        temp = data;
+        // return data;
       })
+      return temp
     }
   });
 }
