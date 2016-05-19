@@ -1,6 +1,8 @@
 # Ember-cli-visual-acceptance
 
-This README outlines the details of collaborating on this Ember addon.
+## Installation
+Coming soon!
+Will be available on npm in future and installation process will be `ember install ember-cli-visual-acceptance`
 
 ## Usage
   * Import the library
