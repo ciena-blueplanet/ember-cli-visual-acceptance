@@ -1,4 +1,3 @@
-/*jshint node:true*/
 module.exports = {
   description: 'Add resemble to bower html2canvas to bower',
 

@@ -1,0 +1,7 @@
+{
+  "globals": {
+    "chai": true,
+    "Ember": true,
+    "sinon": true
+  }
+}

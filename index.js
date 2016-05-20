@@ -1,4 +1,3 @@
-/* jshint node: true */
 'use strict';
 var bodyParser = require('body-parser')
 var fs = require('fs')
