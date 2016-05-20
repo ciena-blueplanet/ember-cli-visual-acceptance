@@ -52,6 +52,8 @@ module.exports = {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js')
       app.import('vendor/html2canvas.js')
     }
+    app.import('vendor/dist/css/materialize.min.css', {type:'test'})
+    app.import('vendor/dist/js/materialize.min.js', {type:'test'})
     app.import('vendor/visual-acceptance-report.css', {
           type: 'test'
     });
