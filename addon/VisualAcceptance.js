@@ -14,7 +14,7 @@ export default function(imageName, height = null, width = null, misMatchPercenta
   var el = $(`
       <ul class="tabs">
         <li class="tab col s3"><a href="#mocha" class="active" >Mocha.js</a></li>
-        <li class="tab col s3"><a href="#blanket-main">Blanket.js</a></li>
+        ${blanket ? `<li class="tab col s3"><a href="#blanket-main">Blanket.js</a></li>` : ``}
         <li class="tab col s3"><a href="#visual-acceptance">VisualAcceptance.js</a></li>
       </ul>
   `)
