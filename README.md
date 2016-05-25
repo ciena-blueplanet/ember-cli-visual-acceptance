@@ -15,10 +15,10 @@ visualAcceptance('Boston', null, null, 0.00).catch(function (err) {
   done(err)
 })
 ```
-    * Otherwise just return the promise
-      ```javascript
-      return visualAcceptance('placeholder', null, null, 0.00)
-      ```
+  * Otherwise just return the promise
+```javascript
+return visualAcceptance('placeholder', null, null, 0.00)
+```
 ### Parameters
 |           Name           | Type   | Default             | Description                                                                                                                                                                         |
 |:------------------------:|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
