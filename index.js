@@ -48,8 +48,8 @@ module.exports = {
   included: function(app) {
     this._super.included(app);
     if (process.env.EMBER_CLI_FASTBOOT !== 'true') {
-      app.import(app.bowerDirectory + '/resemblejs/resemble.js')
-      app.import('vendor/html2canvas.js')
+      app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type:'test'})
+      app.import('vendor/html2canvas.js', {type:'test'})
     }
     app.import('vendor/dist/css/materialize.min.css', {type:'test'})
     app.import('vendor/dist/js/materialize.min.js', {type:'test'})

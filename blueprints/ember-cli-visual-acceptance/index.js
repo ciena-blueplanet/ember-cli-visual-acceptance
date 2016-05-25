@@ -9,8 +9,8 @@ module.exports = {
   // }
   included: function(app) {
      this._super.included(app);
-     app.import('vendor/html2canvas.js')
-     app.import(app.bowerDirectory + '/resemblejs/resemble.js')
+     app.import('vendor/html2canvas.js', {type: 'test'})
+     app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
   },
   normalizeEntityName: function() {
     // no-op
