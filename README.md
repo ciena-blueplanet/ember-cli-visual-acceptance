@@ -8,8 +8,8 @@ Will be available on npm in future and installation process will be `ember insta
   * Import the library
     * `import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'`
   * The first run of the visualAcceptance function will create your baseline image
-  * Be aware different browsers will produce different images. Either due to browser compatability or the library's, html2canvas, functionality 
-  * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test 
+  * Be aware different browsers will produce different images. Either due to browser compatability or the library's, html2canvas, functionality
+  * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test
 ```
 visualAcceptance('Boston', null, null, 0.00).catch(function (err) {
   done(err)
@@ -38,7 +38,8 @@ Integration: FrostSelectComponent selects the hovered item when enter is pressed
 Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. Which shows in pink your visual differences. More info about visual diffs can be found here https://github.com/Huddle/Resemble.js. ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for ResembleJS
 
 ### Example Usage
-```
+#### With done() callback
+```javascript
 it('selects the hovered item when enter is pressed', function (done) {
   keyUp(dropDown, 40)
   keyUp(dropDown, 13)
@@ -47,9 +48,20 @@ it('selects the hovered item when enter is pressed', function (done) {
     let dropDownInput = this.$('.frost-select input')
     let value = dropDownInput.val()
     expect(value).to.eql(props.data[0].label)
-    visualAcceptance('Boston', null, null, 0.00).catch(function (err) {
+    visualAcceptance('Boston', null, null, 0.00).then(function (data) {
+      console.log(arguments)
+      done()
+    }).catch(function (err) {
       done(err)
     })
   })
+})
+```
+#### Without done() callback
+```javascript
+it('supports placeholder', function () {
+  const $input = this.$('.frost-select input')
+  expect($input.attr('placeholder')).to.eql('Select something already')
+  return visualAcceptance('placeholder', null, null, 0.00)
 })
 ```
