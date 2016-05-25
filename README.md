@@ -9,12 +9,16 @@ Will be available on npm in future and installation process will be `ember insta
     * `import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'`
   * The first run of the visualAcceptance function will create your baseline image
   * Be aware different browsers will produce different images. Either due to browser compatability or the library's, html2canvas, functionality
-  * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test
-```
+  * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test if using the done() callback
+```javascript
 visualAcceptance('Boston', null, null, 0.00).catch(function (err) {
   done(err)
 })
 ```
+    * Otherwise just return the promise
+      ```javascript
+      return visualAcceptance('placeholder', null, null, 0.00)
+      ```
 ### Parameters
 |           Name           | Type   | Default             | Description                                                                                                                                                                         |
 |:------------------------:|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
