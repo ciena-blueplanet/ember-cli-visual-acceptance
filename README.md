@@ -11,14 +11,25 @@ Will be available on npm in future and installation process will be `ember insta
   * Be aware different browsers will produce different images. Either due to browser compatability or the library's, html2canvas, functionality
   * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test if using the done() callback
 ```javascript
-visualAcceptance('Boston', null, null, 0.00).catch(function (err) {
-  done(err)
-})
+visualAcceptance('Boston', null, null, 0.00).then(function (data) {
+      console.log(arguments)  
+      /* ResembleJs output
+      {
+        misMatchPercentage : 100, // %
+        isSameDimensions: true, // or false
+        dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
+        getImageDataUrl: function(){}
+      }
+    */
+      done()
+    }).catch(function (err) {
+      done(err)
+    })
 ```
-    * Otherwise just return the promise
-      ```javascript
-      return visualAcceptance('placeholder', null, null, 0.00)
-      ```
+  * Otherwise just return the promise
+```javascript
+return visualAcceptance('placeholder', null, null, 0.00)
+```
 ### Parameters
 |           Name           | Type   | Default             | Description                                                                                                                                                                         |
 |:------------------------:|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -54,6 +65,14 @@ it('selects the hovered item when enter is pressed', function (done) {
     expect(value).to.eql(props.data[0].label)
     visualAcceptance('Boston', null, null, 0.00).then(function (data) {
       console.log(arguments)
+      /* ResembleJs output
+      {
+        misMatchPercentage : 100, // %
+        isSameDimensions: true, // or false
+        dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
+        getImageDataUrl: function(){}
+      }
+    */
       done()
     }).catch(function (err) {
       done(err)
