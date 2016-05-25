@@ -13,13 +13,13 @@ describeComponent(
   'Integration: FrostButtonComponent', {
     integration: true
   },
-  function() {
-    it('renders', function(done) {
+  function () {
+    it('renders', function (done) {
       this.render(hbs `{{input type="text" value='Simple words' disabled=entryNotAllowed size="50"}}`)
       expect(this.$()).to.have.length(1)
-      visualAcceptance('Simple', null, null, 0.00).then(function(data) {
+      visualAcceptance('Simple', null, null, 0.00).then(function (data) {
         done()
-      }).catch(function(err) {
+      }).catch(function (err) {
         done(err)
       })
     })

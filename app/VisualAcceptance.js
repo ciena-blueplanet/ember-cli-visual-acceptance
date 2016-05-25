@@ -1,2 +1,2 @@
-import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance';
-export default visualAcceptance;
+import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'
+export default visualAcceptance
