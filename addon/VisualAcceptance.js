@@ -1,4 +1,4 @@
-/*global XMLHttpRequest,$,blanket,html2canvas */
+/*global XMLHttpRequest,$,html2canvas */
 function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
@@ -10,16 +10,7 @@ import {
 } from 'chai'
 export default function (imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
   $(document.getElementById('ember-testing')).css('zoom', 'normal')
-  // $('#mocha-stats').css('top', '50px')
-  // var el = $(`
-  //     <ul class="tabs">
-  //       <li class="tab col s3"><a href="#mocha" class="active" >Mocha.js</a></li>
-  //       ${blanket ? '<li class="tab col s3"><a href="#blanket-main">Blanket.js</a></li>' : ''}
-  //       <li class="tab col s3"><a href="#visual-acceptance">VisualAcceptance.js</a></li>
-  //     </ul>
-  // `)
-  // $(document.body).prepend(el)
-  // $(el).tabs()
+  console.log(window.ui)
   return html2canvas(document.getElementById('ember-testing-container'), {
     height: height,
     width: width
@@ -72,7 +63,7 @@ export default function (imageName, height = null, width = null, misMatchPercent
               }
             })
             result = true
-            node.innerHTML = '<div> Passed </div>'
+            node.innerHTML = `<li class="test pass"> <h2> Passed: ${imageName} </h2> <img src="${image}" /> </li>`
           } else {
             // Fail
             $.ajax({
