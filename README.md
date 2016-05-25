@@ -1,17 +1,29 @@
 # Ember-cli-visual-acceptance
 
+Create baseline images and test for CSS regression during standard Ember tests using html2Canvas and ResembleJS
+
 ## Installation
-Coming soon!
-Will be available on npm in future and installation process will be `ember install ember-cli-visual-acceptance`
+
+`ember install ember-cli-visual-acceptance`
 
 ## Usage
   * Import the library
-    * `import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'`
-  * The first run of the visualAcceptance function will create your baseline image
-  * Be aware different browsers will produce different images. Either due to browser compatability or the library's, html2canvas, functionality
-  * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test if using the done() callback
-```javascript
-visualAcceptance('Boston', null, null, 0.00).then(function (data) {
+    * `import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'` 
+  * Configure the systems and browsers that will capture images
+    * Different systems and browsers produce different images
+    * To prevent false positives images are only captured against specific targets
+    * The results of each target are stored in separate directories and are only compared against the same target
+  ```javascript
+    Config example
+  ```
+  * Add labeled captures into your tests (what are the params here?)
+  ```javascript
+    return capture(label, height, width, misMatchPercentage)
+  ```
+  * The first capture will automatically become the baseline image
+  * When executing asynchronous tests with an explicit done() you must use a `.catch` to handle image assertion failures
+  ```javascript
+    capture('label', null, null, 0.00).then(function (data) {
       console.log(arguments)  
       /* ResembleJs output
       {
@@ -25,11 +37,8 @@ visualAcceptance('Boston', null, null, 0.00).then(function (data) {
     }).catch(function (err) {
       done(err)
     })
-```
-  * Otherwise just return the promise
-```javascript
-return visualAcceptance('placeholder', null, null, 0.00)
-```
+  ```
+
 ### Parameters
 |           Name           | Type   | Default             | Description                                                                                                                                                                         |
 |:------------------------:|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -50,9 +59,22 @@ Integration: FrostSelectComponent selects the hovered item when enter is pressed
         AssertionError: Image is above mismatch threshold.: expected false to be true
 ```
 
-Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. Which shows in pink your visual differences. More info about visual diffs can be found here https://github.com/Huddle/Resemble.js. ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for ResembleJS
+Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. 
+Visual differences are shown in pink. 
+More info about visual diffs can be found here https://github.com/Huddle/Resemble.js. 
+ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for ResembleJS
 
 ### Example Usage
+
+#### Without done() callback
+```javascript
+it('supports placeholder', function () {
+  const $input = this.$('.frost-select input')
+  expect($input.attr('placeholder')).to.eql('Select something already')
+  return visualAcceptance('placeholder', null, null, 0.00)
+})
+```
+
 #### With done() callback
 ```javascript
 it('selects the hovered item when enter is pressed', function (done) {
@@ -63,28 +85,11 @@ it('selects the hovered item when enter is pressed', function (done) {
     let dropDownInput = this.$('.frost-select input')
     let value = dropDownInput.val()
     expect(value).to.eql(props.data[0].label)
-    visualAcceptance('Boston', null, null, 0.00).then(function (data) {
-      console.log(arguments)
-      /* ResembleJs output
-      {
-        misMatchPercentage : 100, // %
-        isSameDimensions: true, // or false
-        dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
-        getImageDataUrl: function(){}
-      }
-    */
+    visualAcceptance('select-with-value', null, null, 0.00).then(function (data) {
       done()
     }).catch(function (err) {
       done(err)
     })
   })
-})
-```
-#### Without done() callback
-```javascript
-it('supports placeholder', function () {
-  const $input = this.$('.frost-select input')
-  expect($input.attr('placeholder')).to.eql('Select something already')
-  return visualAcceptance('placeholder', null, null, 0.00)
 })
 ```
