@@ -6,13 +6,28 @@ function httpGet (theUrl) {
   return xmlHttp.responseText
 }
 
-function visualAcceptance(imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
+function visualAcceptance (imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
   $(document.getElementById('ember-testing')).css('zoom', 'normal')
+  $(document.getElementById('ember-testing')).css('width', '100%')
+  $(document.getElementById('ember-testing')).css('height', '100%')
+  $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
+  $(document.getElementById('ember-testing-container')).css('position', 'initial')
   var browser = window.ui
   var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+  if (height !== null && width !== null) {
+    $(document.getElementById('ember-testing-container')).css('width', width + 'px')
+    $(document.getElementById('ember-testing-container')).css('height', height + 'px')
+    browserDirectory += width + 'x' + height + '/'
+  } else {
+    // default mocha window size
+    browserDirectory += 640 + 'x' + 384 + '/'
+  }
+  resemble.outputSettings({
+    largeImageThreshold: 0
+  })
   return html2canvas(document.getElementById('ember-testing-container'), {
-    height: height,
-    width: width
+    height: null,
+    width: null
   }).then(function (canvas) {
     // Get test dummy image
     var imageDirectoryTrailingSlash = imageDirectory.replace(/\/$/, '') + '/'
@@ -40,14 +55,14 @@ function visualAcceptance(imageName, height = null, width = null, misMatchPercen
           name: imageDirectoryTrailingSlash + browserDirectory + imageName + '.png'
         }
       })
-
+      $(document.getElementById('ember-testing-container')).removeAttr('style')
       return 'No passed image. Saving current test as base'
 
     } else {
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function (resolve, reject) {
-        resemble(image).compareTo(res.image).scaleToSameSize().onComplete(function (data) {
+        resemble(res.image).compareTo(image).ignoreAntialiasing().onComplete(function (data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
@@ -74,13 +89,15 @@ function visualAcceptance(imageName, height = null, width = null, misMatchPercen
                 name: `${imageDirectoryTrailingSlash}${browserDirectory}${imageName}.png`
               }
             })
-            node.innerHTML = `<li class="test fail"> <h2> Failed: ${imageName} </h2> <img src="${data.getImageDataUrl()}" /> </li>`
+            node.innerHTML = `<li class="test fail"> <h2> Failed: ${imageName} </h2> <img class="diff image" src="${data.getImageDataUrl()}" /> <img class="input image" src="${image}" /> <img class="passed image" src="${res.image}" /></li>`
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
+          $(document.getElementById('ember-testing-container')).removeAttr('style')
           // $('#blanket-main').css('display', 'none')
           // $('#visual-acceptance').css('display', 'none')
           document.getElementById('visual-acceptance').appendChild(node)
-          chai.assert.isTrue(result, 'Image is above mis match threshold.')
+          chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mis match threshold(${misMatchPercentageMargin}).
+          Resemble Output: ${data}`)
           data ? resolve(data) : reject(data)
         })
       })
