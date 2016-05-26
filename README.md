@@ -5,6 +5,13 @@ Create baseline images and test for CSS regression during standard Ember tests u
 ## Installation
 
 `ember install ember-cli-visual-acceptance`
+### Configuration
+You can modify the save directory in `ember-cli-build.js` by including
+```
+visualAcceptanceOptions: {
+      imageDirectory: 'visual-acceptance'
+    }
+``` 
 
 ## Usage
 
