@@ -7,8 +7,7 @@ Create baseline images and test for CSS regression during standard Ember tests u
 `ember install ember-cli-visual-acceptance`
 
 ## Usage
-  * Import the library
-    * `import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'` 
+
   * Configure the systems and browsers that will capture images
     * Different systems and browsers produce different images
     * To prevent false positives images are only captured against specific targets
@@ -37,7 +36,12 @@ Create baseline images and test for CSS regression during standard Ember tests u
     }).catch(function (err) {
       done(err)
     })
-  ```
+```
+  * Otherwise just return the promise
+```javascript
+return capture('placeholder', null, null, 0.00)
+```
+
 
 ### Parameters
 |           Name           | Type   | Default             | Description                                                                                                                                                                         |
@@ -85,7 +89,7 @@ it('selects the hovered item when enter is pressed', function (done) {
     let dropDownInput = this.$('.frost-select input')
     let value = dropDownInput.val()
     expect(value).to.eql(props.data[0].label)
-    visualAcceptance('select-with-value', null, null, 0.00).then(function (data) {
+    capture('Boston', null, null, 0.00).then(function (data) {
       done()
     }).catch(function (err) {
       done(err)
@@ -93,3 +97,4 @@ it('selects the hovered item when enter is pressed', function (done) {
   })
 })
 ```
+  return capture('placeholder', null, null, 0.00)
