@@ -1,16 +1,15 @@
-/*global XMLHttpRequest,$,html2canvas */
+/*global XMLHttpRequest,$,html2canvas,chai */
 function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
   xmlHttp.send(null)
   return xmlHttp.responseText
 }
-import {
-  assert
-} from 'chai'
-export default function (imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
+
+function visualAcceptance(imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
   $(document.getElementById('ember-testing')).css('zoom', 'normal')
-  console.log(window.ui)
+  var browser = window.ui
+  var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   return html2canvas(document.getElementById('ember-testing-container'), {
     height: height,
     width: width
@@ -29,7 +28,7 @@ export default function (imageName, height = null, width = null, misMatchPercent
     }
     var node = document.createElement('div')
       // Get passed image
-    var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(imageDirectoryTrailingSlash) + imageName + '-passed.png'))
+    var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(imageDirectoryTrailingSlash) + browserDirectory + imageName + '-passed.png'))
     if (res.error === 'File does not exist') {
       // Save image as passed if no existing passed image
       $.ajax({
@@ -38,7 +37,7 @@ export default function (imageName, height = null, width = null, misMatchPercent
         url: '/passed',
         data: {
           image: image,
-          name: imageDirectoryTrailingSlash + imageName + '.png'
+          name: imageDirectoryTrailingSlash + browserDirectory + imageName + '.png'
         }
       })
 
@@ -59,7 +58,7 @@ export default function (imageName, height = null, width = null, misMatchPercent
               url: '/passed',
               data: {
                 image: image,
-                name: `${imageDirectoryTrailingSlash}${imageName}.png`
+                name: `${imageDirectoryTrailingSlash}${browserDirectory}${imageName}.png`
               }
             })
             result = true
@@ -72,7 +71,7 @@ export default function (imageName, height = null, width = null, misMatchPercent
               url: '/fail',
               data: {
                 image: data.getImageDataUrl(),
-                name: `${imageDirectoryTrailingSlash}${imageName}.png`
+                name: `${imageDirectoryTrailingSlash}${browserDirectory}${imageName}.png`
               }
             })
             node.innerHTML = `<li class="test fail"> <h2> Failed: ${imageName} </h2> <img src="${data.getImageDataUrl()}" /> </li>`
@@ -81,7 +80,7 @@ export default function (imageName, height = null, width = null, misMatchPercent
           // $('#blanket-main').css('display', 'none')
           // $('#visual-acceptance').css('display', 'none')
           document.getElementById('visual-acceptance').appendChild(node)
-          assert.isTrue(result, 'Image is above mis match threshold.')
+          chai.assert.isTrue(result, 'Image is above mis match threshold.')
           data ? resolve(data) : reject(data)
         })
       })

@@ -2,6 +2,22 @@
 /* eslint-disable no-useless-escape*/
 var bodyParser = require('body-parser')
 var fs = require('fs')
+var path = require('path')
+
+function mkdirSync (path) {
+  try {
+    fs.mkdirSync(path)
+  } catch (e) {
+    if (e.code !== 'EEXIST') throw e
+  }
+}
+
+function mkdirpSync (dirpath) {
+  let parts = dirpath.split(path.sep)
+  for (let i = 1; i <= parts.length; i++) {
+    mkdirSync(path.join.apply(null, parts.slice(0, i)))
+  }
+}
 
 function saveImage (req, res) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
@@ -13,18 +29,18 @@ function saveImage (req, res) {
 function savePassedImage (req, res) {
   var imageDirectory = req.body.name.substring(0, req.body.name.lastIndexOf('\/') + 1)
   if (!fs.existsSync(imageDirectory)) {
-    fs.mkdirSync(imageDirectory)
+    mkdirpSync(imageDirectory)
   }
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
-  fs.writeFileSync(req.body.name.replace('\.', '-passed.'), buff)
+  fs.writeFileSync(req.body.name.replace(/\.([^\.]*)$/, '-passed.$1'), buff)
   res.send('')
 }
 
 function misMatchImage (req, res) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
-  fs.writeFileSync(req.body.name.replace('\.', '-failed.'), buff)
+  fs.writeFileSync(req.body.name.replace(/\.([^\.]*)$/, '-failed.$1'), buff)
   res.send('')
 }
 
@@ -51,6 +67,7 @@ module.exports = {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
       app.import(app.bowerDirectory + '/detectjs/src/detect.js', {type: 'test'})
       app.import('vendor/html2canvas.js', {type: 'test'})
+      app.import('vendor/VisualAcceptance.js', {type: 'test'})
     }
     app.import('vendor/dist/css/materialize.min.css', {type: 'test'})
     app.import('vendor/dist/js/materialize.min.js', {type: 'test'})
@@ -69,6 +86,7 @@ module.exports = {
     })
 
     app.post('/image', function (req, res) {
+      console.log('Hello')
       saveImage(req, res)
     })
 
@@ -90,7 +108,8 @@ module.exports = {
       return
     }
     this.middleware(options.app, {
-      root: this.project.root
+      root: this.project.root,
+      options: options
     })
   }
 

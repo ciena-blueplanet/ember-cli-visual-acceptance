@@ -9,6 +9,7 @@ module.exports = {
   // }
   included: function (app) {
     this._super.included(app)
+    app.import('vendor/VisualAcceptance.js', {type: 'test'})
     app.import('vendor/html2canvas.js', {type: 'test'})
     app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
     app.import(app.bowerDirectory + '/detectjs/src/detect.js', {type: 'test'})
