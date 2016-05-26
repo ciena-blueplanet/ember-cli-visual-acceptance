@@ -5,13 +5,11 @@ Coming soon!
 Will be available on npm in future and installation process will be `ember install ember-cli-visual-acceptance`
 
 ## Usage
-  * Import the library
-    * `import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'`
   * The first run of the visualAcceptance function will create your baseline image
   * Be aware different browsers will produce different images. Either due to browser compatability or the library's, html2canvas, functionality
   * Using the library you must have a `.catch` to  properly catch the assertion error when the image fails the test if using the done() callback
 ```javascript
-visualAcceptance('Boston', null, null, 0.00).then(function (data) {
+capture('Boston', null, null, 0.00).then(function (data) {
       console.log(arguments)  
       /* ResembleJs output
       {
@@ -28,7 +26,7 @@ visualAcceptance('Boston', null, null, 0.00).then(function (data) {
 ```
   * Otherwise just return the promise
 ```javascript
-return visualAcceptance('placeholder', null, null, 0.00)
+return capture('placeholder', null, null, 0.00)
 ```
 ### Parameters
 |           Name           | Type   | Default             | Description                                                                                                                                                                         |
@@ -63,7 +61,7 @@ it('selects the hovered item when enter is pressed', function (done) {
     let dropDownInput = this.$('.frost-select input')
     let value = dropDownInput.val()
     expect(value).to.eql(props.data[0].label)
-    visualAcceptance('Boston', null, null, 0.00).then(function (data) {
+    capture('Boston', null, null, 0.00).then(function (data) {
       console.log(arguments)
       /* ResembleJs output
       {
@@ -85,6 +83,6 @@ it('selects the hovered item when enter is pressed', function (done) {
 it('supports placeholder', function () {
   const $input = this.$('.frost-select input')
   expect($input.attr('placeholder')).to.eql('Select something already')
-  return visualAcceptance('placeholder', null, null, 0.00)
+  return capture('placeholder', null, null, 0.00)
 })
 ```
