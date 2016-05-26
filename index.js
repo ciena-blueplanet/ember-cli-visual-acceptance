@@ -74,7 +74,7 @@ module.exports = {
     app.import('vendor/visual-acceptance-report.css', {
       type: 'test'
     })
-    this.imageDirectory = app.options.visualAcceptance.imageDirectory || 'visual-acceptance'
+    this.imageDirectory = app.options.visualAcceptanceOptions.imageDirectory || 'visual-acceptance'
   },
   imageDirectory: 'visual-acceptance',
   middleware: function (app, options) {

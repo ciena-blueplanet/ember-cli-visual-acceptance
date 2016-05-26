@@ -95,7 +95,7 @@ function capture (imageName, height = null, width = null, misMatchPercentageMarg
           // $('#blanket-main').css('display', 'none')
           // $('#visual-acceptance').css('display', 'none')
           document.getElementById('visual-acceptance').appendChild(node)
-          chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mis match threshold(${misMatchPercentageMargin}).`)
+          chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mismatch threshold(${misMatchPercentageMargin}).`)
           data ? resolve(data) : reject(data)
         })
       })
