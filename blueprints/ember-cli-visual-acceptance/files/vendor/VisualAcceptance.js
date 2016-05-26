@@ -6,7 +6,7 @@ function httpGet (theUrl) {
   return xmlHttp.responseText
 }
 
-function visualAcceptance (imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
+function capture (imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
   $(document.getElementById('ember-testing')).css('zoom', 'normal')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')

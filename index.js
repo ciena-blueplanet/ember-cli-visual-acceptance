@@ -86,7 +86,6 @@ module.exports = {
     })
 
     app.post('/image', function (req, res) {
-      console.log('Hello')
       saveImage(req, res)
     })
 
