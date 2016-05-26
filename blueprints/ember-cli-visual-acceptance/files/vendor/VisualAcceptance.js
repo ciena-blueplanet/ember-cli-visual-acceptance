@@ -30,7 +30,6 @@ function capture (imageName, height = null, width = null, misMatchPercentageMarg
     width: null
   }).then(function (canvas) {
     // Get test dummy image
-    var imageDirectoryTrailingSlash = imageDirectory.replace(/\/$/, '') + '/'
     var image = canvas.toDataURL('image/png')
     var visualAcceptanceContainer
     if (!document.getElementById('visual-acceptance')) {
@@ -43,7 +42,7 @@ function capture (imageName, height = null, width = null, misMatchPercentageMarg
     }
     var node = document.createElement('div')
       // Get passed image
-    var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(imageDirectoryTrailingSlash) + browserDirectory + imageName + '-passed.png'))
+    var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
     if (res.error === 'File does not exist') {
       // Save image as passed if no existing passed image
       $.ajax({
@@ -52,7 +51,7 @@ function capture (imageName, height = null, width = null, misMatchPercentageMarg
         url: '/passed',
         data: {
           image: image,
-          name: imageDirectoryTrailingSlash + browserDirectory + imageName + '.png'
+          name: browserDirectory + imageName + '.png'
         }
       })
       $(document.getElementById('ember-testing-container')).removeAttr('style')
@@ -73,7 +72,7 @@ function capture (imageName, height = null, width = null, misMatchPercentageMarg
               url: '/passed',
               data: {
                 image: image,
-                name: `${imageDirectoryTrailingSlash}${browserDirectory}${imageName}.png`
+                name: `${browserDirectory}${imageName}.png`
               }
             })
             result = true
@@ -86,7 +85,7 @@ function capture (imageName, height = null, width = null, misMatchPercentageMarg
               url: '/fail',
               data: {
                 image: data.getImageDataUrl(),
-                name: `${imageDirectoryTrailingSlash}${browserDirectory}${imageName}.png`
+                name: `${browserDirectory}${imageName}.png`
               }
             })
             node.innerHTML = `<li class="test fail"> <h2> Failed: ${imageName} </h2> <img class="diff image" src="${data.getImageDataUrl()}" /> <img class="input image" src="${image}" /> <img class="passed image" src="${res.image}" /></li>`
@@ -96,8 +95,7 @@ function capture (imageName, height = null, width = null, misMatchPercentageMarg
           // $('#blanket-main').css('display', 'none')
           // $('#visual-acceptance').css('display', 'none')
           document.getElementById('visual-acceptance').appendChild(node)
-          chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mis match threshold(${misMatchPercentageMargin}).
-          Resemble Output: ${data}`)
+          chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mis match threshold(${misMatchPercentageMargin}).`)
           data ? resolve(data) : reject(data)
         })
       })

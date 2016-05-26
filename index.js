@@ -19,33 +19,33 @@ function mkdirpSync (dirpath) {
   }
 }
 
-function saveImage (req, res) {
+function saveImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
-  fs.writeFileSync(req.body.name, buff)
+  fs.writeFileSync(options.imageDirectory + '/' + req.body.name, buff)
   res.send('')
 }
 
-function savePassedImage (req, res) {
-  var imageDirectory = req.body.name.substring(0, req.body.name.lastIndexOf('\/') + 1)
+function savePassedImage (req, res, options) {
+  var imageDirectory = options.imageDirectory + '/' + req.body.name.substring(0, req.body.name.lastIndexOf('\/') + 1)
   if (!fs.existsSync(imageDirectory)) {
     mkdirpSync(imageDirectory)
   }
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
-  fs.writeFileSync(req.body.name.replace(/\.([^\.]*)$/, '-passed.$1'), buff)
+  fs.writeFileSync(options.imageDirectory + '/' + req.body.name.replace(/\.([^\.]*)$/, '-passed.$1'), buff)
   res.send('')
 }
 
-function misMatchImage (req, res) {
+function misMatchImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
-  fs.writeFileSync(req.body.name.replace(/\.([^\.]*)$/, '-failed.$1'), buff)
+  fs.writeFileSync(options.imageDirectory + '/' + req.body.name.replace(/\.([^\.]*)$/, '-failed.$1'), buff)
   res.send('')
 }
 
-function getImage (req, res) {
-  var decodedURI = decodeURIComponent(req.query.name)
+function getImage (req, res, options) {
+  var decodedURI = options.imageDirectory + '/' + decodeURIComponent(req.query.name)
   if (fs.existsSync(decodedURI)) {
     var file = fs.readFileSync(decodedURI)
     res.type('json')
@@ -74,31 +74,33 @@ module.exports = {
     app.import('vendor/visual-acceptance-report.css', {
       type: 'test'
     })
+    this.imageDirectory = app.options.visualAcceptance.imageDirectory || 'visual-acceptance'
   },
-
+  imageDirectory: 'visual-acceptance',
   middleware: function (app, options) {
     app.use(bodyParser.urlencoded({
       extended: true
     }))
     app.use(bodyParser.json())
     app.get('/image', function (req, res) {
-      getImage(req, res)
+      getImage(req, res, options)
     })
 
     app.post('/image', function (req, res) {
-      saveImage(req, res)
+      saveImage(req, res, options)
     })
 
     app.post('/passed', function (req, res) {
-      savePassedImage(req, res)
+      savePassedImage(req, res, options)
     })
     app.post('/fail', function (req, res) {
-      misMatchImage(req, res)
+      misMatchImage(req, res, options)
     })
   },
   testemMiddleware: function (app) {
     this.middleware(app, {
-      root: this.project.root
+      root: this.project.root,
+      imageDirectory: this.imageDirectory
     })
   },
   serverMiddleware: function (options) {
@@ -108,7 +110,7 @@ module.exports = {
     }
     this.middleware(options.app, {
       root: this.project.root,
-      options: options
+      imageDirectory: this.imageDirectory.replace(/\/$/, '')
     })
   }
 
