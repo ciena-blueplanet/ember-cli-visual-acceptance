@@ -9,7 +9,7 @@ function httpGet(theUrl) {
 function capture(imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?browser%5B" + encodeURIComponent(browser)))
-  if (istargetbrowser === true) {
+  if (istargetbrowser === false) {
     return new Promise(function(resolve, reject) {
       resolve("Does not match target browser");
     })
