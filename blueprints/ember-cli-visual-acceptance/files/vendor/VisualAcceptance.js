@@ -18,6 +18,8 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
+  $(document.getElementById('ember-testing-container')).css('position', 'initial')
+  $(document.getElementById('ember-testing-container')).insertBefore(document.getElementById('mocha'))
   var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
@@ -35,14 +37,12 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   }).then(function(canvas) {
     // Get test dummy image
     var image = canvas.toDataURL('image/png')
-    var visualAcceptanceContainer
-    if (!document.getElementById('visual-acceptance')) {
+    if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
+      var visualAcceptanceContainer
       visualAcceptanceContainer = document.createElement('div')
       visualAcceptanceContainer.setAttribute('id', 'visual-acceptance')
-      visualAcceptanceContainer.innerHTML = '<h3> Visual Acceptance tests: </h3> <ul id="visual-acceptance-report"> </ul>'
+      visualAcceptanceContainer.innerHTML = '<h3> Visual Acceptance tests: </h3> <div id="visual-acceptance-container"> </div>'
       document.body.appendChild(visualAcceptanceContainer)
-    } else {
-      visualAcceptanceContainer = document.getElementById('visual-acceptance')
     }
     var node = document.createElement('div')
       // Get passed image
@@ -97,7 +97,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
-          document.getElementById('visual-acceptance').appendChild(node)
+          document.getElementById('visual-acceptance-container').appendChild(node)
           chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mismatch threshold(${misMatchPercentageMargin}).`)
           data ? resolve(data) : reject(data)
         })
