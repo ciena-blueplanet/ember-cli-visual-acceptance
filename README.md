@@ -6,12 +6,26 @@ Create baseline images and test for CSS regression during standard Ember tests u
 
 `ember install ember-cli-visual-acceptance`
 ### Configuration
-You can modify the save directory in `ember-cli-build.js` by including
-```
+* You can modify the save directory in `ember-cli-build.js` by including
+```javascript
 visualAcceptanceOptions: {
       imageDirectory: 'visual-acceptance'
     }
 ``` 
+* You can specify browsers to target by adding an object inside the `targetBrowsers` array in the `visualAcceptanceOptions` of `ember-cli-build.js`
+```javascript
+visualAcceptanceOptions: {
+      targetBrowsers: [{
+        bit: undefined,
+        browser: "Chrome",
+        mobile: undefined,
+        os: "Mac OS X",
+        osversion: "10.11.2",
+        version: "49.0.2623.112"
+      }]
+    }
+```
+  * The browser object is comes from [detect.js](https://github.com/benbscholz/detect/blob/master/src/detect.js#L6-L11). You can view your current browsers object after installing `ember-cli-visual-acceptance` by visiting typing in `window.ui` into the Browser's console after running `ember test -s`
 
 ## Usage
 
@@ -19,9 +33,6 @@ visualAcceptanceOptions: {
     * Different systems and browsers produce different images
     * To prevent false positives images are only captured against specific targets
     * The results of each target are stored in separate directories and are only compared against the same target
-  ```javascript
-    Config example
-  ```
   * Add labeled captures into your tests (what are the params here?)
   ```javascript
     return capture(label, height, width, misMatchPercentage)
