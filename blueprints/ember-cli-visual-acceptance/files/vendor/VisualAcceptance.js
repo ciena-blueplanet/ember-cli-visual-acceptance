@@ -29,9 +29,9 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
     // default mocha window size
     browserDirectory += 640 + 'x' + 384 + '/'
   }
-  resemble.outputSettings({
-    largeImageThreshold: 0
-  })
+  // resemble.outputSettings({
+  //   largeImageThreshold: 0
+  // })
   return html2canvas(document.getElementById('ember-testing-container'), {
     height: null,
     width: null
@@ -68,7 +68,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).ignoreAntialiasing().onComplete(function(data) {
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
