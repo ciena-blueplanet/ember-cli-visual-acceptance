@@ -6,20 +6,18 @@ function httpGet(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
+function capture(imageName, height = null, width = null, misMatchPercentageMargin = 1.00, imageDirectory = 'visual-acceptance') {
   var browser = window.ui
-  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?browser%5B" + encodeURIComponent(browser)))
+  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
   if (istargetbrowser === false) {
     return new Promise(function(resolve, reject) {
       resolve("Does not match target browser");
     })
   }
-  $(document.getElementById('ember-testing')).css('zoom', 'normal')
+  $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
-  $(document.getElementById('ember-testing-container')).css('position', 'initial')
-
   var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
@@ -33,8 +31,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   //   largeImageThreshold: 0
   // })
   return html2canvas(document.getElementById('ember-testing-container'), {
-    height: null,
-    width: null
+    timeout: 1000
   }).then(function(canvas) {
     // Get test dummy image
     var image = canvas.toDataURL('image/png')
@@ -61,6 +58,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
           name: browserDirectory + imageName + '.png'
         }
       })
+      $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
       return 'No passed image. Saving current test as base'
 
@@ -68,7 +66,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
+        resemble(res.image).compareTo(image).scaleToSameSize().ignoreAntialiasing().onComplete(function(data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
@@ -99,8 +97,6 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
-            // $('#blanket-main').css('display', 'none')
-            // $('#visual-acceptance').css('display', 'none')
           document.getElementById('visual-acceptance').appendChild(node)
           chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mismatch threshold(${misMatchPercentageMargin}).`)
           data ? resolve(data) : reject(data)

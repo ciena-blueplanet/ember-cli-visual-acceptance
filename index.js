@@ -20,10 +20,14 @@ function mkdirpSync (dirpath) {
 }
 
 function isTargetBrowser (req, res, targetBrowsers) {
-  console.log(targetBrowsers)
   if (targetBrowsers.length > 0) {
-    var clientBrowser = JSON.stringify(req.body.browser)
-    var result = targetBrowsers.indexOf(clientBrowser) !== -1
+    var result = false
+    for (var i = 0; i < targetBrowsers.length; i++) {
+      if (req.query.browser === targetBrowsers[i].browser && req.query.version === targetBrowsers[i].version && req.query.os === targetBrowsers[i].os && req.query.osversion === targetBrowsers[i].osversion && (req.query.mobile === targetBrowsers[i].mobile || (req.query.mobile === '' && targetBrowsers[i].mobile === undefined)) && (req.query.bit === targetBrowsers[i].bit || (req.query.bit === '' && targetBrowsers[i].bit === undefined))) {
+        result = true
+        break
+      }
+    }
     res.send(result)
   } else {
     res.send(true)
@@ -87,7 +91,7 @@ module.exports = {
     })
     if (app.options.visualAcceptanceOptions) {
       this.imageDirectory = app.options.visualAcceptanceOptions.imageDirectory || 'visual-acceptance'
-      this.targetBrowsers = app.options.visualAcceptanceOptions.targetBrowsers.map(JSON.stringify) || []
+      this.targetBrowsers = app.options.visualAcceptanceOptions.targetBrowsers || []
     }
   },
   imageDirectory: 'visual-acceptance',
@@ -125,7 +129,7 @@ module.exports = {
   },
   serverMiddleware: function (options) {
     this.app = options.app
-    if (!this.validEnv()) {
+    if (this.validEnv && !this.validEnv()) {
       return
     }
     this.middleware(options.app, {
