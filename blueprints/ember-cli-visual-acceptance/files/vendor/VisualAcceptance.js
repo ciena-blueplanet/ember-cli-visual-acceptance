@@ -19,7 +19,6 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
-  $(document.getElementById('ember-testing-container')).insertBefore(document.getElementById('mocha'))
   var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
