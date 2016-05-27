@@ -83,7 +83,7 @@ Integration: FrostSelectComponent selects the hovered item when enter is pressed
 
 Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. 
 Visual differences are shown in pink. 
-More info about visual diffs can be found here https://github.com/Huddle/Resemble.js. 
+More info about visual diffs can be found [here](https://github.com/Huddle/Resemble.js). 
 ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for ResembleJS
 
 ### Example Usage
@@ -93,7 +93,7 @@ ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for Resemb
 it('supports placeholder', function () {
   const $input = this.$('.frost-select input')
   expect($input.attr('placeholder')).to.eql('Select something already')
-  return visualAcceptance('placeholder', null, null, 0.00)
+  return visualAcceptance('placeholder')
 })
 ```
 
@@ -107,7 +107,7 @@ it('selects the hovered item when enter is pressed', function (done) {
     let dropDownInput = this.$('.frost-select input')
     let value = dropDownInput.val()
     expect(value).to.eql(props.data[0].label)
-    capture('Boston', null, null, 0.00).then(function (data) {
+    capture('Boston', 1920, 1080, 5.00).then(function (data) {
       done()
     }).catch(function (err) {
       done(err)
@@ -115,4 +115,3 @@ it('selects the hovered item when enter is pressed', function (done) {
   })
 })
 ```
-  return capture('placeholder', null, null, 0.00)
