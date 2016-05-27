@@ -19,6 +19,17 @@ function mkdirpSync (dirpath) {
   }
 }
 
+function isTargetBrowser (req, res, targetBrowsers) {
+  console.log(targetBrowsers)
+  if (targetBrowsers.length > 0) {
+    var clientBrowser = JSON.stringify(req.body.browser)
+    var result = targetBrowsers.indexOf(clientBrowser) !== -1
+    res.send(result)
+  } else {
+    res.send(true)
+  }
+}
+
 function saveImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
@@ -74,12 +85,13 @@ module.exports = {
     app.import('vendor/visual-acceptance-report.css', {
       type: 'test'
     })
-    if (app.options.visualAcceptanceOptions){
+    if (app.options.visualAcceptanceOptions) {
       this.imageDirectory = app.options.visualAcceptanceOptions.imageDirectory || 'visual-acceptance'
+      this.targetBrowsers = app.options.visualAcceptanceOptions.targetBrowsers.map(JSON.stringify) || []
     }
-
   },
   imageDirectory: 'visual-acceptance',
+  targetBrowsers: [],
   middleware: function (app, options) {
     app.use(bodyParser.urlencoded({
       extended: true
@@ -87,6 +99,10 @@ module.exports = {
     app.use(bodyParser.json())
     app.get('/image', function (req, res) {
       getImage(req, res, options)
+    })
+
+    app.get('/istargetbrowser', function (req, res) {
+      isTargetBrowser(req, res, options.targetBrowsers)
     })
 
     app.post('/image', function (req, res) {
@@ -103,7 +119,8 @@ module.exports = {
   testemMiddleware: function (app) {
     this.middleware(app, {
       root: this.project.root,
-      imageDirectory: this.imageDirectory
+      imageDirectory: this.imageDirectory,
+      targetBrowsers: this.targetBrowsers
     })
   },
   serverMiddleware: function (options) {
@@ -113,7 +130,8 @@ module.exports = {
     }
     this.middleware(options.app, {
       root: this.project.root,
-      imageDirectory: this.imageDirectory.replace(/\/$/, '')
+      imageDirectory: this.imageDirectory.replace(/\/$/, ''),
+      targetBrowsers: this.targetBrowsers
     })
   }
 
