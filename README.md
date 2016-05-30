@@ -70,7 +70,7 @@ return capture('placeholder', null, null, 0.00)
 | imageDirectory           | string | 'visual-acceptance' | The location where the `-passed.png` and `-failed.png` images will be saved. *(Note: Cannot be within the `tests` folder as this will restart the test every time an image is save) |
 
 ### Establishing a new baseline
-To establish a new baseline simply located the `-passed.png` of the image you wish to establish a new baseline for and delete it. The next run of `ember test` will create the new baseline.
+Simply run `ember new-baseline`
 
 ### What a failure looks like
 From ember test:
