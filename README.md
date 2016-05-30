@@ -16,9 +16,7 @@ visualAcceptanceOptions: {
 ```javascript
 visualAcceptanceOptions: {
       targetBrowsers: [{
-        bit: undefined,
         browser: "Chrome",
-        mobile: undefined,
         os: "Mac OS X",
         osversion: "10.11.2",
         version: "49.0.2623.112"
@@ -26,7 +24,8 @@ visualAcceptanceOptions: {
     }
 ```
   * The browser object is comes from [detect.js](https://github.com/benbscholz/detect/blob/master/src/detect.js#L6-L11). You can view your current browsers object after installing `ember-cli-visual-acceptance` by visiting typing in `window.ui` into the Browser's console after running `ember test -s`
-
+  * You can append `>=` to the begininng of the `osversion` and `version` if you also wish to target versions that are greater than or equal to the targeted version
+  * You can also exclude both `osversion` and `version` if only the browser and OS matters to you
 ## Usage
 
   * Configure the systems and browsers that will capture images

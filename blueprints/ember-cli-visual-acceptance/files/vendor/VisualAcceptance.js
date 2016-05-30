@@ -80,7 +80,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
               }
             })
             result = true
-            node.innerHTML = `<li class="test pass"> <h2> Passed: ${imageName} </h2> <img src="${image}" /> </li>`
+            node.innerHTML = `<div class="test pass"> <h4> Passed: ${imageName} </h4> <img src="${image}" /> </div>`
           } else {
             // Fail
             $.ajax({
@@ -92,7 +92,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
                 name: `${browserDirectory}${imageName}.png`
               }
             })
-            node.innerHTML = `<li class="test fail"> <h2> Failed: ${imageName} </h2> <img class="diff image" src="${data.getImageDataUrl()}" /> <img class="input image" src="${image}" /> <img class="passed image" src="${res.image}" /></li>`
+            node.innerHTML = `<div class="test fail"> <h4> Failed: ${imageName} </h4> <img class="diff image" src="${data.getImageDataUrl()}" /> <img class="input image" src="${image}" /> <img class="passed image" src="${res.image}" /></div>`
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')

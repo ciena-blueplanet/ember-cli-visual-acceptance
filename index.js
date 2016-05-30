@@ -4,6 +4,29 @@ var bodyParser = require('body-parser')
 var fs = require('fs')
 var path = require('path')
 
+function compareVersions (installed, required) {
+  if (required === undefined) {
+    return true
+  } else if (required.substring(0, 2) === '>=') {
+    var a = installed.split('.')
+    var b = required.split('.')
+
+    for (var i = 0; i < a.length; ++i) {
+      a[i] = Number(a[i])
+    }
+    for (var j = 0; i < b.length; ++j) {
+      b[j] = Number(b[j])
+    }
+    if (a.length !== b.length) return false
+    for (var k = 0; k < a.length; ++k) {
+      if (a[k] < b[k]) return false
+    }
+    return true
+  } else {
+    return installed === required
+  }
+}
+
 function mkdirSync (path) {
   try {
     fs.mkdirSync(path)
@@ -23,7 +46,7 @@ function isTargetBrowser (req, res, targetBrowsers) {
   if (targetBrowsers.length > 0) {
     var result = false
     for (var i = 0; i < targetBrowsers.length; i++) {
-      if (req.query.browser === targetBrowsers[i].browser && req.query.version === targetBrowsers[i].version && req.query.os === targetBrowsers[i].os && req.query.osversion === targetBrowsers[i].osversion && (req.query.mobile === targetBrowsers[i].mobile || (req.query.mobile === '' && targetBrowsers[i].mobile === undefined)) && (req.query.bit === targetBrowsers[i].bit || (req.query.bit === '' && targetBrowsers[i].bit === undefined))) {
+      if (req.query.browser === targetBrowsers[i].browser && compareVersions(req.query.version, targetBrowsers[i].version) && req.query.os === targetBrowsers[i].os && compareVersions(req.query.osversion, targetBrowsers[i].osversion)) {
         result = true
         break
       }
