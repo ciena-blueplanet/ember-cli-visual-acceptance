@@ -3,6 +3,26 @@
 var bodyParser = require('body-parser')
 var fs = require('fs')
 var path = require('path')
+var spawn = require('child_process').spawn
+var RSVP = require('rsvp')
+
+function runCommand (/* child_process.exec args */) {
+  var args = Array.prototype.slice.call(arguments)
+
+  return new RSVP.Promise(function (resolve, reject) {
+    var child = spawn('ember', ['test'])
+    child.stdout.on('data', function (data) {
+      console.log(data.toString())
+    })
+    child.stderr.on('data', function (data) {
+      reject(data.toString())
+    })
+
+    child.on('exit', function (code) {
+      resolve()
+    })
+  })
+}
 
 function compareVersions (installed, required) {
   if (required === undefined) {
@@ -102,13 +122,25 @@ module.exports = {
   included: function (app) {
     this._super.included(app)
     if (process.env.EMBER_CLI_FASTBOOT !== 'true') {
-      app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
-      app.import(app.bowerDirectory + '/detectjs/src/detect.js', {type: 'test'})
-      app.import('vendor/html2canvas.js', {type: 'test'})
-      app.import('vendor/VisualAcceptance.js', {type: 'test'})
+      app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
+        type: 'test'
+      })
+      app.import(app.bowerDirectory + '/detectjs/src/detect.js', {
+        type: 'test'
+      })
+      app.import('vendor/html2canvas.js', {
+        type: 'test'
+      })
+      app.import('vendor/VisualAcceptance.js', {
+        type: 'test'
+      })
     }
-    app.import('vendor/dist/css/materialize.min.css', {type: 'test'})
-    app.import('vendor/dist/js/materialize.min.js', {type: 'test'})
+    app.import('vendor/dist/css/materialize.min.css', {
+      type: 'test'
+    })
+    app.import('vendor/dist/js/materialize.min.js', {
+      type: 'test'
+    })
     app.import('vendor/visual-acceptance-report.css', {
       type: 'test'
     })
@@ -160,6 +192,42 @@ module.exports = {
       imageDirectory: this.imageDirectory.replace(/\/$/, ''),
       targetBrowsers: this.targetBrowsers
     })
-  }
+  },
 
+  includedCommands: function () {
+    return {
+      'new-baseline': {
+        name: 'new-baseline',
+        aliases: ['new-baseline'],
+        description: 'Create new baseline',
+        works: 'insideProject',
+        availableOptions: [{
+          name: 'image-directory',
+          type: String,
+          default: 'visual-acceptance',
+          description: 'The ember-cli-visual-acceptance directory where images are save'
+        }],
+        run: function (options, rawArgs) {
+          var root = this.project.root
+          var execOptions = { cwd: root }
+          function deleteFolderRecursive (path) {
+            if (fs.existsSync(path)) {
+              fs.readdirSync(path).forEach(function (file, index) {
+                var curPath = path + '/' + file
+                if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                  deleteFolderRecursive(curPath)
+                } else { // delete file
+                  fs.unlinkSync(curPath)
+                }
+              })
+              fs.rmdirSync(path)
+            }
+          }
+
+          deleteFolderRecursive(path.join(root, options.imageDirectory))
+          return runCommand('ember test', execOptions)
+        }
+      }
+    }
+  }
 }
