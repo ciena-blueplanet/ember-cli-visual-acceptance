@@ -1,35 +1,44 @@
----
 language: node_js
-node_js:
-  - "0.12"
-
 sudo: false
-
-cache:
-  directories:
-    - node_modules
-
-env:
-  - EMBER_TRY_SCENARIO=default
-  - EMBER_TRY_SCENARIO=ember-1.13
-  - EMBER_TRY_SCENARIO=ember-release
-  - EMBER_TRY_SCENARIO=ember-beta
-  - EMBER_TRY_SCENARIO=ember-canary
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - env: EMBER_TRY_SCENARIO=ember-canary
-
+node_js:
+- '5.3'
+branches:
+  except:
+  - /^v[0-9\.]+/
 before_install:
-  - export PATH=/usr/local/phantomjs-2.0.0/bin:$PATH
-  - "npm config set spin false"
-  - "npm install -g npm@^2"
-
+- npm install -g coveralls pr-bumper
+- pr-bumper check
 install:
-  - npm install -g bower
-  - npm install
-  - bower install
-
-script:
-  - ember try $EMBER_TRY_SCENARIO test
+- npm install
+- bower install
+after_success:
+- sed -i -- 's/SF:ember-cli-visual-acceptance\/\(.*\)/SF:addon\/\1.js/' coverage/lcov.info
+  && rm -f coverage/lcov.info--
+- cat coverage/lcov.info | coveralls
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+env:
+  matrix:
+  - CXX=g++-4.8
+  global:
+    secure: Ho2hlK6LvVqu4LV8Fz9orPmk1mVOyddxiFncOkldU2nQF1flL4laD1aYe8RHUrIX6Q1CI2OXnTZvSGWGeQuAK96C+6S7HcLAOeuo7mEnMUT4uwzWI0kmpZ+gCOIRBy/uF1ENf1OBV5kfLdHPuANa02YhdoEcGLiOYdnc/JW+7o+mdAG0F7P/nB99iqhIYI42lcZgqsMhrRVJFPXADyH+aWtV2lhRNKZhYeXTGsmVRTiGp70V/tV57Ib01Lb2TKpnkbeaj1tt1Gv+7S5+hdDvuy1jA0dmyhhYUq4hyE+Yh+QRJG7/KeKN43UDSAkxOk+XJBokxPeq5x8smYMa5oDUTTgHg0HhBMSc8Rf/5sbbRP9i7K66SyZ95xYjHXtGBPtHv2ejTQDXnbWW5dlIL+JBosbrKSTDw8brMg+tYLhLaD2vJYA+7NRut/8FgETSeKIpM17reH9CUjG+/gIZy1d60VqWmr+867nZIoHx6RIAbCRnHyitCyT2tA5SHsKX3Uvn79LH2hHe0yBYqwpdxBLK+yuf3parxCcCHfCUOh4K3tZetoAMpPyvtdTjsfNmV/T+Tma1mO81i3jnrFAPzYYwjFtF/tGkS56kULS2JOJltjmmtdP+O2FARhdG10hM8v1E52sm4/Lix8sUNX7FD27agXzR2xn2BzYJEChUWZ6I6uA=
+before_deploy:
+- pr-bumper bump
+deploy:
+  provider: npm
+  email: npm.ciena@gmail.com
+  skip_cleanup: true
+  api_key:
+    secure: HLxqmYM0XGiFrpfJR7wXkPTgTICHNybhJcDBSM+97LF1joLIm61R7hI2OV29EyLJ8ww5b7mC6TbIveAesYv4bER8Wx4zdHdE8OpoQlrDueHGb5xgJY+B6Shcp1euuYDffXPWXExZlf74Sz6SSZtZswxNkCbGngDohOr1DOOL8K/F4L01sK32nM4swnDOSvUx3rWQXNdorRjNKZXwlh0LgoGEh/46RA/ZbDoe9QQ1Qhrwx/Fg45WlkeJ8aT4TVVy9GexDXivEX9s2mx9Hn2ixt/A7CxiSTNtV4ol1FSbHYDNtN5/XqZEKeFEVR5QBmba2TFBZYYmXfEbicsZLJitYvrtL3IHF5DuVIqB/Rhm3AxzzcpXIqe8WjEXe48oCNinjzFImu2jb8VDaUnWIfoK7mVuYBKuumbNAWFyOLrEp8w2uAmN5sd7tOvdvjOIoVsGVw3mexHy34RQ2IQ7dlvWVtHMGZA2y6RQEU181MwzAD2EDU0nFBS9kNPmKXkwIcjzHRhrIouUqoaP5a4YowyHEiE25QEwVgOvHxjPWZIr2oBrfLCeu1q4Yoa6sXX1tA68c4Q34OvqSZCHg+ghoh3orJ0A5mjPq05FOk3/6Qon1tExJ/+zDRvBAnmZlu/6BwvGP+ia/hjYDP/EiseEvAokrPQxUqmz+O/QT8wDhgZlTgQI=
+  on:
+    branch: master
+    tags: false
+after_deploy:
+- .travis/publish-gh-pages.sh
+notifications:
+  slack:
+    secure: q8PU6LpnkEI3MH6E2dMidcC6lgiX/95QkD4fZgI0xtVzUbBq6Le3uF4k1CmZs2NwJpwMMV/gZQNkPFewCNlX9I1UgZSQAEcIiCsHIJJMl4KphXJaHr9spIp3b9uujIDSs+Bl7o/9RnHXAqJN/o5ZpW/8oLfRdcgzu6dezCnRDK5W4oTjJ+s6o2lSed4VS96R1pbyOF5VxGwQnGM0GZ+Ly8l7Rnn/8/A/4S+Ud6pnKbQppYPd7teVNpBw8ow5sIeiGYEuRpt0LFIAzVimgPDY9kK9cnEW/xxn1Upg336c7WzLwTGi9920CwBIVHXoiRou/oiPXCV7MDE/dH/Wu/OrTjq7os50//C6ya/es9tbKRA430kjxyE1lti666uOZJthkuEDPUD1sD8tAAcaPNNSp0Ksl9fK0Rz4dPXZYhIpN2yrcGT08kbDkd94AWZMn1iFXAMSEo9WsU9HskUggZ9AKHWcqJuqMgDvOx2aXujQWC9rFtGVGqtvo8W/ZfvLup/UEyBKwYtPvhk2wxG3l4tKlnsEZObtu1RADBidfwUTs5mBmEIWYc80gRYacD+SfTPCpk2t/AL7HGXyatVrZ/VW6BG80F3VmWAzq6nHcLK0BBYf3TlwnMV1kgaw8J9fMwoCg/G2M9Z7Xg4kKpvpdWnQ/+goRpNJLrIuSNqtrOIzraE=
