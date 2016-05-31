@@ -10,6 +10,8 @@ module.exports = function (defaults) {
   })
 
   app.import('bower_components/sinonjs/sinon.js')
+  app.import('vendor/html2canvas.js', {type: 'test'})
+  app.import('vendor/VisualAcceptance.js', {type: 'test'})
   /*
     This build file specifies the options for the dummy test app of this
     addon, located in `/tests/dummy`

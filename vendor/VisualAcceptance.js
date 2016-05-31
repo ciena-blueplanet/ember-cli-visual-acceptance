@@ -1,0 +1,1 @@
+../blueprints/ember-cli-visual-acceptance/files/vendor/VisualAcceptance.js
