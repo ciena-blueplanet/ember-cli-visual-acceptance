@@ -6,20 +6,19 @@ function httpGet(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, height = null, width = null, misMatchPercentageMargin = 0.00, imageDirectory = 'visual-acceptance') {
+function capture(imageName, height = null, width = null, misMatchPercentageMargin = 1.00, imageDirectory = 'visual-acceptance') {
   var browser = window.ui
-  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?browser%5B" + encodeURIComponent(browser)))
+  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
   if (istargetbrowser === false) {
     return new Promise(function(resolve, reject) {
       resolve("Does not match target browser");
     })
   }
-  $(document.getElementById('ember-testing')).css('zoom', 'normal')
+  $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
-
   var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
@@ -33,19 +32,16 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   //   largeImageThreshold: 0
   // })
   return html2canvas(document.getElementById('ember-testing-container'), {
-    height: null,
-    width: null
+    timeout: 1000
   }).then(function(canvas) {
     // Get test dummy image
     var image = canvas.toDataURL('image/png')
-    var visualAcceptanceContainer
-    if (!document.getElementById('visual-acceptance')) {
+    if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
+      var visualAcceptanceContainer
       visualAcceptanceContainer = document.createElement('div')
       visualAcceptanceContainer.setAttribute('id', 'visual-acceptance')
-      visualAcceptanceContainer.innerHTML = '<h3> Visual Acceptance tests: </h3> <ul id="visual-acceptance-report"> </ul>'
+      visualAcceptanceContainer.innerHTML = '<h3> Visual Acceptance tests: </h3> <div id="visual-acceptance-container"> </div>'
       document.body.appendChild(visualAcceptanceContainer)
-    } else {
-      visualAcceptanceContainer = document.getElementById('visual-acceptance')
     }
     var node = document.createElement('div')
       // Get passed image
@@ -61,6 +57,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
           name: browserDirectory + imageName + '.png'
         }
       })
+      $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
       return 'No passed image. Saving current test as base'
 
@@ -68,7 +65,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
+        resemble(res.image).compareTo(image).scaleToSameSize().ignoreAntialiasing().onComplete(function(data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
@@ -83,7 +80,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
               }
             })
             result = true
-            node.innerHTML = '<li class="test pass"> <h2> Passed:' + imageName + '</h2> <img src="'+ image + '" /> </li>'
+            node.innerHTML = '<div class="test pass"> <h4> Passed:' + imageName + '</h4> <img src="'+ image + '" /> </div>'
           } else {
             // Fail
             $.ajax({
@@ -95,13 +92,11 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
                 name: browserDirectory + imageName + '.png'
               }
             })
-            node.innerHTML = '<li class="test fail"> <h2> Failed: ' + imageName + '</h2> <img class="diff image" src="' + data.getImageDataUrl() +'" /> <img class="input image" src="' + image + '" /> <img class="passed image" src="' + res.image+'" /></li>'
+            node.innerHTML = '<div class="test fail"> <h4> Failed:'+ imageName+' </h4> <h5> Diff: </h5> <img class="diff image" src="'+data.getImageDataUrl()+'" /> <h5> Current: </h5> <img class="input image" src="'+image+'" /> <h5> Baseline: </h5> <img class="passed image" src="'+res.image+'" /></div>'
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
-            // $('#blanket-main').css('display', 'none')
-            // $('#visual-acceptance').css('display', 'none')
-          document.getElementById('visual-acceptance').appendChild(node)
+          document.getElementById('visual-acceptance-container').appendChild(node)
           chai.assert.isTrue(result, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
           data ? resolve(data) : reject(data)
         })
