@@ -25,7 +25,6 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   }else{
     browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   }
-  console.log(browserDirectory)
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
     $(document.getElementById('ember-testing-container')).css('height', height + 'px')
