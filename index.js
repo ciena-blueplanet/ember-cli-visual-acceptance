@@ -7,8 +7,6 @@ var spawn = require('child_process').spawn
 var RSVP = require('rsvp')
 
 function runCommand (/* child_process.exec args */) {
-  var args = Array.prototype.slice.call(arguments)
-
   return new RSVP.Promise(function (resolve, reject) {
     var child = spawn('ember', ['test'])
     child.stdout.on('data', function (data) {
