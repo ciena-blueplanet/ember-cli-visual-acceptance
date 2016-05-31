@@ -1,3 +1,4 @@
+/*global capture */
 import {
   expect
 } from 'chai'
@@ -6,7 +7,6 @@ import {
   it
 } from 'ember-mocha'
 import hbs from 'htmlbars-inline-precompile'
-import visualAcceptance from 'ember-cli-visual-acceptance/VisualAcceptance'
 
 describeComponent(
   'frost-button',
@@ -17,7 +17,7 @@ describeComponent(
     it('renders', function (done) {
       this.render(hbs `{{input type="text" value='Simple words' disabled=entryNotAllowed size="50"}}`)
       expect(this.$()).to.have.length(1)
-      visualAcceptance('Simple', null, null, 0.00).then(function (data) {
+      capture('Simple', null, null, 1.00).then(function (data) {
         done()
       }).catch(function (err) {
         done(err)
