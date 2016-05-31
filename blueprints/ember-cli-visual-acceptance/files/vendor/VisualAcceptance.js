@@ -76,11 +76,11 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
               url: '/passed',
               data: {
                 image: image,
-                name: `${browserDirectory}${imageName}.png`
+                name: browserDirectory + imageName + '.png'
               }
             })
             result = true
-            node.innerHTML = `<div class="test pass"> <h4> Passed: ${imageName} </h4> <img src="${image}" /> </div>`
+            node.innerHTML = '<div class="test pass"> <h4> Passed:' + imageName + '</h4> <img src="'+ image + '" /> </div>'
           } else {
             // Fail
             $.ajax({
@@ -89,15 +89,15 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
               url: '/fail',
               data: {
                 image: data.getImageDataUrl(),
-                name: `${browserDirectory}${imageName}.png`
+                name: browserDirectory + imageName + '.png'
               }
             })
-            node.innerHTML = `<div class="test fail"> <h4> Failed: ${imageName} </h4> <h5> Diff: </h5> <img class="diff image" src="${data.getImageDataUrl()}" /> <h5> Current: </h5> <img class="input image" src="${image}" /> <h5> Baseline: </h5> <img class="passed image" src="${res.image}" /></div>`
+            node.innerHTML = '<div class="test fail"> <h4> Failed:'+ imageName+' </h4> <h5> Diff: </h5> <img class="diff image" src="'+data.getImageDataUrl()+'" /> <h5> Current: </h5> <img class="input image" src="'+image+'" /> <h5> Baseline: </h5> <img class="passed image" src="'+res.image+'" /></div>'
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
           document.getElementById('visual-acceptance-container').appendChild(node)
-          chai.assert.isTrue(result, `Image mismatch percentage (${data.misMatchPercentage}) is above mismatch threshold(${misMatchPercentageMargin}).`)
+          chai.assert.isTrue(result, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
           data ? resolve(data) : reject(data)
         })
       })
