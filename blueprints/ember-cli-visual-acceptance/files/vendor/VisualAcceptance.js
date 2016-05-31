@@ -19,7 +19,13 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
-  var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+  var browserDirectory
+  if (browser.osversion === undefined){
+    browserDirectory = browser.os + '/' + browser.browser + '/'
+  }else{
+    browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+  }
+  console.log(browserDirectory)
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
     $(document.getElementById('ember-testing-container')).css('height', height + 'px')
