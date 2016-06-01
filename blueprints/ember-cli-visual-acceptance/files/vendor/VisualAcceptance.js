@@ -6,7 +6,14 @@ function httpGet(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, height = null, width = null, misMatchPercentageMargin = 1.00, imageDirectory = 'visual-acceptance') {
+function httpPost(theUrl) {
+  var xmlHttp = new XMLHttpRequest()
+  xmlHttp.open('POST', theUrl, false) // false for synchronous request
+  xmlHttp.send(null)
+  return xmlHttp.responseText
+}
+
+function capture(imageName, height, width, misMatchPercentageMargin, imageDirectory) {
   var browser = window.ui
   if (browser === undefined){
       browser = { browser: "Slimerjs", version: "31.0", mobile: undefined, os: "Mac OS X", osversion: "10.11", bit: undefined }
@@ -56,7 +63,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
     var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
     if (res.error === 'File does not exist') {
       // Save image as passed if no existing passed image
-      $.ajax({
+      var jxhr = $.ajax({
         type: 'POST',
         async: false,
         url: '/passed',
@@ -65,6 +72,8 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
           name: browserDirectory + imageName + '.png'
         }
       })
+      console.log(jxhr)
+      // console.log(httpPost('/passed=image' + encodeURIComponent(image)+'&name'+ encodeURIComponent(browserDirectory + imageName + '.png')))
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
       return 'No passed image. Saving current test as base'

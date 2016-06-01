@@ -3,14 +3,18 @@ module.exports = {
   'test_page': 'tests/index.html?hidepassed',
   'disable_watching': true,
   'launch_in_ci': [
-    'slimerjs'
+    'promise'
   ],
   'launch_in_dev': [
-    'slimerjs'
+    'promise'
   ],
   'launchers': {
     'slimerjs': {
       'command': 'slimerjs slimerjs-launcher.js <url>',
+      'protocol': 'browser'
+    },
+    'promise': {
+      'command': 'phantomjs --web-security=false --local-to-remote-url-access=true promise-launcher.js <url> ',
       'protocol': 'browser'
     }
   }

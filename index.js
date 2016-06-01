@@ -123,9 +123,12 @@ module.exports = {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
         type: 'test'
       })
-      // app.import(app.bowerDirectory + '/detectjs/src/detect.js', {
-      //   type: 'test'
-      // })
+      app.import('vendor/bluebird/js/browser/bluebird.min.js', {
+        type: 'test'
+      })
+      app.import('vendor/jquery.min.js', {
+    type: 'test'
+  })
       app.import('vendor/html2canvas.js', {
         type: 'test'
       })
@@ -145,9 +148,10 @@ module.exports = {
   targetBrowsers: [],
   middleware: function (app, options) {
     app.use(bodyParser.urlencoded({
-      extended: true
+      limit: '50mb', extended: true, parameterLimit: 50000
     }))
-    app.use(bodyParser.json())
+    app.use(bodyParser.json({limit: '50mb'}))
+    
     app.get('/image', function (req, res) {
       getImage(req, res, options)
     })
