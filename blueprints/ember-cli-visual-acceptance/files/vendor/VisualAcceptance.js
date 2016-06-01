@@ -8,6 +8,9 @@ function httpGet(theUrl) {
 
 function capture(imageName, height = null, width = null, misMatchPercentageMargin = 1.00, imageDirectory = 'visual-acceptance') {
   var browser = window.ui
+  if (browser === undefined){
+      browser = { browser: "Slimerjs", version: "31.0", mobile: undefined, os: "Mac OS X", osversion: "10.11", bit: undefined }
+  }
   var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
   if (istargetbrowser === false) {
     return new Promise(function(resolve, reject) {
@@ -70,7 +73,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().ignoreAntialiasing().onComplete(function(data) {
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
