@@ -94,6 +94,7 @@ function savePassedImage (req, res, options) {
 }
 
 function misMatchImage (req, res, options) {
+  console.log(req.body.image)
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
   fs.writeFileSync(options.imageDirectory + '/' + req.body.name.replace(/\.([^\.]*)$/, '-failed.$1'), buff)
