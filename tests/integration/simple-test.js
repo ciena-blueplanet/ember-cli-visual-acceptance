@@ -19,7 +19,7 @@ describeComponent(
       expect(this.$()).to.have.length(1)
       console.log('Commence')
       capture('Simple', null, null, 0.00, 'visual-acceptance').then(function (data) {
-        console.log(arguments)
+        console.log(data)
         done()
       }).catch(function (err) {
         done(err)

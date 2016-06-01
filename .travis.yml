@@ -6,7 +6,7 @@ branches:
   except:
   - /^v[0-9\.]+/
 before_install:
-- npm install -g coveralls pr-bumper slimerjs
+- npm install -g coveralls pr-bumper phantomjs@1.9
 - pr-bumper check
 before_script:
 - "export DISPLAY=:99.0"
