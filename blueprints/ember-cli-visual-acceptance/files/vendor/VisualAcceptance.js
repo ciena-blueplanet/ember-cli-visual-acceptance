@@ -14,34 +14,19 @@ function httpPost(theUrl) {
 }
 
 function capture(imageName, height, width, misMatchPercentageMargin, imageDirectory) {
-  var browser = window.ui
-  if (browser === undefined){
-      browser = { browser: "Slimerjs", version: "31.0", mobile: undefined, os: "Mac OS X", osversion: "10.11", bit: undefined }
-  }
-  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
-  if (istargetbrowser === false) {
-    return new Promise(function(resolve, reject) {
-      resolve("Does not match target browser");
-    })
-  }
   $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
   var browserDirectory
-  if (browser.osversion === undefined){
-    browserDirectory = browser.os + '/' + browser.browser + '/'
-  }else{
-    browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
-  }
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
     $(document.getElementById('ember-testing-container')).css('height', height + 'px')
-    browserDirectory += width + 'x' + height + '/'
+    browserDirectory = width + 'x' + height + '/'
   } else {
     // default mocha window size
-    browserDirectory += 640 + 'x' + 384 + '/'
+    browserDirectory = 640 + 'x' + 384 + '/'
   }
   // resemble.outputSettings({
   //   largeImageThreshold: 0
@@ -63,7 +48,7 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
     var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
     if (res.error === 'File does not exist') {
       // Save image as passed if no existing passed image
-      var jxhr = $.ajax({
+      $.ajax({
         type: 'POST',
         async: false,
         url: '/passed',
@@ -72,8 +57,6 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
           name: browserDirectory + imageName + '.png'
         }
       })
-      console.log(jxhr)
-      // console.log(httpPost('/passed=image' + encodeURIComponent(image)+'&name'+ encodeURIComponent(browserDirectory + imageName + '.png')))
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
       return 'No passed image. Saving current test as base'
