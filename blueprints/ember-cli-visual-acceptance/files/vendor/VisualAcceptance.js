@@ -14,6 +14,9 @@ function httpPost(theUrl) {
 }
 
 function capture(imageName, height, width, misMatchPercentageMargin, imageDirectory) {
+  if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
+  if (imageDirectory == null){imageDirectory = 'visual-acceptance'}
+  
   $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
