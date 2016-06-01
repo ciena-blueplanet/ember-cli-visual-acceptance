@@ -12,16 +12,19 @@ module.exports = {
     app.import('vendor/VisualAcceptance.js', {type: 'test'})
     app.import('vendor/html2canvas.js', {type: 'test'})
     app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
-    app.import(app.bowerDirectory + '/detectjs/src/detect.js', {type: 'test'})
+    app.import('vendor/bluebird/js/browser/bluebird.min.js', {
+      type: 'test'
+    })
+    app.import('vendor/jquery.min.js', {
+      type: 'test'
+    })
+    // app.import(app.bowerDirectory + '/detectjs/src/detect.js', {type: 'test'})
   },
   normalizeEntityName: function () {
     // no-op
   },
   afterInstall: function (options) {
     // Perform extra work here.
-    var that = this
-    return this.addBowerPackageToProject('detectjs').then(function (params) {
-      return that.addBowerPackageToProject('resemblejs')
-    })
+    return this.addBowerPackageToProject('resemblejs')
   }
 }

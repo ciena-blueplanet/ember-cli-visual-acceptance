@@ -6,27 +6,30 @@ function httpGet(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, height = null, width = null, misMatchPercentageMargin = 1.00, imageDirectory = 'visual-acceptance') {
-  var browser = window.ui
-  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
-  if (istargetbrowser === false) {
-    return new Promise(function(resolve, reject) {
-      resolve("Does not match target browser");
-    })
-  }
+function httpPost(theUrl) {
+  var xmlHttp = new XMLHttpRequest()
+  xmlHttp.open('POST', theUrl, false) // false for synchronous request
+  xmlHttp.send(null)
+  return xmlHttp.responseText
+}
+
+function capture(imageName, height, width, misMatchPercentageMargin, imageDirectory) {
+  if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
+  if (imageDirectory == null){imageDirectory = 'visual-acceptance'}
+  
   $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
-  var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+  var browserDirectory
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
     $(document.getElementById('ember-testing-container')).css('height', height + 'px')
-    browserDirectory += width + 'x' + height + '/'
+    browserDirectory = width + 'x' + height + '/'
   } else {
     // default mocha window size
-    browserDirectory += 640 + 'x' + 384 + '/'
+    browserDirectory = 640 + 'x' + 384 + '/'
   }
   // resemble.outputSettings({
   //   largeImageThreshold: 0
@@ -65,7 +68,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().ignoreAntialiasing().onComplete(function(data) {
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
