@@ -127,8 +127,8 @@ module.exports = {
         type: 'test'
       })
       app.import('vendor/jquery.min.js', {
-    type: 'test'
-  })
+        type: 'test'
+      })
       app.import('vendor/html2canvas.js', {
         type: 'test'
       })
@@ -151,7 +151,6 @@ module.exports = {
       limit: '50mb', extended: true, parameterLimit: 50000
     }))
     app.use(bodyParser.json({limit: '50mb'}))
-    
     app.get('/image', function (req, res) {
       getImage(req, res, options)
     })
