@@ -6,8 +6,18 @@ function httpGet(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, height = null, width = null, misMatchPercentageMargin = 1.00, imageDirectory = 'visual-acceptance') {
+function httpPost(theUrl) {
+  var xmlHttp = new XMLHttpRequest()
+  xmlHttp.open('POST', theUrl, false) // false for synchronous request
+  xmlHttp.send(null)
+  return xmlHttp.responseText
+}
+
+function capture(imageName, height, width, misMatchPercentageMargin, imageDirectory) {
   var browser = window.ui
+  if (browser === undefined){
+      browser = { browser: "Slimerjs", version: "31.0", mobile: undefined, os: "Mac OS X", osversion: "10.11", bit: undefined }
+  }
   var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
   if (istargetbrowser === false) {
     return new Promise(function(resolve, reject) {
@@ -19,7 +29,12 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
-  var browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+  var browserDirectory
+  if (browser.osversion === undefined){
+    browserDirectory = browser.os + '/' + browser.browser + '/'
+  }else{
+    browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+  }
   if (height !== null && width !== null) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
     $(document.getElementById('ember-testing-container')).css('height', height + 'px')
@@ -48,7 +63,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
     var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
     if (res.error === 'File does not exist') {
       // Save image as passed if no existing passed image
-      $.ajax({
+      var jxhr = $.ajax({
         type: 'POST',
         async: false,
         url: '/passed',
@@ -57,6 +72,8 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
           name: browserDirectory + imageName + '.png'
         }
       })
+      console.log(jxhr)
+      // console.log(httpPost('/passed=image' + encodeURIComponent(image)+'&name'+ encodeURIComponent(browserDirectory + imageName + '.png')))
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
       return 'No passed image. Saving current test as base'
@@ -65,7 +82,7 @@ function capture(imageName, height = null, width = null, misMatchPercentageMargi
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().ignoreAntialiasing().onComplete(function(data) {
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
