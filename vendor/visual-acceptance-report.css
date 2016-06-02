@@ -1,5 +1,7 @@
-@import url(https://fonts.googleapis.com/css?family=Open+Sans);
+@import url(https://fonts.googleapis.com/css?family=Roboto);
 * {
     font-size: 14px !important;
-    font-family: 'Open Sans', sans-serif !important;
+    font-family: 'Arial, Helvetica, sans-serif' !important;
+    -webkit-font-smoothing: antialiased !important;
+	-moz-osx-font-smoothing: grayscale !important;
 }
