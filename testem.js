@@ -3,7 +3,7 @@ module.exports = {
   'test_page': 'tests/index.html?hidepassed',
   'disable_watching': true,
   'launch_in_ci': [
-    'PhantomJS'
+    'promise'
   ],
   'launch_in_dev': [
     'Firefox'
@@ -14,7 +14,7 @@ module.exports = {
       'protocol': 'browser'
     },
     'promise': {
-      'command': 'phantomjs --web-security=false --local-to-remote-url-access=true promise-launcher.js <url> ',
+      'command': './phantomjs-webfonts-mac --web-security=false --local-to-remote-url-access=true promise-launcher.js <url> ',
       'protocol': 'browser'
     }
   }
