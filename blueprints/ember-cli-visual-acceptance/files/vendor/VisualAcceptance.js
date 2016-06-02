@@ -51,7 +51,6 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
   }).then(function(canvas) {
     // Get test dummy image
     var image = canvas.toDataURL('image/png')
-    console.log(image)
     if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
       var visualAcceptanceContainer
       visualAcceptanceContainer = document.createElement('div')
