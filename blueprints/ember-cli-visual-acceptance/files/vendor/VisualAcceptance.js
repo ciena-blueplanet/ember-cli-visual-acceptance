@@ -23,7 +23,7 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
   var browserDirectory
-  if (height !== null && width !== null) {
+  if (height && width) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
     $(document.getElementById('ember-testing-container')).css('height', height + 'px')
     browserDirectory = width + 'x' + height + '/'

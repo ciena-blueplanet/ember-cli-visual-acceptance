@@ -15,7 +15,7 @@ describeComponent(
   },
   function () {
     it('renders', function (done) {
-      this.render(hbs `{{input type="text" value='Simplest worbs' disabled=entryNotAllowed size="50"}}`)
+      this.render(hbs `<div id='test'>Test</div>`)
       expect(this.$()).to.have.length(1)
       capture('Simple').then(function (data) {
         console.log(arguments)
