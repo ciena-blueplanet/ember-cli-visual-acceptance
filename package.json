@@ -40,7 +40,8 @@
     "ember-try": "^0.2.2",
     "eslint": "^2.10.2",
     "eslint-config-frost-standard": "^2.0.0",
-    "loader.js": "^4.0.1"
+    "loader.js": "^4.0.1",
+    "sync-request": "^3.0.1"
   },
   "keywords": [
     "ember-addon"
@@ -48,7 +49,8 @@
   "dependencies": {
     "body-parser": "^1.15.1",
     "ember-cli-babel": "^5.1.6",
-    "resemblejs": "^2.2.0"
+    "resemblejs": "^2.2.0",
+    "lodash": "^4.0.1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

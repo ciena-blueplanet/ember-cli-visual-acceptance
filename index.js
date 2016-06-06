@@ -5,10 +5,12 @@ var fs = require('fs')
 var path = require('path')
 var spawn = require('child_process').spawn
 var RSVP = require('rsvp')
-
-function runCommand (/* child_process.exec args */) {
+var exec = require('child_process').exec
+var request = require('sync-request')
+var __ = require('lodash')
+function runCommand (command, args) {
   return new RSVP.Promise(function (resolve, reject) {
-    var child = spawn('ember', ['test'])
+    var child = spawn(command, args)
     child.stdout.on('data', function (data) {
       console.log(data.toString())
     })
@@ -21,6 +23,30 @@ function runCommand (/* child_process.exec args */) {
     })
   })
 }
+
+function compareVersions (installed, required) {
+  if (required === undefined) {
+    return true
+  } else if (required.substring(0, 2) === '>=') {
+    var a = installed.split('.')
+    var b = required.split('.')
+
+    for (var i = 0; i < a.length; ++i) {
+      a[i] = Number(a[i])
+    }
+    for (var j = 0; i < b.length; ++j) {
+      b[j] = Number(b[j])
+    }
+    if (a.length !== b.length) return false
+    for (var k = 0; k < a.length; ++k) {
+      if (a[k] < b[k]) return false
+    }
+    return true
+  } else {
+    return installed === required
+  }
+}
+
 
 function mkdirSync (path) {
   try {
@@ -36,6 +62,22 @@ function mkdirpSync (dirpath) {
     mkdirSync(path.join.apply(null, parts.slice(0, i)))
   }
 }
+
+function isTargetBrowser (req, res, targetBrowsers) {
+  if (targetBrowsers.length > 0) {
+    var result = false
+    for (var i = 0; i < targetBrowsers.length; i++) {
+      if (req.query.browser === targetBrowsers[i].browser && compareVersions(req.query.version, targetBrowsers[i].version) && req.query.os === targetBrowsers[i].os && compareVersions(req.query.osversion, targetBrowsers[i].osversion)) {
+        result = true
+        break
+      }
+    }
+    res.send(result)
+  } else {
+    res.send(true)
+  }
+}
+
 
 function saveImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
@@ -101,6 +143,8 @@ module.exports = {
     app.import('vendor/visual-acceptance-report.css', {
       type: 'test'
     })
+    app.import('vendor/detect.js', {type: 'test'})
+
     if (app.options.visualAcceptanceOptions) {
       this.imageDirectory = app.options.visualAcceptanceOptions.imageDirectory || 'visual-acceptance'
       this.targetBrowsers = app.options.visualAcceptanceOptions.targetBrowsers || []
@@ -110,9 +154,13 @@ module.exports = {
   targetBrowsers: [],
   middleware: function (app, options) {
     app.use(bodyParser.urlencoded({
-      limit: '50mb', extended: true, parameterLimit: 50000
+      limit: '50mb',
+      extended: true,
+      parameterLimit: 50000
     }))
-    app.use(bodyParser.json({limit: '50mb'}))
+    app.use(bodyParser.json({
+      limit: '50mb'
+    }))
 
     app.get('/image', function (req, res) {
       getImage(req, res, options)
@@ -128,6 +176,10 @@ module.exports = {
     app.post('/fail', function (req, res) {
       misMatchImage(req, res, options)
     })
+    app.get('/istargetbrowser', function (req, res) {
+      isTargetBrowser(req, res, options.targetBrowsers)
+    })
+
   },
   testemMiddleware: function (app) {
     this.middleware(app, {
@@ -163,7 +215,7 @@ module.exports = {
         }],
         run: function (options, rawArgs) {
           var root = this.project.root
-          var execOptions = { cwd: root }
+
           function deleteFolderRecursive (path) {
             if (fs.existsSync(path)) {
               fs.readdirSync(path).forEach(function (file, index) {
@@ -179,7 +231,76 @@ module.exports = {
           }
 
           deleteFolderRecursive(path.join(root, options.imageDirectory))
-          return runCommand('ember test', execOptions)
+          return runCommand('ember', ['test'])
+        }
+      },
+      'travis-visual-acceptance': {
+        name: 'travis-visual-acceptance',
+        aliases: ['tva'],
+        description: 'Run visual-acceptance based off Travis message',
+        works: 'insideProject',
+        availableOptions: [{
+          name: 'image-directory',
+          type: String,
+          default: 'visual-acceptance',
+          description: 'The ember-cli-visual-acceptance directory where images are save'
+        }],
+        run: function (options, rawArgs) {
+          let requestOptions = {
+            'headers': {
+              'user-agent': 'ciena-frost',
+              'Authorization': 'token ' + process.env.RO_GH_TOKEN
+            }
+          }
+
+          function _getLastPrNumber () {
+            return exec('git log -10 --oneline').then((stdout) => {
+              // the --oneline format for `git log` puts each commit on a single line, with the hash and then
+              // the commit message, so we first split on \n to get an array of commits
+              const commits = stdout.split('\n')
+
+              // The commit that represents the merging of the PR will include the text 'Merge pull request' so
+              // we find that one
+              const mergeCommit = __.find(commits, (commit) => {
+                return commit.indexOf('Merge pull request') !== -1
+              })
+
+              // The format of the auto-generated commit line will look something like:
+              // 'edf85e0 Merge pull request #30 from job13er/remove-newline'
+              // so if we split on the space, and grab the 5th item, it's '#30' then strip the '#' to get '30'
+              const prNumber = mergeCommit.split(' ')[4].replace('#', '')
+
+              return prNumber
+            })
+          }
+
+          if (!process.env.RO_GH_TOKEN || !process.env.TRAVIS_REPO_SLUG) {
+            console.log('No github token found or Travis found. Just running ember test')
+            return runCommand('ember', ['test'])
+          }
+          var repoSlug = process.env.TRAVIS_REPO_SLUG
+
+          var prNumber = process.env.TRAVIS_PULL_REQUEST === false ? _getLastPrNumber() : process.env.TRAVIS_PULL_REQUEST
+          var url = 'https://api.github.com/repos/' + repoSlug + '/pulls/' + prNumber
+          var res = request('GET', url, requestOptions)
+          var travisMessage = res.body
+          if (travisMessage.match(/\#new\-baseline\#/ig)) {
+            console.log('Creating new baseline')
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
+              if (process.env.TRAVIS_PULL_REQUEST === false) {
+                console.log('Git add')
+                return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                  console.log('Git commit')
+                  return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function (params) {
+                    console.log('Git push')
+                    return runCommand('git', ['push'])
+                  })
+                })
+              }
+            })
+          } else {
+            return runCommand('ember', ['test'])
+          }
         }
       }
     }

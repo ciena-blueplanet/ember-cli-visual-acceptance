@@ -3,9 +3,15 @@ module.exports = {
   'test_page': 'tests/index.html?hidepassed',
   'disable_watching': true,
   'launch_in_ci': [
-    'PhantomJS'
+    'slimerjs'
   ],
   'launch_in_dev': [
-    'PhantomJS'
-  ]
+    'Firefox'
+  ],
+  'launchers': {
+    'slimerjs': {
+      'command': 'slimerjs slimerjs-launcher.js <url>',
+      'protocol': 'browser'
+    }
+  }
 }

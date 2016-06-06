@@ -17,19 +17,34 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
   if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
   if (imageDirectory == null){imageDirectory = 'visual-acceptance'}
   
+  var browser = window.ui
+  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
+  if (istargetbrowser === false) {
+    return new Promise(function(resolve, reject) {
+      resolve("Does not match target browser");
+    })
+  }
+
+  
   $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
   var browserDirectory
+  if (browser.osversion === undefined){
+    browserDirectory = browser.os + '/' + browser.browser + '/'
+  }else{
+    browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+  }
+
   if (height && width) {
     $(document.getElementById('ember-testing-container')).css('width', width + 'px')
     $(document.getElementById('ember-testing-container')).css('height', height + 'px')
-    browserDirectory = width + 'x' + height + '/'
+    browserDirectory += width + 'x' + height + '/'
   } else {
     // default mocha window size
-    browserDirectory = 640 + 'x' + 384 + '/'
+    browserDirectory += 640 + 'x' + 384 + '/'
   }
   // resemble.outputSettings({
   //   largeImageThreshold: 0

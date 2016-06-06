@@ -18,7 +18,7 @@ module.exports = {
     app.import('vendor/jquery.min.js', {
       type: 'test'
     })
-    // app.import(app.bowerDirectory + '/detectjs/src/detect.js', {type: 'test'})
+    app.import('vendor/detect.js', {type: 'test'})
   },
   normalizeEntityName: function () {
     // no-op
