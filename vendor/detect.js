@@ -12,8 +12,6 @@
     bit,
     ua = window.navigator.userAgent,
     platform = window.navigator.platform;
-    console.log(platform)
-    console.log(ua)
   if (ua && platform ) {
     if(/SlimerJS/.test(ua)){
       browser = 'SlimerJS'
