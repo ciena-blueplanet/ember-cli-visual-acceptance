@@ -1,3 +1,10 @@
-html {
-    font-size: 14px !important;
+@import url(https://fonts.googleapis.com/css?family=Noticia+Text);
+* {
+    font-size: 20pt !important;
+    font-family: 'Noticia Text', serif !important;
+    text-rendering: geometricPrecision;
+}
+#test {
+  height:30pt;
+  width: 50pt;
 }
