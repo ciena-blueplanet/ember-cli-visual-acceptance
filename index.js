@@ -47,7 +47,6 @@ function compareVersions (installed, required) {
   }
 }
 
-
 function mkdirSync (path) {
   try {
     fs.mkdirSync(path)
@@ -77,7 +76,6 @@ function isTargetBrowser (req, res, targetBrowsers) {
     res.send(true)
   }
 }
-
 
 function saveImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
@@ -179,7 +177,6 @@ module.exports = {
     app.get('/istargetbrowser', function (req, res) {
       isTargetBrowser(req, res, options.targetBrowsers)
     })
-
   },
   testemMiddleware: function (app) {
     this.middleware(app, {
@@ -284,7 +281,8 @@ module.exports = {
           var url = 'https://api.github.com/repos/' + repoSlug + '/pulls/' + prNumber
           var res = request('GET', url, requestOptions)
           var travisMessage = res.body
-          if (travisMessage.match(/\#new\-baseline\#/ig)) {
+          console.log(travisMessage)
+          if (/\#new\-baseline\#/.exec(travisMessage)) {
             console.log('Creating new baseline')
             return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
               if (process.env.TRAVIS_PULL_REQUEST === false) {
