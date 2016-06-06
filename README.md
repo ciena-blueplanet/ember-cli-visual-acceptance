@@ -69,7 +69,7 @@ capture(imageName, height, width, misMatch, imageDirectory)
 
 
   |           Name           | Type   | Default             | Description                                                                                                                                                                         |
-  |-------------------------|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+  |--------------------------|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
   | imageName                | string | required            | Name of the image you wish to save                                                                                                                                                  |
   | height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the window.                                                                                         |
   | width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.                                                                                           |
