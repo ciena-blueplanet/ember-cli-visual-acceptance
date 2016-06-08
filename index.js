@@ -5,10 +5,13 @@ var fs = require('fs')
 var path = require('path')
 var spawn = require('child_process').spawn
 var RSVP = require('rsvp')
+var exec = require('child_process').exec
+var request = require('sync-request')
+var __ = require('lodash')
 
-function runCommand (/* child_process.exec args */) {
+function runCommand (command, args) {
   return new RSVP.Promise(function (resolve, reject) {
-    var child = spawn('ember', ['test'])
+    var child = spawn(command, args)
     child.stdout.on('data', function (data) {
       console.log(data.toString())
     })
@@ -20,6 +23,13 @@ function runCommand (/* child_process.exec args */) {
       resolve()
     })
   })
+}
+
+function base64Encode (file) {
+  // read binary data
+  var bitmap = fs.readFileSync(file)
+  // convert binary data to base64 encoded string
+  return new Buffer(bitmap).toString('base64')
 }
 
 function compareVersions (installed, required) {
@@ -58,6 +68,19 @@ function mkdirpSync (dirpath) {
   for (let i = 1; i <= parts.length; i++) {
     mkdirSync(path.join.apply(null, parts.slice(0, i)))
   }
+}
+
+function appendToReport (req, res, options) {
+  try {
+    if (process.env.REPORT_PATH) {
+      var report = fs.readFileSync(process.env.REPORT_PATH)
+      report = report.toString().replace(/(<\/body>\s<\/HTML>)/i, req.body.report + '$1')
+      fs.writeFileSync(process.env.REPORT_PATH, report)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  res.send()
 }
 
 function isTargetBrowser (req, res, targetBrowsers) {
@@ -123,7 +146,10 @@ module.exports = {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
         type: 'test'
       })
-      app.import(app.bowerDirectory + '/detectjs/src/detect.js', {
+      app.import('vendor/bluebird/js/browser/bluebird.min.js', {
+        type: 'test'
+      })
+      app.import('vendor/jquery.min.js', {
         type: 'test'
       })
       app.import('vendor/html2canvas.js', {
@@ -133,15 +159,13 @@ module.exports = {
         type: 'test'
       })
     }
-    app.import('vendor/dist/css/materialize.min.css', {
-      type: 'test'
-    })
-    app.import('vendor/dist/js/materialize.min.js', {
-      type: 'test'
-    })
     app.import('vendor/visual-acceptance-report.css', {
       type: 'test'
     })
+    app.import('vendor/detect.js', {
+      type: 'test'
+    })
+
     if (app.options.visualAcceptanceOptions) {
       this.imageDirectory = app.options.visualAcceptanceOptions.imageDirectory || 'visual-acceptance'
       this.targetBrowsers = app.options.visualAcceptanceOptions.targetBrowsers || []
@@ -151,15 +175,16 @@ module.exports = {
   targetBrowsers: [],
   middleware: function (app, options) {
     app.use(bodyParser.urlencoded({
-      extended: true
+      limit: '50mb',
+      extended: true,
+      parameterLimit: 50000
     }))
-    app.use(bodyParser.json())
+    app.use(bodyParser.json({
+      limit: '50mb'
+    }))
+
     app.get('/image', function (req, res) {
       getImage(req, res, options)
-    })
-
-    app.get('/istargetbrowser', function (req, res) {
-      isTargetBrowser(req, res, options.targetBrowsers)
     })
 
     app.post('/image', function (req, res) {
@@ -171,6 +196,12 @@ module.exports = {
     })
     app.post('/fail', function (req, res) {
       misMatchImage(req, res, options)
+    })
+    app.post('/report', function (req, res) {
+      appendToReport(req, res, options)
+    })
+    app.get('/istargetbrowser', function (req, res) {
+      isTargetBrowser(req, res, options.targetBrowsers)
     })
   },
   testemMiddleware: function (app) {
@@ -194,9 +225,54 @@ module.exports = {
 
   includedCommands: function () {
     return {
+      'build-report': {
+        name: 'build-report',
+        aliases: ['br'],
+        description: 'Create report',
+        works: 'insideProject',
+        availableOptions: [{
+          name: 'report-directory',
+          type: String,
+          default: 'visual-acceptance-report',
+          description: 'Create Report off visual acceptance tests'
+        }],
+        run: function (options, rawArgs) {
+          var root = this.project.root
+
+          function deleteFolderRecursive (path) {
+            if (fs.existsSync(path)) {
+              fs.readdirSync(path).forEach(function (file, index) {
+                var curPath = path + '/' + file
+                if (fs.lstatSync(curPath).isDirectory()) { // recurse
+                  deleteFolderRecursive(curPath)
+                } else { // delete file
+                  fs.unlinkSync(curPath)
+                }
+              })
+              fs.rmdirSync(path)
+            }
+          }
+
+          deleteFolderRecursive(path.join(root, options.reportDirectory))
+          mkdirpSync(options.reportDirectory)
+          var reportPath = options.reportDirectory + '/' + 'report.html'
+          fs.writeFileSync(reportPath, `<HTML>
+<HEAD>
+<TITLE>Visual Acceptance report </TITLE>
+</HEAD>
+<BODY>
+  <h3> Visual Acceptance tests: </h3>
+</BODY>
+</HTML>`)
+
+          process.env.PR_API = options.prApiUrl
+          process.env.REPORT_PATH = reportPath
+          return runCommand('ember', ['test'])
+        }
+      },
       'new-baseline': {
         name: 'new-baseline',
-        aliases: ['new-baseline'],
+        aliases: ['nb'],
         description: 'Create new baseline',
         works: 'insideProject',
         availableOptions: [{
@@ -207,7 +283,7 @@ module.exports = {
         }],
         run: function (options, rawArgs) {
           var root = this.project.root
-          var execOptions = { cwd: root }
+
           function deleteFolderRecursive (path) {
             if (fs.existsSync(path)) {
               fs.readdirSync(path).forEach(function (file, index) {
@@ -223,7 +299,105 @@ module.exports = {
           }
 
           deleteFolderRecursive(path.join(root, options.imageDirectory))
-          return runCommand('ember test', execOptions)
+          return runCommand('ember', ['test'])
+        }
+      },
+      'travis-visual-acceptance': {
+        name: 'travis-visual-acceptance',
+        aliases: ['tva'],
+        description: 'Run visual-acceptance based off Travis message',
+        works: 'insideProject',
+        availableOptions: [{
+          name: 'image-directory',
+          type: String,
+          default: 'visual-acceptance',
+          description: 'The ember-cli-visual-acceptance directory where images are save'
+        }, {
+          name: 'pr-api-url',
+          type: String,
+          default: '', // http://openshiftvisualacceptance-ewhite.rhcloud.com/comment
+          description: 'API to call to comment on pr'
+        }],
+        run: function (options, rawArgs) {
+          let requestOptions = {
+            'headers': {
+              'user-agent': 'ciena-frost',
+              'Authorization': 'token ' + process.env.RO_GH_TOKEN
+            }
+          }
+
+          function _getLastPrNumber () {
+            return exec('git log -10 --oneline').then((stdout) => {
+              // the --oneline format for `git log` puts each commit on a single line, with the hash and then
+              // the commit message, so we first split on \n to get an array of commits
+              const commits = stdout.split('\n')
+
+              // The commit that represents the merging of the PR will include the text 'Merge pull request' so
+              // we find that one
+              const mergeCommit = __.find(commits, (commit) => {
+                return commit.indexOf('Merge pull request') !== -1
+              })
+
+              // The format of the auto-generated commit line will look something like:
+              // 'edf85e0 Merge pull request #30 from job13er/remove-newline'
+              // so if we split on the space, and grab the 5th item, it's '#30' then strip the '#' to get '30'
+              const prNumber = mergeCommit.split(' ')[4].replace('#', '')
+
+              return prNumber
+            })
+          }
+
+          if (!process.env.RO_GH_TOKEN || !process.env.TRAVIS_REPO_SLUG) {
+            console.log('No github token found or Travis found. Just running ember test')
+            return runCommand('ember', ['test'])
+          }
+          var repoSlug = process.env.TRAVIS_REPO_SLUG
+
+          var prNumber = process.env.TRAVIS_PULL_REQUEST === false ? _getLastPrNumber() : process.env.TRAVIS_PULL_REQUEST
+          var url = 'https://api.github.com/repos/' + repoSlug + '/pulls/' + prNumber
+          var res = request('GET', url, requestOptions)
+          var travisMessage = res.body
+          if (/\#new\-baseline\#/.exec(travisMessage)) {
+            console.log('Creating new baseline')
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
+              if (process.env.TRAVIS_PULL_REQUEST === false) {
+                console.log('Git add')
+                return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                  console.log('Git commit')
+                  return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function (params) {
+                    console.log('Git push')
+                    return runCommand('git', ['push'])
+                  })
+                })
+              }
+            })
+          } else if (process.env.TRAVIS_PULL_REQUEST !== false && options.prApiUrl !== '') {
+            return runCommand('ember', ['br']).then(function (params) {
+              return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
+                console.log('Sending to github')
+                var base64str = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+                var ApiOptions = {
+                  'json': {
+                    'repoSlug': repoSlug,
+                    'prNumber': prNumber,
+                    'report': base64str
+                  }
+                }
+                var response = request('POST', options.prApiUrl, ApiOptions)
+                console.log(response.getBody())
+                if (process.env.TRAVIS_PULL_REQUEST === false) {
+                  console.log('Git add')
+                  return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                    console.log('Git commit')
+                    return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function (params) {
+                      console.log('Git push')
+                      return runCommand('git', ['push'])
+                    })
+                  })
+                }
+              })
+            })
+          }
         }
       }
     }

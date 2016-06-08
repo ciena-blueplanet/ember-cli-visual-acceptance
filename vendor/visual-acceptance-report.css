@@ -1,36 +1,10 @@
-#visual-acceptance .test {
-  margin-left: 15px;
-  overflow: hidden;
+@import url(https://fonts.googleapis.com/css?family=Noticia+Text);
+* {
+    font-size: 20pt !important;
+    font-family: 'Noticia Text', serif !important;
+    text-rendering: geometricPrecision;
 }
-
-#visual-acceptance .test.pass::before {
-  content: '✓';
-  font-size: 12px;
-  display: block;
-  float: left;
-  margin-right: 5px;
-  color: #00d6b2;
-}
-
-#visual-acceptance .test.fail {
-  color: #c00;
-}
-
-#visual-acceptance .test.fail::before {
-  content: '✖';
-  font-size: 12px;
-  display: block;
-  float: left;
-  margin-right: 5px;
-  color: #c00;
-}
-
-#visual-acceptance .test h2 {
-  position: relative;
-}
-
-#visual-acceptance h2 {
-  font-size: 12px;
-  font-weight: normal;
-  cursor: pointer;
+#test {
+  height:30pt;
+  width: 50pt;
 }
