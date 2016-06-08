@@ -77,7 +77,7 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
       })
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
-      node.innerHTML = '<div class="test pass"> <h4> No passed image. Saving current as baseline:' + imageName + '</h4> <img src="'+ image + '" /> </div>'
+      node.innerHTML = '<div class="test pass"> <h4> No passed image. Saving current as baseline: ' + imageName + '</h4> <img src="'+ image + '" /> </div>'
       $.ajax({
               type: 'POST',
               async: false,
@@ -107,7 +107,7 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
               }
             })
             result = true
-            node.innerHTML = '<div class="test pass"> <h4> Passed:' + imageName + '</h4> <img src="'+ image + '" /> </div>'
+            node.innerHTML = '<div class="test pass"> <h4> Passed: ' + imageName + '</h4> <img src="'+ image + '" /> </div>'
           } else {
             // Fail
             $.ajax({
@@ -119,7 +119,7 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
                 name: browserDirectory + imageName + '.png'
               }
             })
-            node.innerHTML = '<div class="test fail"> <h4> Failed:'+ imageName+' </h4> <h5> Diff: </h5> <img class="diff image" src="'+data.getImageDataUrl()+'" /> <h5> Current: </h5> <img class="input image" src="'+image+'" /> <h5> Baseline: </h5> <img class="passed image" src="'+res.image+'" /></div>'
+            node.innerHTML = '<div class="test fail"> <h4> Failed: '+ imageName+' </h4> <h5> Diff: </h5> <img class="diff image" src="'+data.getImageDataUrl()+'" /> <h5> Current: </h5> <img class="input image" src="'+image+'" /> <h5> Baseline: </h5> <img class="passed image" src="'+res.image+'" /></div>'
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
