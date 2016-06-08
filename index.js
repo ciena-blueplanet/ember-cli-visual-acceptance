@@ -272,7 +272,7 @@ module.exports = {
 
           process.env.PR_API = options.prApiUrl
           process.env.REPORT_PATH = reportPath
-          return runCommand('ember', ['test', '-s'])
+          return runCommand('ember', ['test'])
         }
       },
       'new-baseline': {
@@ -357,7 +357,6 @@ module.exports = {
           var url = 'https://api.github.com/repos/' + repoSlug + '/pulls/' + prNumber
           var res = request('GET', url, requestOptions)
           var travisMessage = res.body
-          console.log(travisMessage)
           if (/\#new\-baseline\#/.exec(travisMessage)) {
             console.log('Creating new baseline')
             return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function(params) {
@@ -372,21 +371,20 @@ module.exports = {
                 })
               }
             })
-          } else if (!process.env.TRAVIS_PULL_REQUEST) {
+          } else if (process.env.TRAVIS_PULL_REQUEST !== false) {
             return runCommand('ember', ['br']).then(function(params) {
-              runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function(params) {
+              return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function(params) {
+                console.log('Sending to github')
                 var base64str = base64_encode('images/output.png').replace('data:image\/\w+;base64,', '')
                 var ApiOptions = {
-                  'headers': {
-                    'Content-Type': 'application/json'
-                  },
                   'json': {
                     'repoSlug': repoSlug,
                     'prNumber': prNumber,
                     'report': base64str
                   }
                 }
-                var response = request('POST', 'http://openshiftvisualacceptance-ewhite.rhcloud.com/comment')
+                var response = request('POST', 'http://127.0.0.1:8080/comment', ApiOptions)
+                console.log(response.getBody())
               })
             })
           }
