@@ -364,14 +364,14 @@ module.exports = {
                 console.log('Git add')
                 return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
                   console.log('Git commit')
-                  return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function (params) {
+                  return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                     console.log('Git push')
                     return runCommand('git', ['push'])
                   })
                 })
               }
             })
-          } else if (process.env.TRAVIS_PULL_REQUEST !== false && options.prApiUrl !== '') {
+          } else if ((process.env.TRAVIS_PULL_REQUEST !== false || process.env.TRAVIS_PULL_REQUEST !== 'false') && options.prApiUrl !== '') {
             return runCommand('ember', ['br']).then(function (params) {
               return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
                 console.log('Sending to github')
@@ -385,16 +385,17 @@ module.exports = {
                 }
                 var response = request('POST', options.prApiUrl, ApiOptions)
                 console.log(response.getBody())
-                if (process.env.TRAVIS_PULL_REQUEST === false) {
-                  console.log('Git add')
-                  return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
-                    console.log('Git commit')
-                    return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function (params) {
-                      console.log('Git push')
-                      return runCommand('git', ['push'])
-                    })
-                  })
-                }
+              })
+            })
+          } else if ((process.env.TRAVIS_PULL_REQUEST === false || process.env.TRAVIS_PULL_REQUEST === 'false') && options.prApiUrl !== '') {
+            return runCommand('ember', ['test']).then(function (params) {
+              console.log('Git add')
+              return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                console.log('Git commit')
+                return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
+                  console.log('Git push')
+                  return runCommand('git', ['push'])
+                })
               })
             })
           }
