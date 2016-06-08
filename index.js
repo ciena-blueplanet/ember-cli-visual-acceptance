@@ -385,6 +385,16 @@ module.exports = {
                 }
                 var response = request('POST', options.prApiUrl, ApiOptions)
                 console.log(response.getBody())
+                if (process.env.TRAVIS_PULL_REQUEST === false) {
+                  console.log('Git add')
+                  return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                    console.log('Git commit')
+                    return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function (params) {
+                      console.log('Git push')
+                      return runCommand('git', ['push'])
+                    })
+                  })
+                }
               })
             })
           }

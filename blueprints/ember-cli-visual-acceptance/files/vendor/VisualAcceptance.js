@@ -77,6 +77,15 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
       })
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
+      node.innerHTML = '<div class="test pass"> <h4> No passed image. Saving current as baseline:' + imageName + '</h4> <img src="'+ image + '" /> </div>'
+      $.ajax({
+              type: 'POST',
+              async: false,
+              url: '/report',
+              data: {
+                report: node.innerHTML
+              }
+            })
       return 'No passed image. Saving current test as base'
 
     } else {
