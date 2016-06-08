@@ -235,11 +235,6 @@ module.exports = {
           type: String,
           default: 'visual-acceptance-report',
           description: 'Create Report off visual acceptance tests'
-        }, {
-          name: 'pr-api-url',
-          type: String,
-          default: '', // http://openshiftvisualacceptance-ewhite.rhcloud.com/comment
-          description: 'API to call to comment on pr'
         }],
         run: function(options, rawArgs) {
           var root = this.project.root
@@ -317,6 +312,11 @@ module.exports = {
           type: String,
           default: 'visual-acceptance',
           description: 'The ember-cli-visual-acceptance directory where images are save'
+        },{
+          name: 'pr-api-url',
+          type: String,
+          default: '', // http://openshiftvisualacceptance-ewhite.rhcloud.com/comment
+          description: 'API to call to comment on pr'
         }],
         run: function(options, rawArgs) {
           let requestOptions = {
@@ -371,7 +371,7 @@ module.exports = {
                 })
               }
             })
-          } else if (process.env.TRAVIS_PULL_REQUEST !== false) {
+          } else if (process.env.TRAVIS_PULL_REQUEST !== false && options.prApiUrl !== '') {
             return runCommand('ember', ['br']).then(function(params) {
               return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function(params) {
                 console.log('Sending to github')
@@ -383,7 +383,7 @@ module.exports = {
                     'report': base64str
                   }
                 }
-                var response = request('POST', 'http://127.0.0.1:8080/comment', ApiOptions)
+                var response = request('POST', options.prApiUrl, ApiOptions)
                 console.log(response.getBody())
               })
             })
