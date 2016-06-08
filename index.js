@@ -9,30 +9,30 @@ var exec = require('child_process').exec
 var request = require('sync-request')
 var __ = require('lodash')
 
-function runCommand(command, args) {
-  return new RSVP.Promise(function(resolve, reject) {
+function runCommand (command, args) {
+  return new RSVP.Promise(function (resolve, reject) {
     var child = spawn(command, args)
-    child.stdout.on('data', function(data) {
+    child.stdout.on('data', function (data) {
       console.log(data.toString())
     })
-    child.stderr.on('data', function(data) {
+    child.stderr.on('data', function (data) {
       reject(data.toString())
     })
 
-    child.on('exit', function(code) {
+    child.on('exit', function (code) {
       resolve()
     })
   })
 }
 
-function base64_encode(file) {
+function base64Encode (file) {
   // read binary data
-  var bitmap = fs.readFileSync(file);
+  var bitmap = fs.readFileSync(file)
   // convert binary data to base64 encoded string
-  return new Buffer(bitmap).toString('base64');
+  return new Buffer(bitmap).toString('base64')
 }
 
-function compareVersions(installed, required) {
+function compareVersions (installed, required) {
   if (required === undefined) {
     return true
   } else if (required.substring(0, 2) === '>=') {
@@ -55,7 +55,7 @@ function compareVersions(installed, required) {
   }
 }
 
-function mkdirSync(path) {
+function mkdirSync (path) {
   try {
     fs.mkdirSync(path)
   } catch (e) {
@@ -63,14 +63,14 @@ function mkdirSync(path) {
   }
 }
 
-function mkdirpSync(dirpath) {
+function mkdirpSync (dirpath) {
   let parts = dirpath.split(path.sep)
   for (let i = 1; i <= parts.length; i++) {
     mkdirSync(path.join.apply(null, parts.slice(0, i)))
   }
 }
 
-function appendToReport(req, res, options) {
+function appendToReport (req, res, options) {
   try {
     if (process.env.REPORT_PATH) {
       var report = fs.readFileSync(process.env.REPORT_PATH)
@@ -83,7 +83,7 @@ function appendToReport(req, res, options) {
   res.send()
 }
 
-function isTargetBrowser(req, res, targetBrowsers) {
+function isTargetBrowser (req, res, targetBrowsers) {
   if (targetBrowsers.length > 0) {
     var result = false
     for (var i = 0; i < targetBrowsers.length; i++) {
@@ -98,14 +98,14 @@ function isTargetBrowser(req, res, targetBrowsers) {
   }
 }
 
-function saveImage(req, res, options) {
+function saveImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
   fs.writeFileSync(options.imageDirectory + '/' + req.body.name, buff)
   res.send('')
 }
 
-function savePassedImage(req, res, options) {
+function savePassedImage (req, res, options) {
   var imageDirectory = options.imageDirectory + '/' + req.body.name.substring(0, req.body.name.lastIndexOf('\/') + 1)
   if (!fs.existsSync(imageDirectory)) {
     mkdirpSync(imageDirectory)
@@ -116,14 +116,14 @@ function savePassedImage(req, res, options) {
   res.send('')
 }
 
-function misMatchImage(req, res, options) {
+function misMatchImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
   fs.writeFileSync(options.imageDirectory + '/' + req.body.name.replace(/\.([^\.]*)$/, '-failed.$1'), buff)
   res.send('')
 }
 
-function getImage(req, res, options) {
+function getImage (req, res, options) {
   var decodedURI = options.imageDirectory + '/' + decodeURIComponent(req.query.name)
   if (fs.existsSync(decodedURI)) {
     var file = fs.readFileSync(decodedURI)
@@ -140,7 +140,7 @@ function getImage(req, res, options) {
 
 module.exports = {
   name: 'ember-cli-visual-acceptance',
-  included: function(app) {
+  included: function (app) {
     this._super.included(app)
     if (process.env.EMBER_CLI_FASTBOOT !== 'true') {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
@@ -173,7 +173,7 @@ module.exports = {
   },
   imageDirectory: 'visual-acceptance',
   targetBrowsers: [],
-  middleware: function(app, options) {
+  middleware: function (app, options) {
     app.use(bodyParser.urlencoded({
       limit: '50mb',
       extended: true,
@@ -183,35 +183,35 @@ module.exports = {
       limit: '50mb'
     }))
 
-    app.get('/image', function(req, res) {
+    app.get('/image', function (req, res) {
       getImage(req, res, options)
     })
 
-    app.post('/image', function(req, res) {
+    app.post('/image', function (req, res) {
       saveImage(req, res, options)
     })
 
-    app.post('/passed', function(req, res) {
+    app.post('/passed', function (req, res) {
       savePassedImage(req, res, options)
     })
-    app.post('/fail', function(req, res) {
+    app.post('/fail', function (req, res) {
       misMatchImage(req, res, options)
     })
-    app.post('/report', function(req, res) {
+    app.post('/report', function (req, res) {
       appendToReport(req, res, options)
     })
-    app.get('/istargetbrowser', function(req, res) {
+    app.get('/istargetbrowser', function (req, res) {
       isTargetBrowser(req, res, options.targetBrowsers)
     })
   },
-  testemMiddleware: function(app) {
+  testemMiddleware: function (app) {
     this.middleware(app, {
       root: this.project.root,
       imageDirectory: this.imageDirectory,
       targetBrowsers: this.targetBrowsers
     })
   },
-  serverMiddleware: function(options) {
+  serverMiddleware: function (options) {
     this.app = options.app
     if (this.validEnv && !this.validEnv()) {
       return
@@ -223,7 +223,7 @@ module.exports = {
     })
   },
 
-  includedCommands: function() {
+  includedCommands: function () {
     return {
       'build-report': {
         name: 'build-report',
@@ -236,12 +236,12 @@ module.exports = {
           default: 'visual-acceptance-report',
           description: 'Create Report off visual acceptance tests'
         }],
-        run: function(options, rawArgs) {
+        run: function (options, rawArgs) {
           var root = this.project.root
 
-          function deleteFolderRecursive(path) {
+          function deleteFolderRecursive (path) {
             if (fs.existsSync(path)) {
-              fs.readdirSync(path).forEach(function(file, index) {
+              fs.readdirSync(path).forEach(function (file, index) {
                 var curPath = path + '/' + file
                 if (fs.lstatSync(curPath).isDirectory()) { // recurse
                   deleteFolderRecursive(curPath)
@@ -281,12 +281,12 @@ module.exports = {
           default: 'visual-acceptance',
           description: 'The ember-cli-visual-acceptance directory where images are save'
         }],
-        run: function(options, rawArgs) {
+        run: function (options, rawArgs) {
           var root = this.project.root
 
-          function deleteFolderRecursive(path) {
+          function deleteFolderRecursive (path) {
             if (fs.existsSync(path)) {
-              fs.readdirSync(path).forEach(function(file, index) {
+              fs.readdirSync(path).forEach(function (file, index) {
                 var curPath = path + '/' + file
                 if (fs.lstatSync(curPath).isDirectory()) { // recurse
                   deleteFolderRecursive(curPath)
@@ -312,13 +312,13 @@ module.exports = {
           type: String,
           default: 'visual-acceptance',
           description: 'The ember-cli-visual-acceptance directory where images are save'
-        },{
+        }, {
           name: 'pr-api-url',
           type: String,
           default: '', // http://openshiftvisualacceptance-ewhite.rhcloud.com/comment
           description: 'API to call to comment on pr'
         }],
-        run: function(options, rawArgs) {
+        run: function (options, rawArgs) {
           let requestOptions = {
             'headers': {
               'user-agent': 'ciena-frost',
@@ -326,7 +326,7 @@ module.exports = {
             }
           }
 
-          function _getLastPrNumber() {
+          function _getLastPrNumber () {
             return exec('git log -10 --oneline').then((stdout) => {
               // the --oneline format for `git log` puts each commit on a single line, with the hash and then
               // the commit message, so we first split on \n to get an array of commits
@@ -359,12 +359,12 @@ module.exports = {
           var travisMessage = res.body
           if (/\#new\-baseline\#/.exec(travisMessage)) {
             console.log('Creating new baseline')
-            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function(params) {
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
               if (process.env.TRAVIS_PULL_REQUEST === false) {
                 console.log('Git add')
-                return runCommand('git', ['add', options.imageDirectory + '/*']).then(function(params) {
+                return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
                   console.log('Git commit')
-                  return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function(params) {
+                  return runCommand('git', ['commit', '-m', '"Adding new baseline images"']).then(function (params) {
                     console.log('Git push')
                     return runCommand('git', ['push'])
                   })
@@ -372,10 +372,10 @@ module.exports = {
               }
             })
           } else if (process.env.TRAVIS_PULL_REQUEST !== false && options.prApiUrl !== '') {
-            return runCommand('ember', ['br']).then(function(params) {
-              return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function(params) {
+            return runCommand('ember', ['br']).then(function (params) {
+              return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
                 console.log('Sending to github')
-                var base64str = base64_encode('images/output.png').replace('data:image\/\w+;base64,', '')
+                var base64str = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
                 var ApiOptions = {
                   'json': {
                     'repoSlug': repoSlug,
