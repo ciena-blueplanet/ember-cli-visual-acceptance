@@ -115,6 +115,14 @@ function capture(imageName, height, width, misMatchPercentageMargin, imageDirect
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
           document.getElementById('visual-acceptance-container').appendChild(node)
+          $.ajax({
+              type: 'POST',
+              async: false,
+              url: '/report',
+              data: {
+                report: node.innerHTML
+              }
+            })
           chai.assert.isTrue(result, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
           data ? resolve(data) : reject(data)
         })
