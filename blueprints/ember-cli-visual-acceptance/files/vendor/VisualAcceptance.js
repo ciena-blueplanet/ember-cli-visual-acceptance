@@ -13,9 +13,8 @@ function httpPost(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, height, width, misMatchPercentageMargin, imageDirectory) {
+function capture(imageName, height, width, misMatchPercentageMargin) {
   if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
-  if (imageDirectory == null){imageDirectory = 'visual-acceptance'}
   
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
