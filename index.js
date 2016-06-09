@@ -317,6 +317,11 @@ module.exports = {
           type: String,
           default: '', // http://openshiftvisualacceptance-ewhite.rhcloud.com/comment
           description: 'API to call to comment on pr'
+        }, {
+          name: 'branch',
+          type: String,
+          default: 'master',
+          description: 'branch to push to'
         }],
         run: function (options, rawArgs) {
           let requestOptions = {
@@ -326,52 +331,31 @@ module.exports = {
             }
           }
 
-          function _getLastPrNumber () {
-            return exec('git log -10 --oneline').then((stdout) => {
-              // the --oneline format for `git log` puts each commit on a single line, with the hash and then
-              // the commit message, so we first split on \n to get an array of commits
-              const commits = stdout.split('\n')
-
-              // The commit that represents the merging of the PR will include the text 'Merge pull request' so
-              // we find that one
-              const mergeCommit = __.find(commits, (commit) => {
-                return commit.indexOf('Merge pull request') !== -1
-              })
-
-              // The format of the auto-generated commit line will look something like:
-              // 'edf85e0 Merge pull request #30 from job13er/remove-newline'
-              // so if we split on the space, and grab the 5th item, it's '#30' then strip the '#' to get '30'
-              const prNumber = mergeCommit.split(' ')[4].replace('#', '')
-
-              return prNumber
-            })
-          }
-
           if (!process.env.RO_GH_TOKEN || !process.env.TRAVIS_REPO_SLUG) {
             console.log('No github token found or Travis found. Just running ember test')
             return runCommand('ember', ['test'])
           }
           var repoSlug = process.env.TRAVIS_REPO_SLUG
 
-          var prNumber = process.env.TRAVIS_PULL_REQUEST === false ? _getLastPrNumber() : process.env.TRAVIS_PULL_REQUEST
+          var prNumber = process.env.TRAVIS_PULL_REQUEST
           var url = 'https://api.github.com/repos/' + repoSlug + '/pulls/' + prNumber
           var res = request('GET', url, requestOptions)
           var travisMessage = res.body
           if (/\#new\-baseline\#/.exec(travisMessage)) {
             console.log('Creating new baseline')
             return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
-              if (process.env.TRAVIS_PULL_REQUEST === false) {
+              if (prNumber === false) {
                 console.log('Git add')
                 return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
                   console.log('Git commit')
                   return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                     console.log('Git push')
-                    return runCommand('git', ['push'])
+                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
                   })
                 })
               }
             })
-          } else if (process.env.TRAVIS_PULL_REQUEST !== false && process.env.TRAVIS_PULL_REQUEST !== 'false' && options.prApiUrl !== '') {
+          } else if (prNumber !== false && prNumber !== 'false' && options.prApiUrl !== '') {
             return runCommand('ember', ['br']).then(function (params) {
               return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
                 console.log('Sending to github')
@@ -387,14 +371,14 @@ module.exports = {
                 console.log(response.getBody())
               })
             })
-          } else if ((process.env.TRAVIS_PULL_REQUEST === false || process.env.TRAVIS_PULL_REQUEST === 'false') && options.prApiUrl !== '') {
+          } else if ((prNumber === false || prNumber === 'false') && options.prApiUrl !== '') {
             return runCommand('ember', ['test']).then(function (params) {
               console.log('Git add')
               return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
                 console.log('Git commit')
                 return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                   console.log('Git push')
-                  return runCommand('git', ['push'])
+                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
                 })
               })
             })
