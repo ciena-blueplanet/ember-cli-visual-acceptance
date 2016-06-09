@@ -15,6 +15,7 @@ function runCommand (command, args, ignoreStdError) {
     })
     child.stderr.on('data', function (data) {
       if (ignoreStdError) {
+        // Use ignoreStdError only to get around this issue https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/25
         console.log(data.toString())
         console.log(arguments)
       } else {
