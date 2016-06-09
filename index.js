@@ -7,14 +7,20 @@ var spawn = require('child_process').spawn
 var RSVP = require('rsvp')
 var request = require('sync-request')
 
-function runCommand (command, args) {
+function runCommand (command, args, ignoreStdError) {
   return new RSVP.Promise(function (resolve, reject) {
     var child = spawn(command, args)
     child.stdout.on('data', function (data) {
       console.log(data.toString())
     })
     child.stderr.on('data', function (data) {
-      reject(data.toString())
+      if (ignoreStdError) {
+        // Use ignoreStdError only to get around this issue https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/25
+        console.log(data.toString())
+        console.log(arguments)
+      } else {
+        reject(data.toString())
+      }
     })
 
     child.on('exit', function (code) {
@@ -348,7 +354,7 @@ module.exports = {
                   console.log('Git commit')
                   return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                     console.log('Git push')
-                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
+                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                   })
                 })
               }
@@ -376,7 +382,7 @@ module.exports = {
                 console.log('Git commit')
                 return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                   console.log('Git push')
-                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
+                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                 })
               })
             })
