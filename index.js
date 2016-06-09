@@ -371,7 +371,7 @@ module.exports = {
                 })
               }
             })
-          } else if ((process.env.TRAVIS_PULL_REQUEST !== false || process.env.TRAVIS_PULL_REQUEST !== 'false') && options.prApiUrl !== '') {
+          } else if (process.env.TRAVIS_PULL_REQUEST !== false && process.env.TRAVIS_PULL_REQUEST !== 'false' && options.prApiUrl !== '') {
             return runCommand('ember', ['br']).then(function (params) {
               return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
                 console.log('Sending to github')
