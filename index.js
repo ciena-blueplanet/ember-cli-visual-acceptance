@@ -16,6 +16,7 @@ function runCommand (command, args, ignoreStdError) {
     child.stderr.on('data', function (data) {
       if (ignoreStdError) {
         console.log(data.toString())
+        console.log(arguments)
       } else {
         reject(data.toString())
       }
