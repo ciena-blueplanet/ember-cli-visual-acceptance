@@ -1,3 +1,6 @@
+# 0.1.2
+* Fix dependencies
+
 # 0.1.1
 * Add travis integration
 * Extend detectjs to detect PhantomJS and SlimerJS
