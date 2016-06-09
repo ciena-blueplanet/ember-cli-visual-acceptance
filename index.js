@@ -5,9 +5,7 @@ var fs = require('fs')
 var path = require('path')
 var spawn = require('child_process').spawn
 var RSVP = require('rsvp')
-var exec = require('child_process').exec
 var request = require('sync-request')
-var __ = require('lodash')
 
 function runCommand (command, args) {
   return new RSVP.Promise(function (resolve, reject) {
