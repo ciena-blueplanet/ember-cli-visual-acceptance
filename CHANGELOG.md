@@ -1,3 +1,7 @@
+# 0.1.3
+* Temporarily resolve this issue https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/27
+
+
 # 0.1.2
 * Fix dependencies
 
