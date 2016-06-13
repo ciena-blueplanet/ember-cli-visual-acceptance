@@ -13,7 +13,7 @@ function httpPost(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, height, width, misMatchPercentageMargin) {
+function capture(imageName, width, height, misMatchPercentageMargin) {
   if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
   
   var browser = window.ui
