@@ -74,7 +74,6 @@ return capture('placeholder', null, null, 0.00)
 | width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.                                                                                           |
 | height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the window.                                                                                         |
 | misMatchPercentageMargin | float  | 1.00                | The maximum percentage ResembleJs is allowed to misMatch.                                                                                                                           |
-| imageDirectory           | string | 'visual-acceptance' | The location where the `-passed.png` and `-failed.png` images will be saved. *(Note: Cannot be within the `tests` folder as this will restart the test every time an image is save) |
 
 ### Establishing a new baseline
 Simply run `ember new-baseline`
