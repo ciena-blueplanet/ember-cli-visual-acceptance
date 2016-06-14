@@ -324,11 +324,6 @@ module.exports = {
           type: String,
           default: 'master',
           description: 'branch to push to'
-        }, {
-          name: 'visual-acceptance-token',
-          type: String,
-          default: '',
-          description: 'Github token to comment with'
         }],
         run: function (options, rawArgs) {
           let requestOptions = {
@@ -362,7 +357,7 @@ module.exports = {
                 })
               }
             })
-          } else if (prNumber !== false && prNumber !== 'false' && options.visualAcceptanceToken !== '') {
+          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
             return runCommand('ember', ['br']).then(function (params) {
               return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
                 console.log('Sending to github')
@@ -388,7 +383,7 @@ module.exports = {
                 var githubApiPostOptions = {
                   'headers': {
                     'user-agent': 'visual-acceptance',
-                    'Authorization': 'token ' + options.visualAcceptanceToken
+                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
                   },
                   'json': {
                     'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse.data.link + ')'
@@ -398,7 +393,7 @@ module.exports = {
                 var githubApiGetOptions = {
                   'headers': {
                     'user-agent': 'visual-acceptance',
-                    'Authorization': 'token ' + options.visualAcceptanceToken
+                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
                   }
                 }
                 var url = 'https://api.github.com/repos/' + repoSlug + '/issues/' + prNumber + '/comments'
