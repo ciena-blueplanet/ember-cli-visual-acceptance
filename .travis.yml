@@ -20,7 +20,7 @@ before_script:
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
 script:
-- npm run lint && ember tva --pr-api-url=http://openshiftvisualacceptance-ewhite.rhcloud.com/comment
+- npm run lint && ember tva --visual-acceptance-token=8284ea96e1c3c8fd1d8ad1a0812579ab2e535eba
 install:
 - npm install
 - bower install

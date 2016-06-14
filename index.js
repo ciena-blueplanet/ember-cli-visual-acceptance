@@ -206,6 +206,10 @@ module.exports = {
     app.get('/istargetbrowser', function (req, res) {
       isTargetBrowser(req, res, options.targetBrowsers)
     })
+
+    app.get('/visual-acceptance', function (req, res) {
+      res.sendfile('visual-acceptance-report/report.html')
+    })
   },
   testemMiddleware: function (app) {
     this.middleware(app, {
@@ -316,11 +320,6 @@ module.exports = {
           default: 'visual-acceptance',
           description: 'The ember-cli-visual-acceptance directory where images are save'
         }, {
-          name: 'pr-api-url',
-          type: String,
-          default: '', // http://openshiftvisualacceptance-ewhite.rhcloud.com/comment
-          description: 'API to call to comment on pr'
-        }, {
           name: 'branch',
           type: String,
           default: 'master',
@@ -358,23 +357,58 @@ module.exports = {
                 })
               }
             })
-          } else if (prNumber !== false && prNumber !== 'false' && options.prApiUrl !== '') {
+          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
             return runCommand('ember', ['br']).then(function (params) {
               return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
                 console.log('Sending to github')
-                var base64str = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-                var ApiOptions = {
+                var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+                function uploadToImgur (image) {
+                  var imgurClientID = 'e39f00905b80937'
+                  var imgurApiOptions = {
+                    'headers': {
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Client-ID ' + imgurClientID
+                    },
+                    'json': {
+                      'type': 'base64',
+                      'image': image.replace('data:image\/\w+;base64,', '')
+                    }
+
+                  }
+                  var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
+                  return JSON.parse(response.getBody())
+                }
+
+                var imgurResponse = uploadToImgur(image)
+                var githubApiPostOptions = {
+                  'headers': {
+                    'user-agent': 'visual-acceptance',
+                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+                  },
                   'json': {
-                    'repoSlug': repoSlug,
-                    'prNumber': prNumber,
-                    'report': base64str
+                    'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse.data.link + ')'
                   }
                 }
-                var response = request('POST', options.prApiUrl, ApiOptions)
-                console.log(response.getBody())
+
+                var githubApiGetOptions = {
+                  'headers': {
+                    'user-agent': 'visual-acceptance',
+                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+                  }
+                }
+                var url = 'https://api.github.com/repos/' + repoSlug + '/issues/' + prNumber + '/comments'
+                var response = request('GET', url, githubApiGetOptions)
+                var bodyJSON = JSON.parse(response.getBody().toString())
+                for (var i = 0; i < bodyJSON.length; i++) {
+                  if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+                    url = bodyJSON[i].url
+                    break
+                  }
+                }
+                response = request('POST', url, githubApiPostOptions)
               })
             })
-          } else if ((prNumber === false || prNumber === 'false') && options.prApiUrl !== '') {
+          } else if ((prNumber === false || prNumber === 'false')) {
             return runCommand('ember', ['test']).then(function (params) {
               console.log('Git add')
               return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
