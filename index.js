@@ -169,7 +169,6 @@ module.exports = {
       })
     }
 
-
     if (app.options.visualAcceptanceOptions) {
       this.imageDirectory = app.options.visualAcceptanceOptions.imageDirectory || 'visual-acceptance'
       this.targetBrowsers = app.options.visualAcceptanceOptions.targetBrowsers || []
