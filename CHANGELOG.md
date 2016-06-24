@@ -1,3 +1,7 @@
+# 0.1.6
+No CHANGELOG section found in Pull Request description.
+Use a `# CHANGELOG` section in your Pull Request description to auto-populate the `CHANGELOG.md`
+
 # 0.1.5
 * Remove prApiUrl. Instead comment with an account that has no public repo access. So scope can only comment
 * serve html report on `/visual-acceptance` fixes https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/7
