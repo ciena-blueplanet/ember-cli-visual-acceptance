@@ -145,29 +145,30 @@ module.exports = {
   name: 'ember-cli-visual-acceptance',
   included: function (app) {
     this._super.included(app)
-    if (process.env.EMBER_CLI_FASTBOOT !== 'true') {
+    if (app) {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
         type: 'test'
       })
-      app.import('vendor/bluebird/js/browser/bluebird.min.js', {
+      app.import(path.join('vendor', 'bluebird', 'js', 'browser', 'bluebird.min.js'), {
         type: 'test'
       })
-      app.import('vendor/jquery.min.js', {
+      app.import(path.join('vendor', 'jquery.min.js'), {
         type: 'test'
       })
-      app.import('vendor/html2canvas.js', {
+      app.import(path.join('vendor', 'html2canvas.js'), {
         type: 'test'
       })
-      app.import('vendor/VisualAcceptance.js', {
+      app.import(path.join('vendor', 'VisualAcceptance.js'), {
+        type: 'test'
+      })
+      app.import(path.join('vendor', 'visual-acceptance-report.css'), {
+        type: 'test'
+      })
+      app.import(path.join('vendor', 'detect.js'), {
         type: 'test'
       })
     }
-    app.import('vendor/visual-acceptance-report.css', {
-      type: 'test'
-    })
-    app.import('vendor/detect.js', {
-      type: 'test'
-    })
+
 
     if (app.options.visualAcceptanceOptions) {
       this.imageDirectory = app.options.visualAcceptanceOptions.imageDirectory || 'visual-acceptance'

@@ -9,16 +9,7 @@ module.exports = {
   // }
   included: function (app) {
     this._super.included(app)
-    app.import('vendor/VisualAcceptance.js', {type: 'test'})
-    app.import('vendor/html2canvas.js', {type: 'test'})
     app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
-    app.import('vendor/bluebird/js/browser/bluebird.min.js', {
-      type: 'test'
-    })
-    app.import('vendor/jquery.min.js', {
-      type: 'test'
-    })
-    app.import('vendor/detect.js', {type: 'test'})
   },
   normalizeEntityName: function () {
     // no-op
