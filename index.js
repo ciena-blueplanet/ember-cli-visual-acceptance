@@ -504,6 +504,132 @@ module.exports = {
             })
           }
         }
+      },
+      'teamcity-bitbucket-visual-acceptance': {
+        name: 'teamcity-bitbucket-visual-acceptance',
+        aliases: ['tva'],
+        description: 'Run visual-acceptance based off Bitbucket message',
+        works: 'insideProject',
+        availableOptions: [{
+          name: 'image-directory',
+          type: String,
+          default: 'visual-acceptance',
+          description: 'The ember-cli-visual-acceptance directory where images are save'
+        }, {
+          name: 'branch',
+          type: String,
+          default: 'master',
+          description: 'branch to push to'
+        }, {
+          name: 'user',
+          type: String,
+          default: '',
+          description: 'branch to push to'
+        }, {
+          name: 'password',
+          type: String,
+          default: '',
+          description: 'branch to push to'
+        }, {
+          name: 'domain',
+          type: String,
+          default: '',
+          description: 'branch to push to'
+        }],
+        run: function (options, rawArgs) {
+          if (options.user.isEmpty() || options.password.isEmpty() || options.domain.isEmpty()) {
+            console.log('Need to supply a user, password, and domain. Sorry the bitbucket api sucks. \n Just running ember test')
+            return runCommand('ember', ['test'])
+          }
+
+          if (!process.env.RO_GH_TOKEN || !process.env.teamcity.build.branch) {
+            console.log('No Teamcity found. Just running ember test')
+            return runCommand('ember', ['test'])
+          }
+          var buildBranch = process.env.teamcity.build.branch
+          var prRegex = /pull-requests\/([0-9]+)/i
+          var prNumber = prRegex.exec(buildBranch)[1]
+          var baseUrl = 'http://' + options.user + ':' + encodeURIComponent(options.password) + '@' + options.domain + '/rest/api/1.0/projects/BP_MCP_SERVICES/repos/ui/pull-requests/' + prNumber
+          var res = request('GET', baseUrl)
+          var PrDescription = JSON.parse(res.body).description
+          if (PrDescription && /\#new\-baseline\#/.exec(PrDescription)) {
+            console.log('Creating new baseline')
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
+              if (prNumber === false) {
+                console.log('Git add')
+                return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                  console.log('Git commit')
+                  return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
+                    console.log('Git push')
+                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                  })
+                })
+              }
+            })
+          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+            return runCommand('ember', ['br']).then(function (params) {
+              return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
+                console.log('Sending to github')
+                var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+                function uploadToImgur (image) {
+                  var imgurClientID = 'e39f00905b80937'
+                  var imgurApiOptions = {
+                    'headers': {
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Client-ID ' + imgurClientID
+                    },
+                    'json': {
+                      'type': 'base64',
+                      'image': image.replace('data:image\/\w+;base64,', '')
+                    }
+
+                  }
+                  var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
+                  return JSON.parse(response.getBody())
+                }
+
+                var imgurResponse = uploadToImgur(image)
+                var githubApiPostOptions = {
+                  'headers': {
+                    'user-agent': 'visual-acceptance',
+                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+                  },
+                  'json': {
+                    'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse.data.link + ')'
+                  }
+                }
+
+                var githubApiGetOptions = {
+                  'headers': {
+                    'user-agent': 'visual-acceptance',
+                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+                  }
+                }
+                var url = 'https://api.github.com/repos/' + repoSlug + '/issues/' + prNumber + '/comments'
+                var response = request('GET', url, githubApiGetOptions)
+                var bodyJSON = JSON.parse(response.getBody().toString())
+                for (var i = 0; i < bodyJSON.length; i++) {
+                  if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+                    url = bodyJSON[i].url
+                    break
+                  }
+                }
+                response = request('POST', url, githubApiPostOptions)
+              })
+            })
+          } else if ((prNumber === false || prNumber === 'false')) {
+            return runCommand('ember', ['test']).then(function (params) {
+              console.log('Git add')
+              return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                console.log('Git commit')
+                return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
+                  console.log('Git push')
+                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                })
+              })
+            })
+          }
+        }
       }
     }
   }
