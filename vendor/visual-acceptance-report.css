@@ -8,3 +8,44 @@
   height:30pt;
   width: 50pt;
 }
+.visual-acceptance.title  {
+  padding-top: 30px;
+  font-size: 29px;
+  color: #404041;
+  padding-left: 30px;
+  padding-bottom: 20px;
+}
+.visual-acceptance-container {
+  padding-left: 30px;
+}
+.visual-acceptance-container > .test {
+  padding-left: 20px;
+}
+.visual-acceptance-container > .test > .list-name {
+  font-size: 18px;
+  color: #33424F;
+}
+
+.visual-acceptance-container > .test > .list-subtitle {
+  float: left;
+}
+.visual-acceptance-container > .test > .additional-info {
+  font-size: 14px;
+  color: #929497;
+  padding-bottom: 20px;
+}
+.images {
+  text-align:center;
+  margin:50px auto;
+}
+
+.images .image{
+    margin:0px 20px;
+    display:inline-block;
+    text-decoration:none;
+}
+img {
+  width: 160px;
+  height: 160px;
+  padding-right: 10px;
+}

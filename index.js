@@ -77,7 +77,7 @@ function appendToReport (req, res, options) {
   try {
     if (process.env.REPORT_PATH) {
       var report = fs.readFileSync(process.env.REPORT_PATH)
-      report = report.toString().replace(/(<\/body>\s<\/HTML>)/i, req.body.report + '$1')
+      report = report.toString().replace(/(<\/div>\s<\/body>\s<\/HTML>)/i, req.body.report + '$1')
       fs.writeFileSync(process.env.REPORT_PATH, report)
     }
   } catch (e) {
@@ -268,7 +268,47 @@ module.exports = {
 <TITLE>Visual Acceptance report </TITLE>
 </HEAD>
 <BODY>
-  <h3> Visual Acceptance tests: </h3>
+<style>
+  .visual-acceptance.title  {
+    padding-top: 30px;
+    font-size: 29px;
+    color: #404041;
+    padding-left: 30px;
+  }
+  .visual-acceptance-container {
+    padding-left: 30px;
+  }
+  .visual-acceptance-container > .test {
+    padding-left: 20px;
+  }
+  .visual-acceptance-container > .test > .list-name {
+    font-size: 18px;
+    color: #33424F;
+    padding-top: 20px;
+  }
+
+  .visual-acceptance-container > .test > .list-subtitle {
+    float: left;
+  }
+  .visual-acceptance-container > .test > .additional-info {
+    font-size: 14px;
+    color: #929497;
+    padding-bottom: 20px;
+  }
+
+  .images .image{
+      display:inline-block;
+      text-decoration:none;
+  }
+  img {
+    width: 160px;
+    height: 160px;
+    padding-right: 10px;
+  }
+</style>
+  <div class="visual-acceptance title"> Visual Acceptance tests: </div>
+  <div class="visual-acceptance-container"> 
+</div>
 </BODY>
 </HTML>`)
 

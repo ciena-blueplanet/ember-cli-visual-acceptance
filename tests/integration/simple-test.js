@@ -24,5 +24,15 @@ describeComponent(
         done(err)
       })
     })
+    it('renders something else', function (done) {
+      this.render(hbs `<div id='test'>Test Else</div>`)
+      expect(this.$()).to.have.length(1)
+      capture('Error').then(function (data) {
+        console.log(arguments)
+        done()
+      }).catch(function (err) {
+        done(err)
+      })
+    })
   }
 )
