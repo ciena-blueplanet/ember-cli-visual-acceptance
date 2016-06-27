@@ -57,7 +57,7 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
       var visualAcceptanceContainer
       visualAcceptanceContainer = document.createElement('div')
       visualAcceptanceContainer.setAttribute('id', 'visual-acceptance')
-      visualAcceptanceContainer.innerHTML = '<h3> Visual Acceptance tests: </h3> <div id="visual-acceptance-container"> </div>'
+      visualAcceptanceContainer.innerHTML = '<div class="title"> Visual Acceptance tests: </div> <div class="visual-acceptance-container"> </div>'
       document.body.appendChild(visualAcceptanceContainer)
     }
     var node = document.createElement('div')
@@ -76,7 +76,7 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
       })
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
-      node.innerHTML = '<div class="test pass"> <h4> No passed image. Saving current as baseline: ' + imageName + '</h4> <img src="'+ image + '" /> </div>'
+      node.innerHTML = '<div class="test pass"> <div class="list-name"> No passed image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
       $.ajax({
               type: 'POST',
               async: false,
@@ -106,7 +106,7 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
               }
             })
             result = true
-            node.innerHTML = '<div class="test pass"> <h4> Passed: ' + imageName + '</h4> <img src="'+ image + '" /> </div>'
+            node.innerHTML = '<div class="test pass"> <div class="list-name">  Passed: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
           } else {
             // Fail
             $.ajax({
@@ -118,11 +118,11 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
                 name: browserDirectory + imageName + '.png'
               }
             })
-            node.innerHTML = '<div class="test fail"> <h4> Failed: '+ imageName+' </h4> <h5> Diff: </h5> <img class="diff image" src="'+data.getImageDataUrl()+'" /> <h5> Current: </h5> <img class="input image" src="'+image+'" /> <h5> Baseline: </h5> <img class="passed image" src="'+res.image+'" /></div>'
+            node.innerHTML = '<div class="test fail"> <div class="list-name">  Failed: '+ imageName+' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="'+data.getImageDataUrl()+'" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="'+image+'" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="'+res.image+'" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
-          document.getElementById('visual-acceptance-container').appendChild(node)
+          document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
           $.ajax({
               type: 'POST',
               async: false,

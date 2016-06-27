@@ -77,7 +77,7 @@ function appendToReport (req, res, options) {
   try {
     if (process.env.REPORT_PATH) {
       var report = fs.readFileSync(process.env.REPORT_PATH)
-      report = report.toString().replace(/(<\/body>\s<\/HTML>)/i, req.body.report + '$1')
+      report = report.toString().replace(/(<\/div>\s<\/body>\s<\/HTML>)/i, req.body.report + '$1')
       fs.writeFileSync(process.env.REPORT_PATH, report)
     }
   } catch (e) {
@@ -139,6 +139,58 @@ function getImage (req, res, options) {
       error: 'File does not exist'
     })
   }
+}
+
+function buildReport (params) {
+  return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
+    console.log('Sending to github')
+    var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+    function uploadToImgur (image) {
+      var imgurClientID = 'e39f00905b80937'
+      var imgurApiOptions = {
+        'headers': {
+          'Content-Type': 'application/json',
+          'Authorization': 'Client-ID ' + imgurClientID
+        },
+        'json': {
+          'type': 'base64',
+          'image': image.replace('data:image\/\w+;base64,', '')
+        }
+
+      }
+      var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
+      return JSON.parse(response.getBody())
+    }
+
+    var imgurResponse = uploadToImgur(image)
+    var githubApiPostOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+      },
+      'json': {
+        'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse.data.link + ')'
+      }
+    }
+
+    var githubApiGetOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+      }
+    }
+    var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
+    var response = request('GET', url, githubApiGetOptions)
+    var bodyJSON = JSON.parse(response.getBody().toString())
+    for (var i = 0; i < bodyJSON.length; i++) {
+      if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+        url = bodyJSON[i].url
+        break
+      }
+    }
+    response = request('POST', url, githubApiPostOptions)
+    return response
+  })
 }
 
 module.exports = {
@@ -268,7 +320,47 @@ module.exports = {
 <TITLE>Visual Acceptance report </TITLE>
 </HEAD>
 <BODY>
-  <h3> Visual Acceptance tests: </h3>
+<style>
+  .visual-acceptance.title  {
+    padding-top: 30px;
+    font-size: 29px;
+    color: #404041;
+    padding-left: 30px;
+  }
+  .visual-acceptance-container {
+    padding-left: 30px;
+  }
+  .visual-acceptance-container > .test {
+    padding-left: 20px;
+  }
+  .visual-acceptance-container > .test > .list-name {
+    font-size: 18px;
+    color: #33424F;
+    padding-top: 20px;
+  }
+
+  .visual-acceptance-container > .test > .list-subtitle {
+    float: left;
+  }
+  .visual-acceptance-container > .test > .additional-info {
+    font-size: 14px;
+    color: #929497;
+    padding-bottom: 20px;
+  }
+
+  .images .image{
+      display:inline-block;
+      text-decoration:none;
+  }
+  img {
+    width: 160px;
+    height: 160px;
+    padding-right: 10px;
+  }
+</style>
+  <div class="visual-acceptance title"> Visual Acceptance tests: </div>
+  <div class="visual-acceptance-container"> 
+</div>
 </BODY>
 </HTML>`)
 
@@ -358,54 +450,9 @@ module.exports = {
               }
             })
           } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
-            return runCommand('ember', ['br']).then(function (params) {
-              return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
-                console.log('Sending to github')
-                var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-                function uploadToImgur (image) {
-                  var imgurClientID = 'e39f00905b80937'
-                  var imgurApiOptions = {
-                    'headers': {
-                      'Content-Type': 'application/json',
-                      'Authorization': 'Client-ID ' + imgurClientID
-                    },
-                    'json': {
-                      'type': 'base64',
-                      'image': image.replace('data:image\/\w+;base64,', '')
-                    }
-
-                  }
-                  var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-                  return JSON.parse(response.getBody())
-                }
-
-                var imgurResponse = uploadToImgur(image)
-                var githubApiPostOptions = {
-                  'headers': {
-                    'user-agent': 'visual-acceptance',
-                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-                  },
-                  'json': {
-                    'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse.data.link + ')'
-                  }
-                }
-
-                var githubApiGetOptions = {
-                  'headers': {
-                    'user-agent': 'visual-acceptance',
-                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-                  }
-                }
-                var url = 'https://api.github.com/repos/' + repoSlug + '/issues/' + prNumber + '/comments'
-                var response = request('GET', url, githubApiGetOptions)
-                var bodyJSON = JSON.parse(response.getBody().toString())
-                for (var i = 0; i < bodyJSON.length; i++) {
-                  if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
-                    url = bodyJSON[i].url
-                    break
-                  }
-                }
-                response = request('POST', url, githubApiPostOptions)
+            return runCommand('ember', ['br']).then(buildReport, function (params) {
+              return buildReport(params).then(function (params) {
+                throw new Error('Exit 1')
               })
             })
           } else if ((prNumber === false || prNumber === 'false')) {
