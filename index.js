@@ -145,7 +145,9 @@ function buildReport (params) {
   return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
     console.log('Sending to github')
     var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-    function uploadToImgur (image) {
+    function uploadToImgur (image, reportPath) {
+      var imgurAlbum = []
+      var result = []
       var imgurClientID = 'e39f00905b80937'
       var imgurApiOptions = {
         'headers': {
@@ -159,17 +161,51 @@ function buildReport (params) {
 
       }
       var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-      return JSON.parse(response.getBody())
+      var reportID = JSON.parse(response.getBody())
+      imgurAlbum.push(reportID.data.id)
+      result.push(reportID.data.link)
+      var report = fs.readFileSync(reportPath).toString()
+      var regexImageData = /src=\"data\:image\/png;base64\,[^"]*"/ig
+      var matches = report.match(regexImageData)
+      for (var i = 0; i < matches.length; i++) {
+        imgurApiOptions = {
+          'headers': {
+            'Content-Type': 'application/json',
+            'Authorization': 'Client-ID ' + imgurClientID
+          },
+          'json': {
+            'type': 'base64',
+            'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
+          }
+
+        }
+        response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
+        imgurAlbum.push(JSON.parse(response.getBody()).data.id)
+      }
+      // create album
+      imgurApiOptions = {
+        'headers': {
+          'Content-Type': 'application/json',
+          'Authorization': 'Client-ID ' + imgurClientID
+        },
+        'json': {
+          'ids': imgurAlbum
+        }
+
+      }
+      response = request('POST', 'https://api.imgur.com/3/album', imgurApiOptions)
+      result.push('http://imgur.com/a/' + JSON.parse(response.getBody()).data.id)
+      return result
     }
 
-    var imgurResponse = uploadToImgur(image)
+    var imgurResponse = uploadToImgur(image, 'visual-acceptance-report/report.html')
     var githubApiPostOptions = {
       'headers': {
         'user-agent': 'visual-acceptance',
         'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
       },
       'json': {
-        'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse.data.link + ')'
+        'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse[0] + ') \n [Imgur Album](' + imgurResponse[1] + ')'
       }
     }
 
@@ -349,7 +385,7 @@ module.exports = {
   }
 
   .images .image{
-      display:inline-block;
+      float: left;
       text-decoration:none;
   }
   img {
