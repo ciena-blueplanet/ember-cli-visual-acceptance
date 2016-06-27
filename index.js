@@ -188,7 +188,8 @@ function buildReport (params) {
         break
       }
     }
-    return response = request('POST', url, githubApiPostOptions)
+    response = request('POST', url, githubApiPostOptions)
+    return response
   })
 }
 
