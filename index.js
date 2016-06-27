@@ -179,7 +179,7 @@ function buildReport (params) {
         'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
       }
     }
-    var url = 'https://api.github.com/repos/' + repoSlug + '/issues/' + prNumber + '/comments'
+    var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
     var response = request('GET', url, githubApiGetOptions)
     var bodyJSON = JSON.parse(response.getBody().toString())
     for (var i = 0; i < bodyJSON.length; i++) {
@@ -188,7 +188,7 @@ function buildReport (params) {
         break
       }
     }
-    response = request('POST', url, githubApiPostOptions)
+    return response = request('POST', url, githubApiPostOptions)
   })
 }
 
@@ -449,7 +449,11 @@ module.exports = {
               }
             })
           } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
-            return runCommand('ember', ['br']).then(buildReport, buildReport)
+            return runCommand('ember', ['br']).then(buildReport, function (params) {
+              return buildReport(params).then(function (params) {
+                throw new Error('Exit 1')
+              })
+            })
           } else if ((prNumber === false || prNumber === 'false')) {
             return runCommand('ember', ['test']).then(function (params) {
               console.log('Git add')
