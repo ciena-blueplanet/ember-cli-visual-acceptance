@@ -473,7 +473,7 @@ module.exports = {
       },
       'teamcity-bitbucket-visual-acceptance': {
         name: 'teamcity-bitbucket-visual-acceptance',
-        aliases: ['tva'],
+        aliases: ['tbva'],
         description: 'Run visual-acceptance based off Bitbucket message',
         works: 'insideProject',
         availableOptions: [{
@@ -501,21 +501,34 @@ module.exports = {
           type: String,
           default: '',
           description: 'branch to push to'
+        }, {
+          name: 'project',
+          type: String,
+          default: '',
+          description: 'branch to push to'
+        }, {
+          name: 'repo',
+          type: String,
+          default: '',
+          description: 'branch to push to'
+        }, {
+          name: 'express-url',
+          type: String,
+          default: 'http://frost.ciena.com:3000/',
+          description: 'branch to push to'
         }],
         run: function (options, rawArgs) {
-          if (options.user.isEmpty() || options.password.isEmpty() || options.domain.isEmpty()) {
+          if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 || options.project.length === 0 || options.repo.length === 0) {
             console.log('Need to supply a user, password, and domain. Sorry the bitbucket api sucks. \n Just running ember test')
             return runCommand('ember', ['test'])
           }
 
-          if (!process.env.RO_GH_TOKEN || !process.env.teamcity.build.branch) {
+          if (process.env.TEAMCITY_PULL_REQUEST === null) {
             console.log('No Teamcity found. Just running ember test')
             return runCommand('ember', ['test'])
           }
-          var buildBranch = process.env.teamcity.build.branch
-          var prRegex = /pull-requests\/([0-9]+)/i
-          var prNumber = prRegex.exec(buildBranch)[1]
-          var baseUrl = 'http://' + options.user + ':' + encodeURIComponent(options.password) + '@' + options.domain + '/rest/api/1.0/projects/BP_MCP_SERVICES/repos/ui/pull-requests/' + prNumber
+          var prNumber = process.env.TEAMCITY_PULL_REQUEST
+          var baseUrl = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber
           var res = request('GET', baseUrl)
           var PrDescription = JSON.parse(res.body).description
           if (PrDescription && /\#new\-baseline\#/.exec(PrDescription)) {
@@ -532,58 +545,43 @@ module.exports = {
                 })
               }
             })
-          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+          } else if (prNumber !== false) {
             return runCommand('ember', ['br']).then(function (params) {
               return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
                 console.log('Sending to github')
                 var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-                function uploadToImgur (image) {
-                  var imgurClientID = 'e39f00905b80937'
-                  var imgurApiOptions = {
+                function uploadToExpress (url, image, name) {
+                  var apiOptions = {
                     'headers': {
-                      'Content-Type': 'application/json',
-                      'Authorization': 'Client-ID ' + imgurClientID
+                      'Content-Type': 'application/json'
                     },
                     'json': {
-                      'type': 'base64',
-                      'image': image.replace('data:image\/\w+;base64,', '')
+                      'name': name,
+                      'data': image.replace('data:image\/\w+;base64,', '')
                     }
 
                   }
-                  var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-                  return JSON.parse(response.getBody())
+                  var response = request('POST', url + 'api/upload/image', apiOptions)
+                  return response.getBody()
                 }
-
-                var imgurResponse = uploadToImgur(image)
+                var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
+                uploadToExpress(options.expressUrl, image, filename)
                 var githubApiPostOptions = {
                   'headers': {
                     'user-agent': 'visual-acceptance',
-                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+                    'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
                   },
                   'json': {
-                    'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse.data.link + ')'
+                    'text': '![PR ember-cli-visual-acceptance Report](' + 'http://frost.ciena.com:3000/' + filename + ')'
                   }
                 }
-
-                var githubApiGetOptions = {
-                  'headers': {
-                    'user-agent': 'visual-acceptance',
-                    'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-                  }
-                }
-                var url = 'https://api.github.com/repos/' + repoSlug + '/issues/' + prNumber + '/comments'
-                var response = request('GET', url, githubApiGetOptions)
-                var bodyJSON = JSON.parse(response.getBody().toString())
-                for (var i = 0; i < bodyJSON.length; i++) {
-                  if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
-                    url = bodyJSON[i].url
-                    break
-                  }
-                }
-                response = request('POST', url, githubApiPostOptions)
+                var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
+                var response = request('POST', url, githubApiPostOptions)
+                console.log(JSON.parse(response.getBody()))
+                return response
               })
             })
-          } else if ((prNumber === false || prNumber === 'false')) {
+          } else if (prNumber === false) {
             return runCommand('ember', ['test']).then(function (params) {
               console.log('Git add')
               return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
