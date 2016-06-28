@@ -609,9 +609,29 @@ module.exports = {
                     'text': '![PR ember-cli-visual-acceptance Report](' + 'http://frost.ciena.com:3000/' + filename + ')'
                   }
                 }
+                var githubApiGetOptions = {
+                  'headers': {
+                    'user-agent': 'visual-acceptance',
+                    'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+                  }
+                }
                 var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
-                var response = request('POST', url, githubApiPostOptions)
-                console.log(JSON.parse(response.getBody()))
+                var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/activities'
+                var response = request('GET', urlGet, githubApiGetOptions)
+                var bodyJSON = JSON.parse(response.getBody().toString())
+                var existingComment = false
+                for (var i = 0; i < bodyJSON.values.length; i++) {
+                  if (bodyJSON.values[i].action === 'COMMENTED' && bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+                    existingComment = true
+                    break
+                  }
+                }
+                if (existingComment) {
+                  response = {error: 'Comment already exists. Just updating image'}
+                  console.log('Comment already exists. Just updating image')
+                } else {
+                  response = request('POST', url, githubApiPostOptions)
+                }
                 return response
               })
             })
