@@ -1,4 +1,4 @@
-# Ember-cli-visual-acceptance
+ # Ember-cli-visual-acceptance
 
 [ci-img]: https://img.shields.io/travis/ciena-frost/ember-cli-visual-acceptance.svg "Travis CI Build Status"
 [ci-url]: https://travis-ci.org/ciena-frost/ember-cli-visual-acceptance
@@ -13,72 +13,112 @@ Create baseline images and test for CSS regression during standard Ember tests u
 
 `ember install ember-cli-visual-acceptance`
 ### Configuration
-* You can modify the save directory in `ember-cli-build.js` by including
+
+#### Location of saved images
+
+  You can specify the location where the saved images will be stored (do not store under **`tests`** directory).  Include the following in your `ember-cli-build.js`:
+
+
 ```javascript
 visualAcceptanceOptions: {
-      imageDirectory: 'visual-acceptance'
-    }
-``` 
-* You can specify browsers to target by adding an object inside the `targetBrowsers` array in the `visualAcceptanceOptions` of `ember-cli-build.js`
-```javascript
-visualAcceptanceOptions: {
-      targetBrowsers: [{
-        browser: "Chrome",
-        os: "Mac OS X",
-        osversion: "10.11.2",
-        version: "49.0.2623.112"
-      }]
-    }
+  imageDirectory: '<folder name>'
+}
 ```
-  * The browser object is comes from [detect.js](https://github.com/benbscholz/detect/blob/master/src/detect.js#L6-L11). You can view your current browsers object after installing `ember-cli-visual-acceptance` by visiting typing in `window.ui` into the Browser's console after running `ember test -s`
-  * You can append `>=` to the begininng of the `osversion` and `version` if you also wish to target versions that are greater than or equal to the targeted version
-  * You can also exclude both `osversion` and `version` if only the browser and OS matters to you
+
+#### Target browser and OS version
+
+You can specify the exact version of the browser as well as the OS the test will be run against.
+
+    - install `ember-cli-visual-acceptance`
+    - run `ember test -s` (this will launch a browser)
+    - open the console and type `window.ui`
+
+
+To target specific versions, you can edit `ember-cli-build.js` as follows:
+
+```javascript
+visualAcceptanceOptions: {
+  targetBrowsers: [{
+    browser: "Chrome",
+    os: "Mac OS X",
+    osversion: "10.11.2",
+    version: "49.0.2623.112"
+  }]
+}
+```
+
+Also, rather then specifying exact version for the browser and the OS versions ,you can append `>=` as follows:
+
+```javascript
+visualAcceptanceOptions: {
+  targetBrowsers: [{
+    browser: "Chrome",
+    os: "Mac OS X",
+    osversion: ">=10.11.2",
+    version: ">=49.0.2623.112"
+  }]
+}
+```
+You can also omit the `osversion` and `version` if not needed.
+
+## API
+
+```javascript
+capture(imageName, height, width, misMatch, imageDirectory)
+```
+
+
+|           Name           | Type   | Default             | Description                           |
+|--------------------------|--------|---------------------|---------------------------------------|
+| imageName                | string | required            | Name of the image you wish to save    |
+| height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the window. |
+| width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.   |
+| misMatch                 | float  | 1.00                | The maximum percentage ResembleJs is allowed to misMatch. |
+
+
 ## Usage
 
-  * Configure the systems and browsers that will capture images
-    * Different systems and browsers produce different images
-    * To prevent false positives images are only captured against specific targets
-    * The results of each target are stored in separate directories and are only compared against the same target
-  * Add labeled captures into your tests (what are the params here?)
+  * Configure the systems and browsers that will capture images in your `ember-cli-build.js` as described above in the **Configuration** section.
+      * Different systems and browsers produce different images
+      * To prevent false positives images are only captured against specific targets
+      * The results of each target are stored in separate directories and are only compared against the same target
+
+  * Create your tests (ex: tests/integration/components/frost-button-test.js)
+
   ```javascript
-    return capture(label, width, height, misMatchPercentage)
-  ```
-  * The first capture will automatically become the baseline image
-  * When executing asynchronous tests with an explicit done() you must use a `.catch` to handle image assertion failures
-  ```javascript
-    capture('label', null, null, 0.00).then(function (data) {
-      console.log(arguments)  
-      /* ResembleJs output
-      {
-        misMatchPercentage : 100, // %
-        isSameDimensions: true, // or false
-        dimensionDifference: { width: 0, height: -1 }, // defined if dimensions are not the same
-        getImageDataUrl: function(){}
-      }
-    */
+  it ('primary small button', function(done) {
+    this.render(hbs`
+      {{frost-button
+        priority='primary'
+        size='small'
+        text='Text'
+      }}`)
+    capture('primary-small-button').then(function (data) {
+      console.log(arguments)
+      console.log(data)
       done()
     }).catch(function (err) {
       done(err)
-    })
-```
+      })
+  })
+  ```
+
+  * When executing asynchronous tests with an explicit done() you must use a `.catch` to handle image assertion failures
+
   * Otherwise just return the promise
 ```javascript
 return capture('placeholder', null, null, 0.00)
 ```
+  * Run `ember test -s`
+
+### Baseline
+  * The first capture will automatically become the baseline image.
+  * To create a new baseline, run the following:
+
+  `ember new-baseline`
 
 
-### Parameters
-|           Name           | Type   | Default             | Description                                                                                                                                                                         |
-|:------------------------:|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| imageName                | string | required            | Name of the image you wish to save                                                                                                                                                  |
-| width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.                                                                                           |
-| height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the window.                                                                                         |
-| misMatchPercentageMargin | float  | 1.00                | The maximum percentage ResembleJs is allowed to misMatch.                                                                                                                           |
-
-### Establishing a new baseline
-Simply run `ember new-baseline`
-
-### What a failure looks like
+### Failure example
 From ember test:
 ```
 Integration: FrostSelectComponent selects the hovered item when enter is pressed
@@ -86,9 +126,9 @@ Integration: FrostSelectComponent selects the hovered item when enter is pressed
         AssertionError: Image is above mismatch threshold.: expected false to be true
 ```
 
-Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory. 
-Visual differences are shown in pink. 
-More info about visual diffs can be found [here](https://github.com/Huddle/Resemble.js). 
+Then a new `<nameOfImage>-fail.png` will show up in your `visual-acceptance` directory.
+Visual differences are shown in pink.
+More info about visual diffs can be found [here](https://github.com/Huddle/Resemble.js).
 ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for ResembleJS
 
 ### Example Usage
@@ -123,4 +163,3 @@ it('selects the hovered item when enter is pressed', function (done) {
 
 ## Setting up Travis
 The details to setup Travis can be found [here](https://ewhite613.github.io/frost-blog/using-visual-acceptance/). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
-
