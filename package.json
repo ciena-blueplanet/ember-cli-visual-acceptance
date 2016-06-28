@@ -1,6 +1,6 @@
 {
   "name": "ember-cli-visual-acceptance",
-  "version": "0.1.0",
+  "version": "0.1.9",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
     "doc": "doc",
@@ -12,7 +12,7 @@
     "test": "npm run lint && ember test",
     "lint": "eslint *.js addon app blueprints config tests"
   },
-  "repository": "",
+  "repository": "https://github.com/ciena-blueplanet/ember-cli-visual-acceptance.git",
   "engines": {
     "node": ">= 0.10.0"
   },
@@ -48,7 +48,8 @@
   "dependencies": {
     "body-parser": "^1.15.1",
     "ember-cli-babel": "^5.1.6",
-    "resemblejs": "^2.2.0"
+    "resemblejs": "^2.2.0",
+    "sync-request": "^3.0.1"
   },
   "ember-addon": {
     "configPath": "tests/dummy/config"

@@ -9,19 +9,13 @@ module.exports = {
   // }
   included: function (app) {
     this._super.included(app)
-    app.import('vendor/VisualAcceptance.js', {type: 'test'})
-    app.import('vendor/html2canvas.js', {type: 'test'})
     app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
-    app.import(app.bowerDirectory + '/detectjs/src/detect.js', {type: 'test'})
   },
   normalizeEntityName: function () {
     // no-op
   },
   afterInstall: function (options) {
     // Perform extra work here.
-    var that = this
-    return this.addBowerPackageToProject('detectjs').then(function (params) {
-      return that.addBowerPackageToProject('resemblejs')
-    })
+    return this.addBowerPackageToProject('resemblejs')
   }
 }

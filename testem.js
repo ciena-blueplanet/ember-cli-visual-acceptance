@@ -7,5 +7,11 @@ module.exports = {
   ],
   'launch_in_dev': [
     'Firefox'
-  ]
+  ],
+  'launchers': {
+    'slimerjs': {
+      'command': 'slimerjs slimerjs-launcher.js <url>',
+      'protocol': 'browser'
+    }
+  }
 }

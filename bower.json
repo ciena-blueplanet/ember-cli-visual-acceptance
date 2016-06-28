@@ -9,7 +9,6 @@
     "mocha": "~2.2.4",
     "ember-mocha-adapter": "~0.3.1",
     "sinonjs": "^1.17.1",
-    "detectjs": "*",
     "chai": "~2.3.0"
   },"resolutions": {
     "chai": "~2.3.0"

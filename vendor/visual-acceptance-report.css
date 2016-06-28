@@ -1,36 +1,51 @@
-#visual-acceptance .test {
-  margin-left: 15px;
-  overflow: hidden;
+@import url(https://fonts.googleapis.com/css?family=Noticia+Text);
+* {
+    font-size: 20pt !important;
+    font-family: 'Noticia Text', serif !important;
+    text-rendering: geometricPrecision;
+}
+#test {
+  height:30pt;
+  width: 50pt;
+}
+.visual-acceptance.title  {
+  padding-top: 30px;
+  font-size: 29px;
+  color: #404041;
+  padding-left: 30px;
+  padding-bottom: 20px;
+}
+.visual-acceptance-container {
+  padding-left: 30px;
+}
+.visual-acceptance-container > .test {
+  padding-left: 20px;
+}
+.visual-acceptance-container > .test > .list-name {
+  font-size: 18px;
+  color: #33424F;
 }
 
-#visual-acceptance .test.pass::before {
-  content: '✓';
-  font-size: 12px;
-  display: block;
+.visual-acceptance-container > .test > .list-subtitle {
   float: left;
-  margin-right: 5px;
-  color: #00d6b2;
+}
+.visual-acceptance-container > .test > .additional-info {
+  font-size: 14px;
+  color: #929497;
+  padding-bottom: 20px;
+}
+.images {
+  text-align:center;
+  margin:50px auto;
 }
 
-#visual-acceptance .test.fail {
-  color: #c00;
+.images .image{
+    margin:0px 20px;
+    display:inline-block;
+    text-decoration:none;
 }
-
-#visual-acceptance .test.fail::before {
-  content: '✖';
-  font-size: 12px;
-  display: block;
-  float: left;
-  margin-right: 5px;
-  color: #c00;
-}
-
-#visual-acceptance .test h2 {
-  position: relative;
-}
-
-#visual-acceptance h2 {
-  font-size: 12px;
-  font-weight: normal;
-  cursor: pointer;
+img {
+  width: 160px;
+  height: 160px;
+  padding-right: 10px;
 }

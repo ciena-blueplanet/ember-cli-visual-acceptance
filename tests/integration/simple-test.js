@@ -15,9 +15,20 @@ describeComponent(
   },
   function () {
     it('renders', function (done) {
-      this.render(hbs `{{input type="text" value='Simple words' disabled=entryNotAllowed size="50"}}`)
+      this.render(hbs `<div id='test'>Test</div>`)
       expect(this.$()).to.have.length(1)
-      capture('Simple', null, null, 1.00).then(function (data) {
+      capture('Simple').then(function (data) {
+        console.log(arguments)
+        done()
+      }).catch(function (err) {
+        done(err)
+      })
+    })
+    it('renders something else', function (done) {
+      this.render(hbs `<div id='test'>Test Else</div>`)
+      expect(this.$()).to.have.length(1)
+      capture('Error').then(function (data) {
+        console.log(arguments)
         done()
       }).catch(function (err) {
         done(err)
