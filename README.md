@@ -1,4 +1,4 @@
-# Ember-cli-visual-acceptance
+ # Ember-cli-visual-acceptance
 
 [ci-img]: https://img.shields.io/travis/ciena-frost/ember-cli-visual-acceptance.svg "Travis CI Build Status"
 [ci-url]: https://travis-ci.org/ciena-frost/ember-cli-visual-acceptance
@@ -27,7 +27,7 @@ visualAcceptanceOptions: {
 
 #### Target browser and OS version
 
-You can specify the exact version of the browser as well as the OS the test will be run against.  To determine the current version of your browser and OS, follow these steps (from [detect.js](https://github.com/benbscholz/detect/blob/master/src/detect.js#L6-L11)):
+You can specify the exact version of the browser as well as the OS the test will be run against.
 
     - install `ember-cli-visual-acceptance`
     - run `ember test -s` (this will launch a browser)
@@ -73,7 +73,6 @@ capture(imageName, height, width, misMatch, imageDirectory)
 | height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the window. |
 | width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.   |
 | misMatch                 | float  | 1.00                | The maximum percentage ResembleJs is allowed to misMatch. |
-| imageDirectory           | string | 'visual-acceptance' | The location where the `-passed.png` and `-failed.png` images will be saved. Note: Cannot be within the `tests` folder as this will restart the test every time an image is saved |
 
 
 ## Usage
