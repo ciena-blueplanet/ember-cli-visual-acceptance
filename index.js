@@ -228,7 +228,61 @@ function buildReport (params) {
     return response
   })
 }
+function buildTeamcityBitbucketReport (params, options, prNumber) {
+  return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
+    console.log('Sending to github')
+    var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+    function uploadToExpress (url, image, name) {
+      var apiOptions = {
+        'headers': {
+          'Content-Type': 'application/json'
+        },
+        'json': {
+          'name': name,
+          'data': image.replace('data:image\/\w+;base64,', '')
+        }
 
+      }
+      var response = request('POST', url + 'api/upload/image', apiOptions)
+      return response.getBody()
+    }
+    var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
+    uploadToExpress(options.expressUrl, image, filename)
+    var githubApiPostOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+      },
+      'json': {
+        'text': '![PR ember-cli-visual-acceptance Report](' + 'http://frost.ciena.com:3000/' + filename + ')'
+      }
+    }
+    var githubApiGetOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+      }
+    }
+    var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
+    var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/activities'
+    var response = request('GET', urlGet, githubApiGetOptions)
+    var bodyJSON = JSON.parse(response.getBody().toString())
+    var existingComment = false
+    for (var i = 0; i < bodyJSON.values.length; i++) {
+      if (bodyJSON.values[i].action === 'COMMENTED' && bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+        existingComment = true
+        break
+      }
+    }
+    if (existingComment) {
+      response = {error: 'Comment already exists. Just updating image'}
+      console.log('Comment already exists. Just updating image')
+    } else {
+      response = request('POST', url, githubApiPostOptions)
+    }
+    return response
+  })
+}
 module.exports = {
   name: 'ember-cli-visual-acceptance',
   included: function (app) {
@@ -581,58 +635,10 @@ module.exports = {
             })
           } else if (prNumber !== false) {
             return runCommand('ember', ['br']).then(function (params) {
-              return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
-                console.log('Sending to github')
-                var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-                function uploadToExpress (url, image, name) {
-                  var apiOptions = {
-                    'headers': {
-                      'Content-Type': 'application/json'
-                    },
-                    'json': {
-                      'name': name,
-                      'data': image.replace('data:image\/\w+;base64,', '')
-                    }
-
-                  }
-                  var response = request('POST', url + 'api/upload/image', apiOptions)
-                  return response.getBody()
-                }
-                var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
-                uploadToExpress(options.expressUrl, image, filename)
-                var githubApiPostOptions = {
-                  'headers': {
-                    'user-agent': 'visual-acceptance',
-                    'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
-                  },
-                  'json': {
-                    'text': '![PR ember-cli-visual-acceptance Report](' + 'http://frost.ciena.com:3000/' + filename + ')'
-                  }
-                }
-                var githubApiGetOptions = {
-                  'headers': {
-                    'user-agent': 'visual-acceptance',
-                    'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
-                  }
-                }
-                var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
-                var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/activities'
-                var response = request('GET', urlGet, githubApiGetOptions)
-                var bodyJSON = JSON.parse(response.getBody().toString())
-                var existingComment = false
-                for (var i = 0; i < bodyJSON.values.length; i++) {
-                  if (bodyJSON.values[i].action === 'COMMENTED' && bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
-                    existingComment = true
-                    break
-                  }
-                }
-                if (existingComment) {
-                  response = {error: 'Comment already exists. Just updating image'}
-                  console.log('Comment already exists. Just updating image')
-                } else {
-                  response = request('POST', url, githubApiPostOptions)
-                }
-                return response
+              return buildTeamcityBitbucketReport(params, options, prNumber)
+            }, function (params) {
+              return buildTeamcityBitbucketReport(params, options, prNumber).then(function (params) {
+                throw new Error('Exit 1')
               })
             })
           } else if (prNumber === false) {
