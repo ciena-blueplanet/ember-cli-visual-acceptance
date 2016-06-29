@@ -247,14 +247,14 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
       return response.getBody()
     }
     var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
-    uploadToExpress(options.expressUrl, image, filename)
+    uploadToExpress(options.apiUrl, image, filename)
     var githubApiPostOptions = {
       'headers': {
         'user-agent': 'visual-acceptance',
         'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
       },
       'json': {
-        'text': '![PR ember-cli-visual-acceptance Report](' + 'http://frost.ciena.com:3000/' + filename + ')'
+        'text': '![PR ember-cli-visual-acceptance Report](' + options.apiUrl + filename + ')'
       }
     }
     var githubApiGetOptions = {
@@ -578,36 +578,36 @@ module.exports = {
           name: 'user',
           type: String,
           default: '',
-          description: 'branch to push to'
+          description: 'Bitbucket username'
         }, {
           name: 'password',
           type: String,
           default: '',
-          description: 'branch to push to'
+          description: 'Bitbucket user\'s password'
         }, {
           name: 'domain',
           type: String,
           default: '',
-          description: 'branch to push to'
+          description: 'Domain of Bitbucket server ex("bitbucket.host.com")'
         }, {
           name: 'project',
           type: String,
           default: '',
-          description: 'branch to push to'
+          description: 'Name of project where the repository is held'
         }, {
           name: 'repo',
           type: String,
           default: '',
-          description: 'branch to push to'
+          description: 'Name of the repository'
         }, {
-          name: 'express-url',
+          name: 'api-url',
           type: String,
-          default: 'http://frost.ciena.com:3000/',
-          description: 'branch to push to'
+          default: '',
+          description: 'Url of api server to save and host images. https://gitlab.com/EWhite613/express-reports'
         }],
         run: function (options, rawArgs) {
-          if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 || options.project.length === 0 || options.repo.length === 0) {
-            console.log('Need to supply a user, password, and domain. Sorry the bitbucket api sucks. \n Just running ember test')
+          if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 || options.project.length === 0 || options.repo.length === 0 || options.apiUrl.length === 0) {
+            console.log('Need to supply a user, password, domain, project, repo, and express-url . Sorry the bitbucket api sucks. \n Just running ember test')
             return runCommand('ember', ['test'])
           }
 
