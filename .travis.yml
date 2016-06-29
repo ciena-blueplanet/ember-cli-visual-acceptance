@@ -1,5 +1,5 @@
 language: node_js
-sudo: false
+sudo: trur
 node_js:
 - '5.3'
 branches:
