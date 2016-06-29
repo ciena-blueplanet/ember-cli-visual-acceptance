@@ -13,7 +13,7 @@ function httpPost(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, width, height, misMatchPercentageMargin) {
+function capture(imageName, width, height, misMatchPercentageMargin, assert) {
   if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
   
   var browser = window.ui
@@ -131,7 +131,9 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
                 report: node.innerHTML
               }
             })
-          chai.assert.isTrue(result, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
+          assert = assert === undefined ? chai.assert : assert
+          assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
+        
           data ? resolve(data) : reject(data)
         })
       })
