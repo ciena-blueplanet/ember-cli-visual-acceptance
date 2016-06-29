@@ -13,9 +13,99 @@ function httpPost(theUrl) {
   return xmlHttp.responseText
 }
 
-function capture(imageName, width, height, misMatchPercentageMargin) {
-  if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
-  
+function capture(imageName, width, height, misMatchPercentageMargin, experimentalSVGs) {
+  if (experimentalSVGs) {
+    console.log('Using experimentalSVGs')
+    if (document.querySelectorAll('use').length !== 0) {
+      Array.from(document.querySelectorAll('use')).forEach(function(use) {
+
+        var
+          svg = use.parentNode,
+          url = use.getAttribute('xlink:href').split('#'),
+          url_root = url[0],
+          url_hash = url[1],
+          xhr = new XMLHttpRequest()
+
+        if (!xhr.s) {
+          xhr.s = []
+
+          xhr.open('GET', url_root, false)
+          xhr.send()
+
+          console.log('onload 1')
+          var x = document.createElement('x'),
+            s = xhr.s
+
+          x.innerHTML = xhr.responseText
+
+          xhr.onload = function() {
+            try {
+              s.splice(0).map(function(array) {
+                var g = x.querySelector('#' + array[2])
+                if (g) {
+                  array[0].insertBefore(g, array[1])
+                  array[1].setAttribute('xlink:href', '#' + array[2])
+                  var svg = array[0]
+                  var myCanvas = document.createElement('canvas')
+
+                  // Get drawing context for the Canvas
+                  var myCanvasContext = myCanvas.getContext('2d')
+                    // Load up our image.
+                  var source = new Image()
+                  var xml = new XMLSerializer().serializeToString(svg)
+                  var data = 'data:image/svg+xml;base64,' + btoa(xml)
+                  source.src = data
+                    // Render our SVG image to the canvas once it loads.
+                  $(source).ready(function() {
+                    var clientWidth = svg.clientWidth || svg.parentNode.clientWidth
+                    var clientHeight = svg.clientHeight || svg.parentNode.clientHeight
+                    myCanvas.width = clientWidth
+                    myCanvas.height = clientHeight
+                    myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
+                    $(svg).replaceWith(myCanvas)
+                  })
+                }
+              })
+            } catch (ex) {
+              console.log(ex)
+            }
+          }
+          xhr.onload()
+        }
+
+        xhr.s.push([svg, use, url_hash])
+
+        if (xhr.responseText) xhr.onload()
+      })
+    } else {
+      console.log('else')
+      Array.from(document.querySelectorAll('svg')).forEach(function(svg) {
+        var myCanvas = document.createElement('canvas')
+
+        // Get drawing context for the Canvas
+        var myCanvasContext = myCanvas.getContext('2d')
+          // Load up our image.
+        var source = new Image()
+        var xml = new XMLSerializer().serializeToString(svg)
+        var data = 'data:image/svg+xml;base64,' + btoa(xml)
+        source.src = data
+          // Render our SVG image to the canvas once it loads.
+        $(source).ready(function() {
+          var clientWidth = svg.clientWidth || svg.parentNode.clientWidth
+          var clientHeight = svg.clientHeight || svg.parentNode.clientHeight
+          myCanvas.width = clientWidth
+          myCanvas.height = clientHeight
+          myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
+          $(svg).replaceWith(myCanvas)
+        })
+      })
+      debugger
+    }
+  }
+  if (misMatchPercentageMargin == null) {
+    misMatchPercentageMargin = 0.00
+  }
+
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
   if (istargetbrowser === false) {
@@ -24,16 +114,16 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
     })
   }
 
-  
+
   $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
   var browserDirectory
-  if (browser.osversion === undefined){
+  if (browser.osversion === undefined) {
     browserDirectory = browser.os + '/' + browser.browser + '/'
-  }else{
+  } else {
     browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   }
 
@@ -76,15 +166,15 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
       })
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
-      node.innerHTML = '<div class="test pass"> <div class="list-name"> No passed image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
+      node.innerHTML = '<div class="test pass"> <div class="list-name"> No passed image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
       $.ajax({
-              type: 'POST',
-              async: false,
-              url: '/report',
-              data: {
-                report: node.innerHTML
-              }
-            })
+        type: 'POST',
+        async: false,
+        url: '/report',
+        data: {
+          report: node.innerHTML
+        }
+      })
       return 'No passed image. Saving current test as base'
 
     } else {
@@ -106,7 +196,7 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
               }
             })
             result = true
-            node.innerHTML = '<div class="test pass"> <div class="list-name">  Passed: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
+            node.innerHTML = '<div class="test pass"> <div class="list-name">  Passed: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
           } else {
             // Fail
             $.ajax({
@@ -118,20 +208,20 @@ function capture(imageName, width, height, misMatchPercentageMargin) {
                 name: browserDirectory + imageName + '.png'
               }
             })
-            node.innerHTML = '<div class="test fail"> <div class="list-name">  Failed: '+ imageName+' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="'+data.getImageDataUrl()+'" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="'+image+'" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="'+res.image+'" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
+            node.innerHTML = '<div class="test fail"> <div class="list-name">  Failed: ' + imageName + ' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="' + data.getImageDataUrl() + '" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="' + image + '" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="' + res.image + '" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
           document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
           $.ajax({
-              type: 'POST',
-              async: false,
-              url: '/report',
-              data: {
-                report: node.innerHTML
-              }
-            })
-          chai.assert.isTrue(result, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
+            type: 'POST',
+            async: false,
+            url: '/report',
+            data: {
+              report: node.innerHTML
+            }
+          })
+          chai.assert.isTrue(result, 'Image mismatch percentage (' + data.misMatchPercentage + ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
           data ? resolve(data) : reject(data)
         })
       })

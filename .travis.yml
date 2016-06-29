@@ -9,6 +9,10 @@ before_install:
 - npm install -g coveralls pr-bumper
 - pr-bumper check
 - phantomjs -v
+- wget http://chromedriver.storage.googleapis.com/2.21/chromedriver_linux64.zip
+- unzip chromedriver_linux64.zip
+- sudo chmod u+x chromedriver
+- sudo mv chromedriver /usr/bin/
 before_script:
 - git config --global user.email "ericwhite613@gmail.com"
 - git config --global user.name "Eric White"
