@@ -1,4 +1,4 @@
-/*global capture */
+/*global capture, experimentalSVGs */
 import {
   expect
 } from 'chai'
@@ -49,7 +49,7 @@ describeComponent(
       return capture('svg')
     })
 
-     it('renders svg experimental', function () {
+    it('renders svg experimental', function () {
       this.render(hbs `<svg id="mySVG"xmlns="http://www.w3.org/2000/svg" viewBox="-350 -250 700 500">
       <style type="text/css" media="screen">
         svg { background:#fff; }
@@ -60,7 +60,7 @@ describeComponent(
       <circle cx="-60" cy="-50" r="20" fill="#000"/>
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
-      return capture('svg-experimental', null, null, 0.00, true)
+      return experimentalSVGs('svg-experimental')
     })
   }
 )
