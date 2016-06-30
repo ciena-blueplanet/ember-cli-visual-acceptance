@@ -29,6 +29,7 @@ after_success:
   && rm -f coverage/lcov.info--
 - cat coverage/lcov.info | coveralls
 addons:
+  firefox: "latest"
   apt:
     sources:
     - ubuntu-toolchain-r-test
