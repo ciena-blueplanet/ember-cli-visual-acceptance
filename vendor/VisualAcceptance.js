@@ -1,13 +1,12 @@
-/*global XMLHttpRequest,$,html2canvas,chai, Image, XMLSerializer, btoa  */
+/*global XMLHttpRequest,$,html2canvas,chai, Image, XMLSerializer, btoa, resemble  */
 function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
   xmlHttp.send(null)
   return xmlHttp.responseText
 }
-
-
-function experimentalSVGs (imageName, width, height, misMatchPercentageMargin) {
+// eslint-disable-next-line no-unused-vars
+function experimentalSvgCapture (imageName, width, height, misMatchPercentageMargin) { // ingor
   var items = Array.from(document.querySelectorAll('svg'))
   var promises = items.map(function (svg) {
     return new Promise(resolve => {
@@ -45,7 +44,7 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
   if (misMatchPercentageMargin == null) {
     misMatchPercentageMargin = 0.00
   }
-    var browser = window.ui
+  var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
   if (istargetbrowser === false) {
     return new Promise(function (resolve, reject) {
@@ -111,7 +110,6 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
         }
       })
       return 'No passed image. Saving current test as base'
-
     } else {
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
@@ -157,8 +155,8 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
             }
           })
           assert = assert === undefined ? chai.assert : assert
-          assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
-        
+          assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage + ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
+
           data ? resolve(data) : reject(data)
         })
       })

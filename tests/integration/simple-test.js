@@ -1,4 +1,4 @@
-/*global capture, experimentalSVGs */
+/*global capture, experimentalSvgCapture */
 import {
   expect
 } from 'chai'
@@ -60,7 +60,7 @@ describeComponent(
       <circle cx="-60" cy="-50" r="20" fill="#000"/>
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
-      return experimentalSVGs('svg-experimental')
+      return experimentalSvgCapture('svg-experimental')
     })
   }
 )
