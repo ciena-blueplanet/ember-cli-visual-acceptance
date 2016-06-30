@@ -74,6 +74,7 @@ capture(imageName, height, width, misMatch, imageDirectory)
 | height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the window. |
 | width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.   |
 | misMatch                 | float  | 1.00                | The maximum percentage ResembleJs is allowed to misMatch. |
+| assert                 | object  | undefined                | Only use to pass in **Qunit** `assert` object.|
 
 
 ## Usage
