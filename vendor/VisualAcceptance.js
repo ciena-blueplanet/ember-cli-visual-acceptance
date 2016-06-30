@@ -1,119 +1,57 @@
-/*global XMLHttpRequest,$,html2canvas,chai */
-function httpGet(theUrl) {
+/*global XMLHttpRequest,$,html2canvas,chai, Image, XMLSerializer, btoa  */
+function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
   xmlHttp.send(null)
   return xmlHttp.responseText
 }
 
-function httpPost(theUrl) {
-  var xmlHttp = new XMLHttpRequest()
-  xmlHttp.open('POST', theUrl, false) // false for synchronous request
-  xmlHttp.send(null)
-  return xmlHttp.responseText
+
+function experimentalSVGs (imageName, width, height, misMatchPercentageMargin) {
+  var items = Array.from(document.querySelectorAll('svg'))
+  var promises = items.map(function (svg) {
+    return new Promise(resolve => {
+      var clientWidth = svg.clientWidth || svg.parentNode.clientWidth
+      var clientHeight = svg.clientHeight || svg.parentNode.clientHeight
+      svg.setAttribute('width', clientWidth)
+      svg.setAttribute('height', clientWidth)
+      var myCanvas = document.createElement('canvas')
+
+      // Get drawing context for the Canvas
+      var myCanvasContext = myCanvas.getContext('2d')
+        // Load up our image.
+      var source = new Image()
+      var xml = new XMLSerializer().serializeToString(svg)
+      var data = 'data:image/svg+xml;base64,' + btoa(xml)
+      source.src = data
+        // Render our SVG image to the canvas once it loads.
+      source.onload = function () {
+        console.log('onload')
+        myCanvas.width = clientWidth
+        myCanvas.height = clientHeight
+        myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
+        $(svg).replaceWith(myCanvas)
+        resolve()
+      }
+    })
+  })
+
+  return Promise.all(promises).then(data => {
+    return capture(imageName, width, height, misMatchPercentageMargin)
+  })
 }
 
-function capture(imageName, width, height, misMatchPercentageMargin, experimentalSVGs) {
-  if (experimentalSVGs) {
-    console.log('Using experimentalSVGs')
-    if (document.querySelectorAll('use').length !== 0) {
-      Array.from(document.querySelectorAll('use')).forEach(function(use) {
-
-        var
-          svg = use.parentNode,
-          url = use.getAttribute('xlink:href').split('#'),
-          url_root = url[0],
-          url_hash = url[1],
-          xhr = new XMLHttpRequest()
-
-        if (!xhr.s) {
-          xhr.s = []
-
-          xhr.open('GET', url_root, false)
-          xhr.send()
-
-          console.log('onload 1')
-          var x = document.createElement('x'),
-            s = xhr.s
-
-          x.innerHTML = xhr.responseText
-
-          xhr.onload = function() {
-            try {
-              s.splice(0).map(function(array) {
-                var g = x.querySelector('#' + array[2])
-                if (g) {
-                  array[0].insertBefore(g, array[1])
-                  array[1].setAttribute('xlink:href', '#' + array[2])
-                  var svg = array[0]
-                  var myCanvas = document.createElement('canvas')
-
-                  // Get drawing context for the Canvas
-                  var myCanvasContext = myCanvas.getContext('2d')
-                    // Load up our image.
-                  var source = new Image()
-                  var xml = new XMLSerializer().serializeToString(svg)
-                  var data = 'data:image/svg+xml;base64,' + btoa(xml)
-                  source.src = data
-                    // Render our SVG image to the canvas once it loads.
-                  $(source).ready(function() {
-                    var clientWidth = svg.clientWidth || svg.parentNode.clientWidth
-                    var clientHeight = svg.clientHeight || svg.parentNode.clientHeight
-                    myCanvas.width = clientWidth
-                    myCanvas.height = clientHeight
-                    myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
-                    $(svg).replaceWith(myCanvas)
-                  })
-                }
-              })
-            } catch (ex) {
-              console.log(ex)
-            }
-          }
-          xhr.onload()
-        }
-
-        xhr.s.push([svg, use, url_hash])
-
-        if (xhr.responseText) xhr.onload()
-      })
-    } else {
-      console.log('else')
-      Array.from(document.querySelectorAll('svg')).forEach(function(svg) {
-        var myCanvas = document.createElement('canvas')
-
-        // Get drawing context for the Canvas
-        var myCanvasContext = myCanvas.getContext('2d')
-          // Load up our image.
-        var source = new Image()
-        var xml = new XMLSerializer().serializeToString(svg)
-        var data = 'data:image/svg+xml;base64,' + btoa(xml)
-        source.src = data
-          // Render our SVG image to the canvas once it loads.
-        $(source).ready(function() {
-          var clientWidth = svg.clientWidth || svg.parentNode.clientWidth
-          var clientHeight = svg.clientHeight || svg.parentNode.clientHeight
-          myCanvas.width = clientWidth
-          myCanvas.height = clientHeight
-          myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
-          $(svg).replaceWith(myCanvas)
-        })
-      })
-      debugger
-    }
-  }
+function capture (imageName, width, height, misMatchPercentageMargin) {
   if (misMatchPercentageMargin == null) {
     misMatchPercentageMargin = 0.00
   }
-
-  var browser = window.ui
-  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
+    var browser = window.ui
+  var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
   if (istargetbrowser === false) {
-    return new Promise(function(resolve, reject) {
-      resolve("Does not match target browser");
+    return new Promise(function (resolve, reject) {
+      resolve('Does not match target browser')
     })
   }
-
 
   $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
@@ -135,12 +73,9 @@ function capture(imageName, width, height, misMatchPercentageMargin, experimenta
     // default mocha window size
     browserDirectory += 640 + 'x' + 384 + '/'
   }
-  // resemble.outputSettings({
-  //   largeImageThreshold: 0
-  // })
   return html2canvas(document.getElementById('ember-testing-container'), {
     timeout: 1000
-  }).then(function(canvas) {
+  }).then(function (canvas) {
     // Get test dummy image
     var image = canvas.toDataURL('image/png')
     if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
@@ -180,8 +115,8 @@ function capture(imageName, width, height, misMatchPercentageMargin, experimenta
     } else {
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
-      return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
+      return new Promise(function (resolve, reject) {
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
           var result = false
 
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
