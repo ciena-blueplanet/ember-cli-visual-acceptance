@@ -1,5 +1,5 @@
 language: node_js
-sudo: true
+sudo: false
 node_js:
 - '5.3'
 branches:
@@ -29,6 +29,7 @@ after_success:
   && rm -f coverage/lcov.info--
 - cat coverage/lcov.info | coveralls
 addons:
+  firefox: "latest"
   apt:
     sources:
     - ubuntu-toolchain-r-test
