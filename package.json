@@ -1,6 +1,6 @@
 {
   "name": "ember-cli-visual-acceptance",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "The default blueprint for ember-cli addons.",
   "directories": {
     "doc": "doc",
