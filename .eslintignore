@@ -2,9 +2,7 @@ bower_components/**/*
 dist/**/*
 node_modules/**/*
 tmp/**/*
-blueprints/**/vendor/bluebird/*
-blueprints/**/vendor/bluebird/*
-blueprints/**/vendor/html2canvas.js
+blueprints/**/
 vendor/bluebird/*
 vendor/jquery.min.js
 vendor/html2canvas.js
