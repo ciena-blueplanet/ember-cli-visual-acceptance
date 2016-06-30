@@ -6,7 +6,7 @@ function httpGet (theUrl) {
   return xmlHttp.responseText
 }
 // eslint-disable-next-line no-unused-vars
-function experimentalSvgCapture (imageName, width, height, misMatchPercentageMargin) { // ingor
+function experimentalSvgCapture (imageName, width, height, misMatchPercentageMargin, assert) { // ingor
   var items = Array.from(document.querySelectorAll('svg'))
   var promises = items.map(function (svg) {
     return new Promise(resolve => {
@@ -36,7 +36,7 @@ function experimentalSvgCapture (imageName, width, height, misMatchPercentageMar
   })
 
   return Promise.all(promises).then(data => {
-    return capture(imageName, width, height, misMatchPercentageMargin)
+    return capture(imageName, width, height, misMatchPercentageMargin, assert)
   })
 }
 
