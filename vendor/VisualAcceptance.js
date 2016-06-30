@@ -46,6 +46,8 @@ function experimentalSvgCapture (imageName, width, height, misMatchPercentageMar
         console.log('onload')
         myCanvas.width = clientWidth
         myCanvas.height = clientHeight
+        myCanvas.className = svg.className
+        myCanvas.id = svg.id
         myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
         $(svg).replaceWith(myCanvas)
         resolve()
