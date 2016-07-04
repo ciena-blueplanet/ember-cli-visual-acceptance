@@ -28,13 +28,6 @@ function runCommand (command, args, ignoreStdError) {
   })
 }
 
-function base64Encode (file) {
-  // read binary data
-  var bitmap = fs.readFileSync(file)
-  // convert binary data to base64 encoded string
-  return new Buffer(bitmap).toString('base64')
-}
-
 function compareVersions (installed, required) {
   if (required === undefined) {
     return true
@@ -142,91 +135,64 @@ function getImage (req, res, options) {
 }
 
 function buildReport (params) {
-  return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
-    console.log('Sending to github')
-    var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-    function uploadToImgur (image, reportPath) {
-      var imgurAlbum = []
-      var result = []
-      var imgurClientID = 'e39f00905b80937'
-      var imgurApiOptions = {
-        'headers': {
-          'Content-Type': 'application/json',
-          'Authorization': 'Client-ID ' + imgurClientID
-        },
-        'json': {
-          'type': 'base64',
-          'image': image.replace('data:image\/\w+;base64,', '')
+  console.log('Sending to github')
+  var reportPath = 'visual-acceptance-report/report.html'
+  var newReportPath = process.env.TRAVIS_REPO_SLUG + '/' + process.env.TRAVIS_PULL_REQUEST + '.html'
+  function uploadToCompanionRepo (reportPath, filename) {
+    console.log('uploadToCompanionRepo')
+    var repoURL = process.env.COMPANION_REPO
+    console.log('cloning: ' + repoURL)
+    return runCommand('git', ['clone', '-b', 'gh-pages', repoURL, 'companionRepo']).then(function (params) {
+      fs.exists(filename, function (exists) {
+        if (exists) {
+          console.log('File exists. Deleting now ...')
+          fs.unlink(filename)
+        } else {
+          console.log('File not found, so not deleting.')
         }
+      })
+      mkdirpSync('companionRepo/' + process.env.TRAVIS_REPO_SLUG)
+      fs.renameSync(reportPath, 'companionRepo/' + newReportPath)
+      process.chdir('companionRepo')
+      return runCommand('git', ['add', '-A']).then(function () {
+        return runCommand('git', ['commit', '-am', '"Add new report"']).then(function () {
+          return runCommand('git', ['push', repoURL]).then(function () {
+            console.log('Pushing to ' + repoURL)
+            return ['https://ember-cli-visual-acceptance.github.io/' + newReportPath]
+          })
+        })
+      })
+    })
+  }
 
-      }
-      var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-      var reportID = JSON.parse(response.getBody())
-      imgurAlbum.push(reportID.data.id)
-      result.push(reportID.data.link)
-      var report = fs.readFileSync(reportPath).toString()
-      var regexImageData = /src=\"data\:image\/png;base64\,[^"]*"/ig
-      var matches = report.match(regexImageData)
-      for (var i = 0; i < matches.length; i++) {
-        imgurApiOptions = {
-          'headers': {
-            'Content-Type': 'application/json',
-            'Authorization': 'Client-ID ' + imgurClientID
-          },
-          'json': {
-            'type': 'base64',
-            'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
-          }
-
-        }
-        response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-        imgurAlbum.push(JSON.parse(response.getBody()).data.id)
-      }
-      // create album
-      imgurApiOptions = {
-        'headers': {
-          'Content-Type': 'application/json',
-          'Authorization': 'Client-ID ' + imgurClientID
-        },
-        'json': {
-          'ids': imgurAlbum
-        }
-
-      }
-      response = request('POST', 'https://api.imgur.com/3/album', imgurApiOptions)
-      result.push('http://imgur.com/a/' + JSON.parse(response.getBody()).data.id)
-      return result
+  var imgurResponse = uploadToCompanionRepo(reportPath, newReportPath)
+  var githubApiPostOptions = {
+    'headers': {
+      'user-agent': 'visual-acceptance',
+      'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+    },
+    'json': {
+      'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse[0] + ')'
     }
+  }
 
-    var imgurResponse = uploadToImgur(image, 'visual-acceptance-report/report.html')
-    var githubApiPostOptions = {
-      'headers': {
-        'user-agent': 'visual-acceptance',
-        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-      },
-      'json': {
-        'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse[0] + ') \n [Imgur Album](' + imgurResponse[1] + ')'
-      }
+  var githubApiGetOptions = {
+    'headers': {
+      'user-agent': 'visual-acceptance',
+      'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
     }
-
-    var githubApiGetOptions = {
-      'headers': {
-        'user-agent': 'visual-acceptance',
-        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-      }
+  }
+  var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
+  var response = request('GET', url, githubApiGetOptions)
+  var bodyJSON = JSON.parse(response.getBody().toString())
+  for (var i = 0; i < bodyJSON.length; i++) {
+    if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+      url = bodyJSON[i].url
+      break
     }
-    var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
-    var response = request('GET', url, githubApiGetOptions)
-    var bodyJSON = JSON.parse(response.getBody().toString())
-    for (var i = 0; i < bodyJSON.length; i++) {
-      if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
-        url = bodyJSON[i].url
-        break
-      }
-    }
-    response = request('POST', url, githubApiPostOptions)
-    return response
-  })
+  }
+  response = request('POST', url, githubApiPostOptions)
+  return response
 }
 
 module.exports = {
