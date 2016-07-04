@@ -87,7 +87,6 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
       return new Promise(function (resolve, reject) {
         resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
           var result = false
-          console.log('resemble')
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
             // Passed
             $.ajax({
