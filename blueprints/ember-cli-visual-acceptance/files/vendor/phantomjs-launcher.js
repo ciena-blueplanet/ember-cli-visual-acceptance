@@ -8,27 +8,28 @@ page.viewportSize = {
   height: 768
 }
 
-page.open(url)
-
-page.onCallback = function (data) {
-  console.log('CALLBACK: ' + JSON.stringify(data))
-  // Prints 'CALLBACK: { "hello": "world" }'
-  var bb = page.evaluate(function () {
-    return document.getElementById('ember-testing-container').getBoundingClientRect()
-  })
-  console.log(bb)
-  page.clipRect = {
-    top: bb.top,
-    left: bb.left,
-    width: bb.width,
-    height: bb.height
+setTimeout(function() {
+  page.open(url)
+  page.onCallback = function(data) {
+    console.log('CALLBACK: ' + JSON.stringify(data))
+      // Prints 'CALLBACK: { "hello": "world" }'
+    var bb = page.evaluate(function() {
+      return document.getElementById('ember-testing-container').getBoundingClientRect()
+    })
+    console.log(bb)
+    page.clipRect = {
+      top: bb.top,
+      left: bb.left,
+      width: bb.width,
+      height: bb.height
+    }
+    return page.renderBase64('PNG')
   }
-  return page.renderBase64('PNG')
-}
 
-page.onError = function (msg, trace) {
-  console.log(msg)
-  trace.forEach(function (item) {
-    console.log('  ', item.file, ':', item.line)
-  })
-}
+  page.onError = function(msg, trace) {
+    console.log(msg)
+    trace.forEach(function(item) {
+      console.log('  ', item.file, ':', item.line)
+    })
+  }
+}, 1000);
