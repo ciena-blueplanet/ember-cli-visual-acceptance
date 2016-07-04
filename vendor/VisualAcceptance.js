@@ -47,6 +47,7 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
       id: 'ember-testing-container'
     })
     image = 'data:image/png;base64,' + image
+    // console.log(image)
     if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
       var visualAcceptanceContainer
       visualAcceptanceContainer = document.createElement('div')
