@@ -291,7 +291,7 @@ module.exports = {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
         type: 'test'
       })
-      app.import(path.join('vendor', 'bluebird', 'js', 'browser', 'bluebird.min.js'), {
+      app.import(app.bowerDirectory + '/es6-promise/es6-promise.js', {
         type: 'test'
       })
       app.import(path.join('vendor', 'jquery.min.js'), {

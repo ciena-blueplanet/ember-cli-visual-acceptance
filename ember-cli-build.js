@@ -12,7 +12,7 @@ module.exports = function (defaults) {
   app.import('bower_components/sinonjs/sinon.js')
   app.import('vendor/html2canvas.js', {type: 'test'})
   app.import('vendor/VisualAcceptance.js', {type: 'test'})
-  app.import('vendor/bluebird/js/browser/bluebird.min.js', {
+  app.import('bower_components/es6-promise/es6-promise.js', {
     type: 'test'
   })
   app.import('vendor/jquery.min.js', {
