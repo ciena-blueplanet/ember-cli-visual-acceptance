@@ -78,7 +78,7 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
       node.innerHTML = '<div class="test pass"> <div class="list-name"> No passed image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
-      markdown = '## No passed image. Saving current as baseline: \n### Addition Information: \n <img>\n' 
+      markdown = '## No passed image. Saving current as baseline: \n#### Addition Information: \n <img>\n' 
       $.ajax({
               type: 'POST',
               async: false,
@@ -110,7 +110,7 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
             })
             result = true
             node.innerHTML = '<div class="test pass"> <div class="list-name">  Passed: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
-            markdown = '## Passed: \n### Addition Information: \n <img>\n'         
+            markdown = '## Passed: \n#### Addition Information: \n <img>\n'         
         } else {
             // Fail
             $.ajax({
@@ -123,7 +123,7 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
               }
             })
             node.innerHTML = '<div class="test fail"> <div class="list-name">  Failed: '+ imageName+' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="'+data.getImageDataUrl()+'" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="'+image+'" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="'+res.image+'" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
-            markdown = '## Failed: \n### Addition Information: \n <table>'
+            markdown = '## Failed: \n#### Addition Information: \n <table>'
             markdown += '<tr> <td><img></td> <td><img></td> <td><img></td> </tr>'
             markdown += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'  
             markdown += '</table>'                   
