@@ -171,7 +171,7 @@ function buildReport (params) {
             if (repoUrlSplit[4].indexOf('.github.io') === -1) {
               ghPageUrl += repoUrlSplit[4].replace(/\.git$/i, '/')
             }
-            return ['https://ember-cli-visual-acceptance.github.io/' + newReportPath]
+            return [ghPageUrl + newReportPath]
           })
         })
       })
