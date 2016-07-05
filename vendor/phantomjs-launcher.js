@@ -23,11 +23,11 @@ setTimeout(function() {
     })
     })
   })
-   
+
   page.onCallback = function(data) {
     if (data && data.command && (data.command === 'exit')) {
       if (data.reason) console.log('web page requested exit: '+data.reason);
-        phantom.exit(1);
+        phantom.exit(0);
     }
     console.log('CALLBACK: ' + JSON.stringify(data))
       // Prints 'CALLBACK: { "hello": "world" }'
