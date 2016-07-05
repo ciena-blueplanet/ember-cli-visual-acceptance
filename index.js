@@ -83,6 +83,16 @@ function appendToReport (req, res, options) {
   } catch (e) {
     console.log(e)
   }
+
+  try {
+    if (process.env.REPORT_MARKDOWN_PATH) {
+      var markdown = fs.readFileSync(process.env.REPORT_MARKDOWN_PATH)
+      markdown += req.body.markdown
+      fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdown)
+    }
+  } catch (e) {
+    console.log(e)
+  }
   res.send()
 }
 
@@ -195,17 +205,23 @@ function buildReport (params) {
       }
       response = request('POST', 'https://api.imgur.com/3/album', imgurApiOptions)
       result.push('http://imgur.com/a/' + JSON.parse(response.getBody()).data.id)
+      result.push(imgurAlbum)
       return result
     }
 
     var imgurResponse = uploadToImgur(image, 'visual-acceptance-report/report.html')
+    var markdownBody = fs.readFileSync('visual-acceptance-report/report.md').toString()
+    var imgurLinks = imgurResponse[2]
+    for (let i = 1; i < imgurLinks.length; i++) {
+      markdownBody = markdownBody.replace('<img>', '<img src="' + 'http://i.imgur.com/' + imgurLinks[i] + '.png' + '" width="160" height="160">')
+    }
     var githubApiPostOptions = {
       'headers': {
         'user-agent': 'visual-acceptance',
         'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
       },
       'json': {
-        'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse[0] + ') \n [Imgur Album](' + imgurResponse[1] + ')'
+        'body': markdownBody
       }
     }
 
@@ -219,7 +235,7 @@ function buildReport (params) {
     var response = request('GET', url, githubApiGetOptions)
     var bodyJSON = JSON.parse(response.getBody().toString())
     for (var i = 0; i < bodyJSON.length; i++) {
-      if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+      if (bodyJSON[i].body.indexOf('# Visual Acceptance tests:') > -1) {
         url = bodyJSON[i].url
         break
       }
@@ -351,6 +367,7 @@ module.exports = {
           deleteFolderRecursive(path.join(root, options.reportDirectory))
           mkdirpSync(options.reportDirectory)
           var reportPath = options.reportDirectory + '/' + 'report.html'
+          var markdownPath = options.reportDirectory + '/' + 'report.md'
           fs.writeFileSync(reportPath, `<HTML>
 <HEAD>
 <TITLE>Visual Acceptance report </TITLE>
@@ -399,9 +416,11 @@ module.exports = {
 </div>
 </BODY>
 </HTML>`)
+          fs.writeFileSync(markdownPath, '# Visual Acceptance tests:\n')
 
           process.env.PR_API = options.prApiUrl
           process.env.REPORT_PATH = reportPath
+          process.env.REPORT_MARKDOWN_PATH = markdownPath
           return runCommand('ember', ['test'])
         }
       },
