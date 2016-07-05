@@ -15,7 +15,7 @@ function runCommand (command, args, ignoreStdError) {
     })
     child.stderr.on('data', function (data) {
       if (ignoreStdError || data.toString().indexOf('fs: re-evaluating native module sources is not supported.') > -1) {
-        // Use ignoreStdError only to get around this issue https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/25
+         // Use ignoreStdError only to get around this issue https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/25
         console.log(data.toString())
       } else {
         reject(data.toString())
@@ -142,70 +142,50 @@ function getImage (req, res, options) {
 }
 
 function buildReport (params) {
-  return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
-    console.log('Sending to github')
-    var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-    function uploadToImgur (image, reportPath) {
-      var imgurAlbum = []
-      var result = []
-      var imgurClientID = 'e39f00905b80937'
-      var imgurApiOptions = {
-        'headers': {
-          'Content-Type': 'application/json',
-          'Authorization': 'Client-ID ' + imgurClientID
-        },
-        'json': {
-          'type': 'base64',
-          'image': image.replace('data:image\/\w+;base64,', '')
+  console.log('Sending to github')
+  var reportPath = 'visual-acceptance-report/report.html'
+  var newReportPath = process.env.TRAVIS_REPO_SLUG + '/' + process.env.TRAVIS_PULL_REQUEST + '.html'
+  function uploadToCompanionRepo (reportPath, filename) {
+    console.log('uploadToCompanionRepo')
+    var repoURL = process.env.COMPANION_REPO
+    console.log('cloning: ' + repoURL)
+    return runCommand('git', ['clone', repoURL, 'companionRepo'], true).then(function (params) {
+      console.log('cloned')
+      fs.exists(filename, function (exists) {
+        if (exists) {
+          console.log('File exists. Deleting now ...')
+          fs.unlink(filename)
+        } else {
+          console.log('File not found, so not deleting.')
         }
+      })
+      mkdirpSync('companionRepo/' + process.env.TRAVIS_REPO_SLUG)
+      fs.renameSync(reportPath, 'companionRepo/' + newReportPath)
+      process.chdir('companionRepo')
+      return runCommand('git', ['add', '-A']).then(function () {
+        return runCommand('git', ['commit', '-am', '"Add new report"']).then(function () {
+          return runCommand('git', ['push', repoURL], true).then(function () {
+            console.log('Pushing to ' + repoURL)
+            var repoUrlSplit = repoURL.split('/')
+            var ghPageUrl = 'https://' + repoUrlSplit[3] + '.github.io/'
+            if (repoUrlSplit[4].indexOf('.github.io') === -1) {
+              ghPageUrl += repoUrlSplit[4].replace(/\.git$/i, '/')
+            }
+            return [ghPageUrl + newReportPath]
+          })
+        })
+      })
+    })
+  }
 
-      }
-      var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-      var reportID = JSON.parse(response.getBody())
-      imgurAlbum.push(reportID.data.id)
-      result.push(reportID.data.link)
-      var report = fs.readFileSync(reportPath).toString()
-      var regexImageData = /src=\"data\:image\/png;base64\,[^"]*"/ig
-      var matches = report.match(regexImageData)
-      for (var i = 0; i < matches.length; i++) {
-        imgurApiOptions = {
-          'headers': {
-            'Content-Type': 'application/json',
-            'Authorization': 'Client-ID ' + imgurClientID
-          },
-          'json': {
-            'type': 'base64',
-            'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
-          }
-
-        }
-        response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-        imgurAlbum.push(JSON.parse(response.getBody()).data.id)
-      }
-      // create album
-      imgurApiOptions = {
-        'headers': {
-          'Content-Type': 'application/json',
-          'Authorization': 'Client-ID ' + imgurClientID
-        },
-        'json': {
-          'ids': imgurAlbum
-        }
-
-      }
-      response = request('POST', 'https://api.imgur.com/3/album', imgurApiOptions)
-      result.push('http://imgur.com/a/' + JSON.parse(response.getBody()).data.id)
-      return result
-    }
-
-    var imgurResponse = uploadToImgur(image, 'visual-acceptance-report/report.html')
+  return uploadToCompanionRepo(reportPath, newReportPath).then(function (response) {
     var githubApiPostOptions = {
       'headers': {
         'user-agent': 'visual-acceptance',
         'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
       },
       'json': {
-        'body': '![PR ember-cli-visual-acceptance Report](' + imgurResponse[0] + ') \n [Imgur Album](' + imgurResponse[1] + ')'
+        'body': '[PR ember-cli-visual-acceptance Report](' + response[0] + ')'
       }
     }
 
@@ -216,10 +196,10 @@ function buildReport (params) {
       }
     }
     var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
-    var response = request('GET', url, githubApiGetOptions)
+    response = request('GET', url, githubApiGetOptions)
     var bodyJSON = JSON.parse(response.getBody().toString())
     for (var i = 0; i < bodyJSON.length; i++) {
-      if (bodyJSON[i].body.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+      if (bodyJSON[i].body.indexOf('[PR ember-cli-visual-acceptance Report]') > -1) {
         url = bodyJSON[i].url
         break
       }
@@ -242,6 +222,60 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
           'data': image.replace('data:image\/\w+;base64,', '')
         }
 
+      }
+      var response = request('POST', url + 'api/upload/image', apiOptions)
+      return response.getBody()
+    }
+    var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
+    uploadToExpress(options.apiUrl, image, filename)
+    var githubApiPostOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+      },
+      'json': {
+        'text': '![PR ember-cli-visual-acceptance Report](' + options.apiUrl + filename + ')'
+      }
+    }
+    var githubApiGetOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+      }
+    }
+    var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
+    var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/activities'
+    var response = request('GET', urlGet, githubApiGetOptions)
+    var bodyJSON = JSON.parse(response.getBody().toString())
+    var existingComment = false
+    for (var i = 0; i < bodyJSON.values.length; i++) {
+      if (bodyJSON.values[i].action === 'COMMENTED' && bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+        existingComment = true
+        break
+      }
+    }
+    if (existingComment) {
+      response = {error: 'Comment already exists. Just updating image'}
+      console.log('Comment already exists. Just updating image')
+    } else {
+      response = request('POST', url, githubApiPostOptions)
+    }
+    return response
+  })
+}
+function buildTeamcityBitbucketReport (params, options, prNumber) {
+  return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
+    console.log('Sending to github')
+    var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+    function uploadToExpress (url, image, name) {
+      var apiOptions = {
+        'headers': {
+          'Content-Type': 'application/json'
+        },
+        'json': {
+          'name': name,
+          'data': image.replace('data:image\/\w+;base64,', '')
+        }
       }
       var response = request('POST', url + 'api/upload/image', apiOptions)
       return response.getBody()
