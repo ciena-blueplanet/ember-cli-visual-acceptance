@@ -9,8 +9,26 @@ page.viewportSize = {
 }
 
 setTimeout(function() {
-  page.open(url)
+  page.open(url, function (status) {
+    page.evaluate(function(s) {
+       Testem.afterTests(
+      //Asynchronously
+      function(config, data, callback) {
+        setTimeout( function (params) {
+          var status = window.callPhantom({
+            command: 'exit',
+            reason:  'User Request.'
+          })
+        }, 1000)
+    })
+    })
+  })
+
   page.onCallback = function(data) {
+    if (data && data.command && (data.command === 'exit')) {
+      if (data.reason) console.log('web page requested exit: '+data.reason);
+        phantom.exit(0);
+    }
     console.log('CALLBACK: ' + JSON.stringify(data))
       // Prints 'CALLBACK: { "hello": "world" }'
     var bb = page.evaluate(function() {
