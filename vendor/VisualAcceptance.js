@@ -42,6 +42,9 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
   // })
 
   return new Promise(function (resolve, reject) {
+    if (window.callPhantom === undefined){
+      resolve('Not on PhantomJS')
+    }
     // Get test dummy image
     var image = window.callPhantom({
       id: 'ember-testing-container'
