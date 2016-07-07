@@ -15,19 +15,19 @@ setTimeout(function() {
       //Asynchronously
       function(config, data, callback) {
         setTimeout( function (params) {
-          var status = window.callPhantom({
-            command: 'exit',
-            reason:  'User Request.'
-          })
+          callback(null)
         }, 1000)
     })
     })
   })
 
+  page.onConsoleMessage = function(msg) {
+    console.log('console: ' + msg);
+  }
   page.onCallback = function(data) {
     if (data && data.command && (data.command === 'exit')) {
       if (data.reason) console.log('web page requested exit: '+data.reason);
-        phantom.exit(0);
+      // phantom.exit(0);        
     }
     console.log('CALLBACK: ' + JSON.stringify(data))
       // Prints 'CALLBACK: { "hello": "world" }'
