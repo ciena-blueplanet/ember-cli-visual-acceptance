@@ -14,9 +14,14 @@ setTimeout(function() {
        Testem.afterTests(
       //Asynchronously
       function(config, data, callback) {
-        setTimeout( function (params) {
           callback(null)
-        }, 1000)
+        
+        setTimeout( function (params) {
+          var status = window.callPhantom({
+            command: 'exit',
+            reason:  'transport close'
+          })
+        }, 2000)
     })
     })
   })
@@ -27,7 +32,7 @@ setTimeout(function() {
   page.onCallback = function(data) {
     if (data && data.command && (data.command === 'exit')) {
       if (data.reason) console.log('web page requested exit: '+data.reason);
-      // phantom.exit(0);        
+      phantom.exit(0);        
     }
     console.log('CALLBACK: ' + JSON.stringify(data))
       // Prints 'CALLBACK: { "hello": "world" }'

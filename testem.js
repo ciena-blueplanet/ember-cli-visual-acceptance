@@ -9,6 +9,7 @@ module.exports = {
   'launch_in_dev': [
     'Firefox'
   ],
+
   'launchers': {
     'PhantomJsVisualAcceptance': {
       'command': 'phantomjs vendor/phantomjs-launcher.js <url>',
