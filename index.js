@@ -168,7 +168,7 @@ function getImage (req, res, options) {
 
 function buildReport (params) {
   console.log('Sending to github')
-  var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
+  var markdownReport = JSON.parse(fs.readFileSync('visual-acceptance-report/report.json'))
   var markdownBody = '# Visual Acceptance Tests\n' + markdownReport.new + '\n' + markdownReport.changed
   try {
     if (process.env.REPORT_MARKDOWN_PATH) {
