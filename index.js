@@ -177,7 +177,7 @@ function buildReport (params) {
     markdownBody += markdownReport.changed
   }
   if (markdownReport.changed === '## Changed\n' && markdownReport.new === '## New\n') {
-    markdownBody += '## No changes\n'
+    markdownBody += '### No changes\n'
   }
   try {
     if (process.env.REPORT_MARKDOWN_PATH) {
