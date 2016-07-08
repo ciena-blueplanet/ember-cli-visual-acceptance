@@ -83,8 +83,8 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
         async: false,
         url: '/report',
         data: {
-                type: 'New',
-                images: images
+          type: 'New',
+          images: images
         }
       })
       resolve('No passed image. Saving current test as base')

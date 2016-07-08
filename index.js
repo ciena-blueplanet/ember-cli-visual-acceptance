@@ -172,7 +172,6 @@ function buildReport (params) {
   var markdownBody = '# Visual Acceptance Tests\n'
   if (markdownReport.new !== '## New\n') {
     markdownBody += markdownReport.new + '\n'
-      if (matches !== null) {
   }
   if (markdownReport.changed !== '## Changed\n') {
     markdownBody += markdownReport.changed
