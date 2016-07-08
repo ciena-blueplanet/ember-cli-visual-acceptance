@@ -9,13 +9,18 @@ module.exports = {
   // }
   included: function (app) {
     this._super.included(app)
-    app.import(app.bowerDirectory + '/resemblejs/resemble.js', {type: 'test'})
+    app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
+      type: 'test'
+    })
   },
   normalizeEntityName: function () {
     // no-op
   },
   afterInstall: function (options) {
     // Perform extra work here.
-    return this.addBowerPackageToProject('resemblejs')
+    var that = this
+    return this.addBowerPackageToProject('es6-promise').then(function (params) {
+      return that.addBowerPackageToProject('resemblejs')
+    })
   }
 }

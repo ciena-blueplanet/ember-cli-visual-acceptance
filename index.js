@@ -31,7 +31,7 @@ function runCommand (command, args, ignoreStdError) {
 function base64Encode (file) {
   // read binary data
   var bitmap = fs.readFileSync(file)
-  // convert binary data to base64 encoded string
+    // convert binary data to base64 encoded string
   return new Buffer(bitmap).toString('base64')
 }
 
@@ -145,6 +145,7 @@ function buildReport (params) {
   return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
     console.log('Sending to github')
     var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+
     function uploadToImgur (image, reportPath) {
       var imgurAlbum = []
       var result = []
@@ -167,21 +168,24 @@ function buildReport (params) {
       var report = fs.readFileSync(reportPath).toString()
       var regexImageData = /src=\"data\:image\/png;base64\,[^"]*"/ig
       var matches = report.match(regexImageData)
-      for (var i = 0; i < matches.length; i++) {
-        imgurApiOptions = {
-          'headers': {
-            'Content-Type': 'application/json',
-            'Authorization': 'Client-ID ' + imgurClientID
-          },
-          'json': {
-            'type': 'base64',
-            'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
-          }
+      if (matches !== null) {
+        for (var i = 0; i < matches.length; i++) {
+          imgurApiOptions = {
+            'headers': {
+              'Content-Type': 'application/json',
+              'Authorization': 'Client-ID ' + imgurClientID
+            },
+            'json': {
+              'type': 'base64',
+              'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
+            }
 
+          }
+          response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
+          imgurAlbum.push(JSON.parse(response.getBody()).data.id)
         }
-        response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-        imgurAlbum.push(JSON.parse(response.getBody()).data.id)
       }
+
       // create album
       imgurApiOptions = {
         'headers': {
@@ -228,10 +232,12 @@ function buildReport (params) {
     return response
   })
 }
+
 function buildTeamcityBitbucketReport (params, options, prNumber) {
   return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
     console.log('Sending to github')
     var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+
     function uploadToExpress (url, image, name) {
       var apiOptions = {
         'headers': {
@@ -275,7 +281,9 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
       }
     }
     if (existingComment) {
-      response = {error: 'Comment already exists. Just updating image'}
+      response = {
+        error: 'Comment already exists. Just updating image'
+      }
       console.log('Comment already exists. Just updating image')
     } else {
       response = request('POST', url, githubApiPostOptions)
@@ -291,13 +299,10 @@ module.exports = {
       app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
         type: 'test'
       })
-      app.import(path.join('vendor', 'bluebird', 'js', 'browser', 'bluebird.min.js'), {
+      app.import(app.bowerDirectory + '/es6-promise/es6-promise.js', {
         type: 'test'
       })
       app.import(path.join('vendor', 'jquery.min.js'), {
-        type: 'test'
-      })
-      app.import(path.join('vendor', 'html2canvas.js'), {
         type: 'test'
       })
       app.import(path.join('vendor', 'VisualAcceptance.js'), {
@@ -469,6 +474,11 @@ module.exports = {
           type: String,
           default: 'visual-acceptance',
           description: 'The ember-cli-visual-acceptance directory where images are save'
+        }, {
+          name: 'build-report',
+          type: Boolean,
+          default: false,
+          description: 'Wheter or not to build a report'
         }],
         run: function (options, rawArgs) {
           var root = this.project.root
@@ -488,7 +498,11 @@ module.exports = {
           }
 
           deleteFolderRecursive(path.join(root, options.imageDirectory))
-          return runCommand('ember', ['test'])
+          if (options.buildReport) {
+            return runCommand('ember', ['br'])
+          } else {
+            return runCommand('ember', ['test'])
+          }
         }
       },
       'travis-visual-acceptance': {
@@ -527,7 +541,7 @@ module.exports = {
           var travisMessage = res.body
           if (/\#new\-baseline\#/.exec(travisMessage)) {
             console.log('Creating new baseline')
-            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory, '--build-report=true']).then(function (params) {
               if (prNumber === false) {
                 console.log('Git add')
                 return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
@@ -537,24 +551,30 @@ module.exports = {
                     return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                   })
                 })
-              }
-            })
-          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
-            return runCommand('ember', ['br']).then(buildReport, function (params) {
-              return buildReport(params).then(function (params) {
-                throw new Error('Exit 1')
-              })
-            })
-          } else if ((prNumber === false || prNumber === 'false')) {
-            return runCommand('ember', ['test']).then(function (params) {
-              console.log('Git add')
-              return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
-                console.log('Git commit')
-                return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
-                  console.log('Git push')
-                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+              } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+                return buildReport(params).then(buildReport, function (params) {
+                  return buildReport(params).then(function (params) {
+                    throw new Error('Exit 1')
+                  })
                 })
-              })
+              } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+                return runCommand('ember', ['br']).then(buildReport, function (params) {
+                  return buildReport(params).then(function (params) {
+                    throw new Error('Exit 1')
+                  })
+                })
+              } else if (prNumber === false || prNumber === 'false') {
+                return runCommand('ember', ['test']).then(function (params) {
+                  console.log('Git add')
+                  return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                    console.log('Git commit')
+                    return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
+                      console.log('Git push')
+                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                    })
+                  })
+                })
+              }
             })
           }
         }
