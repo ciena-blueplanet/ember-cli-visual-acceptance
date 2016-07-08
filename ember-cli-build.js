@@ -10,7 +10,6 @@ module.exports = function (defaults) {
   })
 
   app.import('bower_components/sinonjs/sinon.js')
-  app.import('vendor/html2canvas.js', {type: 'test'})
   app.import('vendor/VisualAcceptance.js', {type: 'test'})
   app.import('bower_components/es6-promise/es6-promise.js', {
     type: 'test'
