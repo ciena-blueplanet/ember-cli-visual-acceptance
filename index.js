@@ -169,7 +169,16 @@ function getImage (req, res, options) {
 function buildReport (params) {
   console.log('Sending to github')
   var markdownReport = JSON.parse(fs.readFileSync('visual-acceptance-report/report.json'))
-  var markdownBody = '# Visual Acceptance Tests\n' + markdownReport.new + '\n' + markdownReport.changed
+  var markdownBody = '# Visual Acceptance Tests\n'
+  if (markdownReport.new !== '## New\n') {
+    markdownBody += markdownReport.new + '\n'
+  }
+  if (markdownReport.changed !== '## Changed\n') {
+    markdownBody += markdownReport.changed
+  }
+  if (markdownReport.changed === '## Changed\n' && markdownReport.new === '## New\n') {
+    markdownBody += '## No changes\n'
+  }
   try {
     if (process.env.REPORT_MARKDOWN_PATH) {
       fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdownBody)
