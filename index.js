@@ -469,6 +469,12 @@ module.exports = {
           type: String,
           default: 'visual-acceptance',
           description: 'The ember-cli-visual-acceptance directory where images are save'
+        },
+        {
+          name: 'build-report',
+          type: Boolean,
+          default: false,
+          description: 'Wheter or not to build a report'
         }],
         run: function (options, rawArgs) {
           var root = this.project.root
@@ -488,7 +494,11 @@ module.exports = {
           }
 
           deleteFolderRecursive(path.join(root, options.imageDirectory))
-          return runCommand('ember', ['test'])
+          if (options.buildReport) {
+            return runCommand('ember', ['br'])
+          } else {
+            return runCommand('ember', ['test'])
+          }
         }
       },
       'travis-visual-acceptance': {
@@ -527,7 +537,7 @@ module.exports = {
           var travisMessage = res.body
           if (/\#new\-baseline\#/.exec(travisMessage)) {
             console.log('Creating new baseline')
-            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory, '--build-report=true']).then(function (params) {
               if (prNumber === false) {
                 console.log('Git add')
                 return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
@@ -536,6 +546,10 @@ module.exports = {
                     console.log('Git push')
                     return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                   })
+                })
+              } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+                return buildReport(params).then(function (params) {
+                  throw new Error('Exit 1')
                 })
               }
             })
