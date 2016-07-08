@@ -27,7 +27,9 @@ function uploadToImgur (image, reportPath) {
 
 function runCommand (command, args, ignoreStdError) {
   return new RSVP.Promise(function (resolve, reject) {
-    var child = spawn(command, args, {env: process.env})
+    var child = spawn(command, args, {
+      env: process.env
+    })
     child.stdout.on('data', function (data) {
       console.log(data.toString())
     })
@@ -52,6 +54,7 @@ function base64Encode (file) {
     // convert binary data to base64 encoded string
   return new Buffer(bitmap).toString('base64')
 }
+
 function compareVersions (installed, required) {
   if (required === undefined) {
     return true
@@ -394,7 +397,10 @@ module.exports = {
           var reportPath = options.reportDirectory + '/' + 'report.html'
           var markdownPath = options.reportDirectory + '/' + 'report.md'
           var jsonPath = options.reportDirectory + '/' + 'report.json'
-          var markdownReport = {new: '## New\n', changed: '## Changed\n'}
+          var markdownReport = {
+            new: '## New\n',
+            changed: '## Changed\n'
+          }
           fs.writeFileSync(jsonPath, JSON.stringify(markdownReport))
           process.env.PR_API = options.prApiUrl
           process.env.REPORT_PATH = reportPath
@@ -490,30 +496,30 @@ module.exports = {
                     return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                   })
                 })
-              } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
-                return buildReport(params).then(buildReport, function (params) {
-                  return buildReport(params).then(function (params) {
-                    throw new Error('Exit 1')
-                  })
-                })
-              } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
-                return runCommand('ember', ['br']).then(buildReport, function (params) {
-                  return buildReport(params).then(function (params) {
-                    throw new Error('Exit 1')
-                  })
-                })
-              } else if (prNumber === false || prNumber === 'false') {
-                return runCommand('ember', ['test']).then(function (params) {
-                  console.log('Git add')
-                  return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
-                    console.log('Git commit')
-                    return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
-                      console.log('Git push')
-                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
-                    })
-                  })
-                })
               }
+            })
+          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+            return runCommand('ember', ['br']).then(buildReport, function (params) {
+              return buildReport(params).then(function (params) {
+                throw new Error('Exit 1')
+              })
+            })
+          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+            return runCommand('ember', ['br']).then(buildReport, function (params) {
+              return buildReport(params).then(function (params) {
+                throw new Error('Exit 1')
+              })
+            })
+          } else if (prNumber === false || prNumber === 'false') {
+            return runCommand('ember', ['test']).then(function (params) {
+              console.log('Git add')
+              return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                console.log('Git commit')
+                return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
+                  console.log('Git push')
+                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                })
+              })
             })
           }
         }
