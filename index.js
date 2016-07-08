@@ -31,7 +31,7 @@ function runCommand (command, args, ignoreStdError) {
 function base64Encode (file) {
   // read binary data
   var bitmap = fs.readFileSync(file)
-  // convert binary data to base64 encoded string
+    // convert binary data to base64 encoded string
   return new Buffer(bitmap).toString('base64')
 }
 
@@ -145,6 +145,7 @@ function buildReport (params) {
   return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
     console.log('Sending to github')
     var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+
     function uploadToImgur (image, reportPath) {
       var imgurAlbum = []
       var result = []
@@ -231,10 +232,12 @@ function buildReport (params) {
     return response
   })
 }
+
 function buildTeamcityBitbucketReport (params, options, prNumber) {
   return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
     console.log('Sending to github')
     var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+
     function uploadToExpress (url, image, name) {
       var apiOptions = {
         'headers': {
@@ -278,7 +281,9 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
       }
     }
     if (existingComment) {
-      response = {error: 'Comment already exists. Just updating image'}
+      response = {
+        error: 'Comment already exists. Just updating image'
+      }
       console.log('Comment already exists. Just updating image')
     } else {
       response = request('POST', url, githubApiPostOptions)
@@ -469,8 +474,7 @@ module.exports = {
           type: String,
           default: 'visual-acceptance',
           description: 'The ember-cli-visual-acceptance directory where images are save'
-        },
-        {
+        }, {
           name: 'build-report',
           type: Boolean,
           default: false,
@@ -552,23 +556,25 @@ module.exports = {
                   return buildReport(params).then(function (params) {
                     throw new Error('Exit 1')
                   })
-              })
-          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
-            return runCommand('ember', ['br']).then(buildReport, function (params) {
-              return buildReport(params).then(function (params) {
-                throw new Error('Exit 1')
-              })
-            })
-          } else if ((prNumber === false || prNumber === 'false')) {
-            return runCommand('ember', ['test']).then(function (params) {
-              console.log('Git add')
-              return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
-                console.log('Git commit')
-                return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
-                  console.log('Git push')
-                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                 })
-              })
+              } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+                return runCommand('ember', ['br']).then(buildReport, function (params) {
+                  return buildReport(params).then(function (params) {
+                    throw new Error('Exit 1')
+                  })
+                })
+              } else if (prNumber === false || prNumber === 'false') {
+                return runCommand('ember', ['test']).then(function (params) {
+                  console.log('Git add')
+                  return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                    console.log('Git commit')
+                    return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
+                      console.log('Git push')
+                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                    })
+                  })
+                })
+              }
             })
           }
         }
