@@ -7,9 +7,27 @@ var spawn = require('child_process').spawn
 var RSVP = require('rsvp')
 var request = require('sync-request')
 
+function uploadToImgur (image, reportPath) {
+  var imgurClientID = 'e39f00905b80937'
+  var imgurApiOptions = {
+    'headers': {
+      'Content-Type': 'application/json',
+      'Authorization': 'Client-ID ' + imgurClientID
+    },
+    'json': {
+      'type': 'base64',
+      'image': image.replace('data:image\/\w+;base64,', '')
+    }
+
+  }
+  var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
+  var reportID = JSON.parse(response.getBody())
+  return reportID.data.link
+}
+
 function runCommand (command, args, ignoreStdError) {
   return new RSVP.Promise(function (resolve, reject) {
-    var child = spawn(command, args)
+    var child = spawn(command, args, {env: process.env})
     child.stdout.on('data', function (data) {
       console.log(data.toString())
     })
@@ -26,13 +44,6 @@ function runCommand (command, args, ignoreStdError) {
       resolve()
     })
   })
-}
-
-function base64Encode (file) {
-  // read binary data
-  var bitmap = fs.readFileSync(file)
-  // convert binary data to base64 encoded string
-  return new Buffer(bitmap).toString('base64')
 }
 
 function compareVersions (installed, required) {
@@ -74,24 +85,22 @@ function mkdirpSync (dirpath) {
 }
 
 function appendToReport (req, res, options) {
-  try {
-    if (process.env.REPORT_PATH) {
-      var report = fs.readFileSync(process.env.REPORT_PATH)
-      report = report.toString().replace(/(<\/div>\s<\/body>\s<\/HTML>)/i, req.body.report + '$1')
-      fs.writeFileSync(process.env.REPORT_PATH, report)
-    }
-  } catch (e) {
-    console.log(e)
-  }
+  if (process.env.REPORT_JSON_PATH) {
+    var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
 
-  try {
-    if (process.env.REPORT_MARKDOWN_PATH) {
-      var markdown = fs.readFileSync(process.env.REPORT_MARKDOWN_PATH)
-      markdown += req.body.markdown
-      fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdown)
+    var imgurLinks = []
+    for (let i = 0; i < req.body.images; i++) {
+      imgurLinks.push(uploadToImgur(req.body.images[i]))
     }
-  } catch (e) {
-    console.log(e)
+    if (req.body.type === 'New') {
+      markdownReport.new += '### No new image. Saving current as baseline: \n#### Addition Information: \n <img src="' + imgurLinks[0] + '" height="160">\n'
+    } else if (req.body.type === 'Changed') {
+      markdownReport.changed += '### Changed \n### Addition Information: \n <table>'
+      markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] + '" height="160">' + '</td> </tr>'
+      markdownReport.changed += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'
+      markdownReport.changed += '</table>'
+    }
+    fs.writeFileSync(process.env.REPORT_JSON_PATH, JSON.stringify(markdownReport))
   }
   res.send()
 }
@@ -152,97 +161,43 @@ function getImage (req, res, options) {
 }
 
 function buildReport (params) {
-  return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
-    console.log('Sending to github')
-    var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-    function uploadToImgur (image, reportPath) {
-      var imgurAlbum = []
-      var result = []
-      var imgurClientID = 'e39f00905b80937'
-      var imgurApiOptions = {
-        'headers': {
-          'Content-Type': 'application/json',
-          'Authorization': 'Client-ID ' + imgurClientID
-        },
-        'json': {
-          'type': 'base64',
-          'image': image.replace('data:image\/\w+;base64,', '')
-        }
-
-      }
-      var response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-      var reportID = JSON.parse(response.getBody())
-      imgurAlbum.push(reportID.data.id)
-      result.push(reportID.data.link)
-      var report = fs.readFileSync(reportPath).toString()
-      var regexImageData = /src=\"data\:image\/png;base64\,[^"]*"/ig
-      var matches = report.match(regexImageData)
-      for (var i = 0; i < matches.length; i++) {
-        imgurApiOptions = {
-          'headers': {
-            'Content-Type': 'application/json',
-            'Authorization': 'Client-ID ' + imgurClientID
-          },
-          'json': {
-            'type': 'base64',
-            'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
-          }
-
-        }
-        response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-        imgurAlbum.push(JSON.parse(response.getBody()).data.id)
-      }
-      // create album
-      imgurApiOptions = {
-        'headers': {
-          'Content-Type': 'application/json',
-          'Authorization': 'Client-ID ' + imgurClientID
-        },
-        'json': {
-          'ids': imgurAlbum
-        }
-
-      }
-      response = request('POST', 'https://api.imgur.com/3/album', imgurApiOptions)
-      result.push('http://imgur.com/a/' + JSON.parse(response.getBody()).data.id)
-      result.push(imgurAlbum)
-      return result
+  console.log('Sending to github')
+  var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
+  var markdownBody = '# Visual Acceptance Tests\n' + markdownReport.new + '\n' + markdownReport.changed
+  try {
+    if (process.env.REPORT_MARKDOWN_PATH) {
+      fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdownBody)
     }
+  } catch (e) {
+    console.log(e)
+  }
+  var githubApiPostOptions = {
+    'headers': {
+      'user-agent': 'visual-acceptance',
+      'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+    },
+    'json': {
+      'body': markdownBody
+    }
+  }
 
-    var imgurResponse = uploadToImgur(image, 'visual-acceptance-report/report.html')
-    var markdownBody = fs.readFileSync('visual-acceptance-report/report.md').toString()
-    var imgurLinks = imgurResponse[2]
-    for (let i = 1; i < imgurLinks.length; i++) {
-      markdownBody = markdownBody.replace('<img>', '<img src="' + 'http://i.imgur.com/' + imgurLinks[i] + '.png" ' + 'height="160">')
+  var githubApiGetOptions = {
+    'headers': {
+      'user-agent': 'visual-acceptance',
+      'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
     }
-    var githubApiPostOptions = {
-      'headers': {
-        'user-agent': 'visual-acceptance',
-        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-      },
-      'json': {
-        'body': markdownBody
-      }
+  }
+  var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
+  var response = request('GET', url, githubApiGetOptions)
+  var bodyJSON = JSON.parse(response.getBody().toString())
+  for (var i = 0; i < bodyJSON.length; i++) {
+    if (bodyJSON[i].body.indexOf('# Visual Acceptance tests:') > -1) {
+      url = bodyJSON[i].url
+      break
     }
-
-    var githubApiGetOptions = {
-      'headers': {
-        'user-agent': 'visual-acceptance',
-        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-      }
-    }
-    var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
-    var response = request('GET', url, githubApiGetOptions)
-    var bodyJSON = JSON.parse(response.getBody().toString())
-    for (var i = 0; i < bodyJSON.length; i++) {
-      if (bodyJSON[i].body.indexOf('# Visual Acceptance tests:') > -1) {
-        url = bodyJSON[i].url
-        break
-      }
-    }
-    response = request('POST', url, githubApiPostOptions)
-    return response
-  })
+  }
+  response = request('POST', url, githubApiPostOptions)
+  return response
 }
 
 module.exports = {
@@ -368,59 +323,13 @@ module.exports = {
           mkdirpSync(options.reportDirectory)
           var reportPath = options.reportDirectory + '/' + 'report.html'
           var markdownPath = options.reportDirectory + '/' + 'report.md'
-          fs.writeFileSync(reportPath, `<HTML>
-<HEAD>
-<TITLE>Visual Acceptance report </TITLE>
-</HEAD>
-<BODY>
-<style>
-  .visual-acceptance.title  {
-    padding-top: 30px;
-    font-size: 29px;
-    color: #404041;
-    padding-left: 30px;
-  }
-  .visual-acceptance-container {
-    padding-left: 30px;
-  }
-  .visual-acceptance-container > .test {
-    padding-left: 20px;
-  }
-  .visual-acceptance-container > .test > .list-name {
-    font-size: 18px;
-    color: #33424F;
-    padding-top: 20px;
-  }
-
-  .visual-acceptance-container > .test > .list-subtitle {
-    float: left;
-  }
-  .visual-acceptance-container > .test > .additional-info {
-    font-size: 14px;
-    color: #929497;
-    padding-bottom: 20px;
-  }
-
-  .images .image{
-      float: left;
-      text-decoration:none;
-  }
-  img {
-    width: 160px;
-    height: 160px;
-    padding-right: 10px;
-  }
-</style>
-  <div class="visual-acceptance title"> Visual Acceptance tests: </div>
-  <div class="visual-acceptance-container"> 
-</div>
-</BODY>
-</HTML>`)
-          fs.writeFileSync(markdownPath, '# Visual Acceptance tests:\n')
-
+          var jsonPath = options.reportDirectory + '/' + 'report.json'
+          var markdownReport = {new: '## New\n', changed: '## Changed\n'}
+          fs.writeFileSync(jsonPath, JSON.stringify(markdownReport))
           process.env.PR_API = options.prApiUrl
           process.env.REPORT_PATH = reportPath
           process.env.REPORT_MARKDOWN_PATH = markdownPath
+          process.env.REPORT_JSON_PATH = jsonPath
           return runCommand('ember', ['test'])
         }
       },
@@ -453,7 +362,7 @@ module.exports = {
           }
 
           deleteFolderRecursive(path.join(root, options.imageDirectory))
-          return runCommand('ember', ['test'])
+          return runCommand('ember', ['br'])
         }
       },
       'travis-visual-acceptance': {

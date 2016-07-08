@@ -62,6 +62,7 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
     }
     var node = document.createElement('div')
     var markdown = ''
+    var images = []
       // Get passed image
     var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
     if (res.error === 'File does not exist') {
@@ -78,14 +79,14 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
       node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
-      markdown = '## No new image. Saving current as baseline: \n#### Addition Information: \n <img>\n' 
+      images.push(image)
       $.ajax({
               type: 'POST',
               async: false,
               url: '/report',
               data: {
-                report: node.innerHTML,
-                markdown: markdown
+                type: 'New',
+                images: images
               }
             })
       return 'No passed image. Saving current test as base'
@@ -123,23 +124,23 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
               }
             })
             node.innerHTML = '<div class="test fail"> <div class="list-name">  Changed: '+ imageName+' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="'+data.getImageDataUrl()+'" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="'+image+'" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="'+res.image+'" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
-            markdown = '## Changed: \n#### Addition Information: \n <table>'
-            markdown += '<tr> <td><img></td> <td><img></td> <td><img></td> </tr>'
-            markdown += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'  
-            markdown += '</table>'                   
-        }
-          $(document.getElementById('ember-testing')).removeAttr('style')
-          $(document.getElementById('ember-testing-container')).removeAttr('style')
-          document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
-          $.ajax({
+  
+            images.push(data.getImageDataUrl())
+            images.push(image)
+            images.push(res.image)                    
+            $.ajax({
               type: 'POST',
               async: false,
               url: '/report',
               data: {
-                report: node.innerHTML,
-                markdown: markdown                
+                type: 'Changed',
+                images: images             
               }
-            })
+            })           
+        }
+          $(document.getElementById('ember-testing')).removeAttr('style')
+          $(document.getElementById('ember-testing-container')).removeAttr('style')
+          document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
           assert = assert === undefined ? chai.assert : assert
           assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
         
