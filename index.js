@@ -167,21 +167,24 @@ function buildReport (params) {
       var report = fs.readFileSync(reportPath).toString()
       var regexImageData = /src=\"data\:image\/png;base64\,[^"]*"/ig
       var matches = report.match(regexImageData)
-      for (var i = 0; i < matches.length; i++) {
-        imgurApiOptions = {
-          'headers': {
-            'Content-Type': 'application/json',
-            'Authorization': 'Client-ID ' + imgurClientID
-          },
-          'json': {
-            'type': 'base64',
-            'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
-          }
+      if (matches !== null) {
+        for (var i = 0; i < matches.length; i++) {
+          imgurApiOptions = {
+            'headers': {
+              'Content-Type': 'application/json',
+              'Authorization': 'Client-ID ' + imgurClientID
+            },
+            'json': {
+              'type': 'base64',
+              'image': matches[i].replace('src="data:image/png;base64', '').replace('"', '')
+            }
 
+          }
+          response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
+          imgurAlbum.push(JSON.parse(response.getBody()).data.id)
         }
-        response = request('POST', 'https://api.imgur.com/3/image', imgurApiOptions)
-        imgurAlbum.push(JSON.parse(response.getBody()).data.id)
       }
+
       // create album
       imgurApiOptions = {
         'headers': {
