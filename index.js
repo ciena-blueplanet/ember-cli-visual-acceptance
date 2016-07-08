@@ -437,7 +437,7 @@ module.exports = {
           }
 
           deleteFolderRecursive(path.join(root, options.imageDirectory))
-          if (options.buildReport) {          return runCommand('ember', ['br'])
+          if (options.buildReport) {
             return runCommand('ember', ['br'])
           } else {
             return runCommand('ember', ['test'])
