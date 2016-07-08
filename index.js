@@ -213,7 +213,7 @@ function buildReport (params) {
     var markdownBody = fs.readFileSync('visual-acceptance-report/report.md').toString()
     var imgurLinks = imgurResponse[2]
     for (let i = 1; i < imgurLinks.length; i++) {
-      markdownBody = markdownBody.replace('<img>', '<img src="' + 'http://i.imgur.com/' + imgurLinks[i] + '.png' + '" width="160" height="160">')
+      markdownBody = markdownBody.replace('<img>', '<img src="' + 'http://i.imgur.com/' + imgurLinks[i] + '.png' + 'height="160">')
     }
     var githubApiPostOptions = {
       'headers': {
