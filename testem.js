@@ -1,7 +1,6 @@
 module.exports = {
   'framework': 'mocha',
   'test_page': 'tests/index.html?hidepassed',
-  'on_exit': 'echo Dude we are closed',
   'disable_watching': true,
   'launch_in_ci': [
     'SlimerJsVisualAcceptance'

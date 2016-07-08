@@ -14,8 +14,8 @@ setTimeout(function() {
        Testem.afterTests(
       //Asynchronously
       function(config, data, callback) {
-          callback(null)
-        
+        callback(null)
+        // Set time to wait for callback to finish its work. Then close launcher (Issue Testem: fails to close custom launcher on Linux) https://github.com/testem/testem/issues/915
         setTimeout( function (params) {
           var status = window.callPhantom({
             command: 'exit',

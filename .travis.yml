@@ -6,9 +6,9 @@ branches:
   except:
   - /^v[0-9\.]+/
 before_install:
-- npm install -g coveralls pr-bumper phantomjs slimerjs
+- npm install -g coveralls pr-bumper slimerjs
 - pr-bumper check
-- phantomjs -v
+- slimerjs -v
 before_script:
 - git config --global user.email "ericwhite613@gmail.com"
 - git config --global user.name "Eric White"

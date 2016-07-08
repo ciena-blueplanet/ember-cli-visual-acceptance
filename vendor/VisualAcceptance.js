@@ -116,18 +116,18 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
               }
             })
             node.innerHTML = '<div class="test fail"> <div class="list-name">  Failed: ' + imageName + ' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="' + data.getImageDataUrl() + '" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="' + image + '" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="' + res.image + '" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
+            $.ajax({
+              type: 'POST',
+              async: false,
+              url: '/report',
+              data: {
+                report: node.innerHTML
+              }
+            })
           }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
           document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
-          $.ajax({
-            type: 'POST',
-            async: false,
-            url: '/report',
-            data: {
-              report: node.innerHTML
-            }
-          })
           assert = assert === undefined ? chai.assert : assert
           assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage + ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
           data ? resolve(data) : reject(data)
