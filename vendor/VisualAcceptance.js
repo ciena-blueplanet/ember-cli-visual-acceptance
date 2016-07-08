@@ -1,39 +1,31 @@
-/*global XMLHttpRequest,$,html2canvas,chai */
-function httpGet(theUrl) {
+/*global XMLHttpRequest,$,,chai,resemble */
+function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
   xmlHttp.send(null)
   return xmlHttp.responseText
 }
 
-function httpPost(theUrl) {
-  var xmlHttp = new XMLHttpRequest()
-  xmlHttp.open('POST', theUrl, false) // false for synchronous request
-  xmlHttp.send(null)
-  return xmlHttp.responseText
-}
+function capture (imageName, width, height, misMatchPercentageMargin, assert) {
+  if (misMatchPercentageMargin == null) { misMatchPercentageMargin = 0.00 }
 
-function capture(imageName, width, height, misMatchPercentageMargin, assert) {
-  if (misMatchPercentageMargin == null ){ misMatchPercentageMargin = 0.00}
-  
   var browser = window.ui
-  var istargetbrowser = JSON.parse(httpGet("/istargetbrowser?" + $.param(browser)))
+  var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
   if (istargetbrowser === false) {
-    return new Promise(function(resolve, reject) {
-      resolve("Does not match target browser");
+    return new Promise(function (resolve, reject) {
+      resolve('Does not match target browser')
     })
   }
 
-  
   $(document.getElementById('ember-testing')).css('zoom', 'initial')
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
   $(document.getElementById('ember-testing-container')).css('position', 'initial')
   var browserDirectory
-  if (browser.osversion === undefined){
+  if (browser.osversion === undefined) {
     browserDirectory = browser.os + '/' + browser.browser + '/'
-  }else{
+  } else {
     browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   }
 
@@ -48,11 +40,17 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
   // resemble.outputSettings({
   //   largeImageThreshold: 0
   // })
-  return html2canvas(document.getElementById('ember-testing-container'), {
-    timeout: 1000
-  }).then(function(canvas) {
+
+  return new Promise(function (resolve, reject) {
+    if (window.callPhantom === undefined){
+      resolve('Not on PhantomJS')
+    }
     // Get test dummy image
-    var image = canvas.toDataURL('image/png')
+    var image = window.callPhantom({
+      id: 'ember-testing-container'
+    })
+    image = 'data:image/png;base64,' + image
+    // console.log(image)
     if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
       var visualAcceptanceContainer
       visualAcceptanceContainer = document.createElement('div')
@@ -81,23 +79,22 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
       node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
       images.push(image)
       $.ajax({
-              type: 'POST',
-              async: false,
-              url: '/report',
-              data: {
+        type: 'POST',
+        async: false,
+        url: '/report',
+        data: {
                 type: 'New',
                 images: images
-              }
-            })
-      return 'No passed image. Saving current test as base'
-
+        }
+      })
+      resolve('No passed image. Saving current test as base')
     } else {
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
-      return new Promise(function(resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function(data) {
-          var result = false
 
+      return new Promise(function (resolve, reject) {
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
+          var result = false
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
             // Passed
             $.ajax({
@@ -142,10 +139,11 @@ function capture(imageName, width, height, misMatchPercentageMargin, assert) {
           $(document.getElementById('ember-testing-container')).removeAttr('style')
           document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
           assert = assert === undefined ? chai.assert : assert
-          assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +') is above mismatch threshold('+misMatchPercentageMargin+').')
-        
+          assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage + ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
           data ? resolve(data) : reject(data)
         })
+      }).then(function (data) {
+        data ? resolve(data) : reject(data)
       })
     }
   })

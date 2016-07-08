@@ -25,6 +25,12 @@ visualAcceptanceOptions: {
 }
 ```
 
+### Browsers to test against
+
+[PhantomJS](http://phantomjs.org/) and [SlimerJS](https://slimerjs.org/) can both be used with this tool to capture images.
+
+Personally I prefer SlimerJS. As PhantomJS's webkit version is behind the latest Safari's webkit. While SlimerJS uses the same version of Gecko as the latest Firefox.
+
 #### Target browser and OS version
 
 You can specify the exact version of the browser as well as the OS the test will be run against.

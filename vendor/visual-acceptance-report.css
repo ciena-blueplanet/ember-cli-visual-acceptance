@@ -18,6 +18,9 @@
 .visual-acceptance-container {
   padding-left: 30px;
 }
+#mySVG {
+ margin-top: 100px;
+}
 .visual-acceptance-container > .test {
   padding-left: 20px;
 }

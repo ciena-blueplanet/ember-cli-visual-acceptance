@@ -1,14 +1,14 @@
 language: node_js
-sudo: false
+sudo: true
 node_js:
 - '5.3'
 branches:
   except:
   - /^v[0-9\.]+/
 before_install:
-- npm install -g coveralls pr-bumper
+- npm install -g coveralls pr-bumper slimerjs
 - pr-bumper check
-- phantomjs -v
+- slimerjs -v
 before_script:
 - git config --global user.email "ericwhite613@gmail.com"
 - git config --global user.name "Eric White"
@@ -20,7 +20,7 @@ before_script:
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
 script:
-- npm run lint && ember tva --visual-acceptance-token=8284ea96e1c3c8fd1d8ad1a0812579ab2e535eba
+- npm run lint && ember tva
 install:
 - npm install
 - bower install
