@@ -490,7 +490,7 @@ module.exports = {
             return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory, '--build-report=true']).then(function (params) {
               if (prNumber === false) {
                 console.log('Git add')
-                return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
                   console.log('Git commit')
                   return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                     console.log('Git push')
@@ -514,7 +514,7 @@ module.exports = {
           } else if (prNumber === false || prNumber === 'false') {
             return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
               console.log('Git add')
-              return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+              return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
                 console.log('Git commit')
                 return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                   console.log('Git push')
@@ -590,7 +590,7 @@ module.exports = {
             return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
               if (prNumber === false) {
                 console.log('Git add')
-                return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+                return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
                   console.log('Git commit')
                   return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                     console.log('Git push')
@@ -608,9 +608,9 @@ module.exports = {
               })
             })
           } else if (prNumber === false) {
-            return runCommand('ember', ['test']).then(function (params) {
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
               console.log('Git add')
-              return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
+              return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
                 console.log('Git commit')
                 return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
                   console.log('Git push')
