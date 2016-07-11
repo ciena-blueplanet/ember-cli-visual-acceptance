@@ -84,16 +84,16 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
         url: '/report',
         data: {
           type: 'New',
-          images: images
+          images: images,
+          name: imageName
         }
       })
       resolve('No passed image. Saving current test as base')
     } else {
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
-
       return new Promise(function (resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {          
           var result = false
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
             // Passed
@@ -124,14 +124,15 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
   
             images.push(data.getImageDataUrl())
             images.push(image)
-            images.push(res.image)                    
+            images.push(res.image)                
             $.ajax({
               type: 'POST',
               async: false,
               url: '/report',
               data: {
                 type: 'Changed',
-                images: images             
+                images: images,
+                name: imageName          
               }
             })           
         }

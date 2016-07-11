@@ -16,7 +16,7 @@ function uploadToImgur (image, reportPath) {
     },
     'json': {
       'type': 'base64',
-      'image': image.replace('data:image\/\w+;base64,', '')
+      'image': image.replace(/data:image\/\w+;base64,/i, '')
     }
 
   }
@@ -96,15 +96,14 @@ function mkdirpSync (dirpath) {
 function appendToReport (req, res, options) {
   if (process.env.REPORT_JSON_PATH) {
     var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
-
     var imgurLinks = []
-    for (let i = 0; i < req.body.images; i++) {
+    for (var i = 0; i < req.body.images.length; i++) {
       imgurLinks.push(uploadToImgur(req.body.images[i]))
     }
     if (req.body.type === 'New') {
-      markdownReport.new += '### No new image. Saving current as baseline: \n#### Addition Information: \n <img src="' + imgurLinks[0] + '" height="160">\n'
+      markdownReport.new += '### No new image. Saving current as baseline: ' + req.body.name + '\n#### Addition Information: \n <img src="' + imgurLinks[0] + '" height="160">\n'
     } else if (req.body.type === 'Changed') {
-      markdownReport.changed += '### Changed \n### Addition Information: \n <table>'
+      markdownReport.changed += '\n### Addition Information: ' + req.body.name + '\n <table>'
       markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] + '" height="160">' + '</td> </tr>'
       markdownReport.changed += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'
       markdownReport.changed += '</table>'
@@ -170,52 +169,54 @@ function getImage (req, res, options) {
 }
 
 function buildReport (params) {
-  console.log('Sending to github')
-  var markdownReport = JSON.parse(fs.readFileSync('visual-acceptance-report/report.json'))
-  var markdownBody = '# Visual Acceptance tests:\n'
-  if (markdownReport.new !== '## New\n') {
-    markdownBody += markdownReport.new + '\n'
-  }
-  if (markdownReport.changed !== '## Changed\n') {
-    markdownBody += markdownReport.changed
-  }
-  if (markdownReport.changed === '## Changed\n' && markdownReport.new === '## New\n') {
-    markdownBody += '### No changes\n'
-  }
-  try {
-    if (process.env.REPORT_MARKDOWN_PATH) {
-      fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdownBody)
+  return new Promise(function (resolve, reject) {
+    console.log('Sending to github')
+    var markdownReport = JSON.parse(fs.readFileSync('visual-acceptance-report/report.json'))
+    var markdownBody = '# Visual Acceptance tests:\n'
+    if (markdownReport.new !== '## New\n') {
+      markdownBody += markdownReport.new + '\n'
     }
-  } catch (e) {
-    console.log(e)
-  }
-  var githubApiPostOptions = {
-    'headers': {
-      'user-agent': 'visual-acceptance',
-      'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
-    },
-    'json': {
-      'body': markdownBody
+    if (markdownReport.changed !== '## Changed\n') {
+      markdownBody += markdownReport.changed
     }
-  }
+    if (markdownReport.changed === '## Changed\n' && markdownReport.new === '## New\n') {
+      markdownBody += '### No changes\n'
+    }
+    try {
+      if (process.env.REPORT_MARKDOWN_PATH) {
+        fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdownBody)
+      }
+    } catch (e) {
+      console.log(e)
+    }
+    var githubApiPostOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+      },
+      'json': {
+        'body': markdownBody
+      }
+    }
 
-  var githubApiGetOptions = {
-    'headers': {
-      'user-agent': 'visual-acceptance',
-      'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+    var githubApiGetOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
+      }
     }
-  }
-  var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
-  var response = request('GET', url, githubApiGetOptions)
-  var bodyJSON = JSON.parse(response.getBody().toString())
-  for (var i = 0; i < bodyJSON.length; i++) {
-    if (bodyJSON[i].body.indexOf('# Visual Acceptance tests:') > -1) {
-      url = bodyJSON[i].url
-      break
+    var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
+    var response = request('GET', url, githubApiGetOptions)
+    var bodyJSON = JSON.parse(response.getBody().toString())
+    for (var i = 0; i < bodyJSON.length; i++) {
+      if (bodyJSON[i].body.indexOf('# Visual Acceptance tests:') > -1) {
+        url = bodyJSON[i].url
+        break
+      }
     }
-  }
-  response = request('POST', url, githubApiPostOptions)
-  return response
+    response = request('POST', url, githubApiPostOptions)
+    resolve(response)
+  })
 }
 
 function buildTeamcityBitbucketReport (params, options, prNumber) {
