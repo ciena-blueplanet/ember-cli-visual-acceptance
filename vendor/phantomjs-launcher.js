@@ -55,4 +55,4 @@ setTimeout(function() {
       console.log('  ', item.file, ':', item.line)
     })
   }
-}, 1000);
+}, 2000);
