@@ -101,9 +101,9 @@ function appendToReport (req, res, options) {
       imgurLinks.push(uploadToImgur(req.body.images[i]))
     }
     if (req.body.type === 'New') {
-      markdownReport.new += '\n#### Addition Information: \n##### Saving current as baseline: ' + req.body.name + '\n <img src="' + imgurLinks[0] + '" height="160">\n'
+      markdownReport.new += '\n#### ' + req.body.name + '\n <img src="' + imgurLinks[0] + '" height="160">\n'
     } else if (req.body.type === 'Changed') {
-      markdownReport.changed += '\n### Addition Information: \n ##### Title: ' + req.body.name + '\n <table>'
+      markdownReport.changed += '\n### ' + req.body.name + '\n <table>'
       markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] + '" height="160">' + '</td> </tr>'
       markdownReport.changed += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'
       markdownReport.changed += '</table>'
@@ -512,7 +512,7 @@ module.exports = {
               })
             })
           } else if (prNumber === false || prNumber === 'false') {
-            return runCommand('ember', ['test']).then(function (params) {
+            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
               console.log('Git add')
               return runCommand('git', ['add', options.imageDirectory + '/*']).then(function (params) {
                 console.log('Git commit')
