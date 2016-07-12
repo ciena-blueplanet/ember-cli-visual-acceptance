@@ -1,4 +1,4 @@
-/*global XMLHttpRequest,$,,chai,resemble */
+/*global XMLHttpRequest,$,,chai,resemble, html2canvas */
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "capture" }]*/
 function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
@@ -43,7 +43,11 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
   // resemble.outputSettings({
   //   largeImageThreshold: 0
   // })
-  return capturePhantom(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+  if (window.callPhantom !== undefined) {
+    return capturePhantom(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+  } else {
+    return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+  }
 }
 function capturePhantom (imageName, width, height, misMatchPercentageMargin, assert, browserDirectory) {
   return new Promise(function (resolve, reject) {
@@ -59,6 +63,19 @@ function capturePhantom (imageName, width, height, misMatchPercentageMargin, ass
     return utilizeImage(imageName, width, height, misMatchPercentageMargin, assert, image, browserDirectory, resolve, reject)
   })
 }
+
+function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin, assert, browserDirectory) {
+  return html2canvas(document.getElementById('ember-testing-container'), {
+    timeout: 1000
+  }).then(function (canvas) {
+    // Get test dummy image
+    var image = canvas.toDataURL('image/png')
+    return new Promise(function (resolve, reject) {
+      return utilizeImage(imageName, width, height, misMatchPercentageMargin, assert, image, browserDirectory, resolve, reject)
+    })
+  })
+}
+
 function utilizeImage (imageName, width, height, misMatchPercentageMargin, assert, image, browserDirectory, resolve, reject) {
   if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
     var visualAcceptanceContainer

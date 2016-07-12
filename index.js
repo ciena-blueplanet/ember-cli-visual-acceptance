@@ -291,6 +291,9 @@ module.exports = {
       app.import(path.join('vendor', 'jquery.min.js'), {
         type: 'test'
       })
+      app.import(path.join('vendor', 'html2canvas.js'), {
+        type: 'test'
+      })
       app.import(path.join('vendor', 'VisualAcceptance.js'), {
         type: 'test'
       })
