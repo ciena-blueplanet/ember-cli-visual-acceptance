@@ -512,7 +512,7 @@ module.exports = {
                     })
                  })
                } else {
-                 return buildReport(params).then(function (params) {
+                 return buildReport(params).then(buildReport, function (params) {
                    throw new Error('Exit 1')
                  })
                }
