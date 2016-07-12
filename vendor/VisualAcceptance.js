@@ -81,20 +81,16 @@ function capture (imageName, width, height, misMatchPercentageMargin, experiment
   // resemble.outputSettings({
   //   largeImageThreshold: 0
   // })
-  if (experimentalSvgs === true) {
-    return experimentalSvgCapture().then(function () {
-      return useCapture(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
-    })
-  } else {
-    return useCapture(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
-  }
-}
-
-function useCapture (imageName, width, height, misMatchPercentageMargin, assert, browserDirectory) {
   if (window.callPhantom !== undefined) {
     return capturePhantom(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
   } else {
-    return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+    if (experimentalSvgs === true) {
+      return experimentalSvgCapture().then(function () {
+        return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+      })
+    } else {
+      return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+    }
   }
 }
 
