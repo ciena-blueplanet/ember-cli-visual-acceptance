@@ -25,11 +25,27 @@ visualAcceptanceOptions: {
 }
 ```
 
-### Browsers to test against
+### Browsers - html2canvas vs. PhantomJS render callback
+
+#### PhantomJS - SlimerJS
 
 [PhantomJS](http://phantomjs.org/) and [SlimerJS](https://slimerjs.org/) can both be used with this tool to capture images.
 
 Personally I prefer SlimerJS. As PhantomJS's webkit version is behind the latest Safari's webkit. While SlimerJS uses the same version of Gecko as the latest Firefox.
+
+##### Warning
+
+With certain repositories I've had trouble with SlimerJS having segmentation faults on both Linux and Mac. I've yet to resolve this issue. So I have re-included html2Canvas work. 
+
+#### Html2Canvas
+
+Html2Canvas is used when a browser does not have the function `window.callPhantom` (Only PhantomJS and SlimerJS have this defined). Html2Canvas is still in beta and as result you will see some issues.
+Html2Canvas relies on Canvas drawing support. I find Chrome has the best Canvas drawing support (miles ahead of their competitors), while Firefox has the second best Canvas drawing support. 
+
+##### SVGs
+
+Html2Canvas has difficulties rendering SVGs (more so in Firefox than in Chrome). As a result I have added a new **expermental** functionality that attempts to render the svgs better.
+You can use this experimental feature by setting `experimentalSvgs` to `true` (Example: `capture('svg-experimental', null, null, null, true)`)
 
 #### Target browser and OS version
 
@@ -80,7 +96,8 @@ capture(imageName, height, width, misMatch, imageDirectory)
 | height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the window. |
 | width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the window.   |
 | misMatch                 | float  | 1.00                | The maximum percentage ResembleJs is allowed to misMatch. |
-| assert                 | object  | undefined                | Only use to pass in **Qunit** `assert` object.|
+| experimentalSvgs         | boolean  | undefined                | Set to true in order try experimental rendering of svgs using html2canvas.|
+| assert                   | object  | undefined                | Only use to pass in **Qunit** `assert` object.|
 
 
 ## Usage

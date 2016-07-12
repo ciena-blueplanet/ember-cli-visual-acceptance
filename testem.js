@@ -3,7 +3,7 @@ module.exports = {
   'test_page': 'tests/index.html?hidepassed',
   'disable_watching': true,
   'launch_in_ci': [
-    'SlimerJsVisualAcceptance'
+    'Firefox'
   ],
   'launch_in_dev': [
     'Firefox'
@@ -15,7 +15,7 @@ module.exports = {
       'protocol': 'browser'
     },
     'SlimerJsVisualAcceptance': {
-      'command': 'slimerjs -jsconsole vendor/phantomjs-launcher.js <url>',
+      'command': 'slimerjs --debug=true --error-log-file=error.log vendor/phantomjs-launcher.js <url>',
       'protocol': 'browser'
     }
   }
