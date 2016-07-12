@@ -1,4 +1,4 @@
-/*global XMLHttpRequest,$,,chai,resemble, html2canvas */
+/*global XMLHttpRequest,$,,chai,resemble, html2canvas, Image, XMLSerializer,btoa */
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "capture" }]*/
 function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
@@ -7,7 +7,45 @@ function httpGet (theUrl) {
   return xmlHttp.responseText
 }
 
-function capture (imageName, width, height, misMatchPercentageMargin, assert) {
+function experimentalSvgCapture () {
+  /* eslint-enable no-unused-vars */
+  var items = Array.from(document.querySelectorAll('svg'))
+  var promises = items.map(function (svg) {
+    return new Promise(resolve => {
+      var clientWidth = svg.clientWidth || svg.parentNode.clientWidth
+      var clientHeight = svg.clientHeight || svg.parentNode.clientHeight
+      svg.setAttribute('width', clientWidth)
+      svg.setAttribute('height', clientWidth)
+      var myCanvas = document.createElement('canvas')
+
+      // Get drawing context for the Canvas
+      var myCanvasContext = myCanvas.getContext('2d')
+        // Load up our image.
+      var source = new Image()
+      var xml = new XMLSerializer().serializeToString(svg)
+      var data = 'data:image/svg+xml;base64,' + btoa(xml)
+      source.src = data
+        // Render our SVG image to the canvas once it loads.
+      /**
+       *
+       */
+      source.onload = function () {
+        debugger
+        myCanvas.width = clientWidth
+        myCanvas.height = clientHeight
+        myCanvas.className = svg.className
+        myCanvas.id = svg.id
+        myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
+        $(svg).replaceWith(myCanvas)
+        resolve()
+      }
+    })
+  })
+
+  return Promise.all(promises)
+}
+
+function capture (imageName, width, height, misMatchPercentageMargin, experimentalSvgs, assert) {
   if (misMatchPercentageMargin == null) {
     misMatchPercentageMargin = 0.00
   }
@@ -43,12 +81,23 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
   // resemble.outputSettings({
   //   largeImageThreshold: 0
   // })
+  if (experimentalSvgs === true) {
+    return experimentalSvgCapture().then(function () {
+      return useCapture(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+    })
+  } else {
+    return useCapture(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
+  }
+}
+
+function useCapture (imageName, width, height, misMatchPercentageMargin, assert, browserDirectory) {
   if (window.callPhantom !== undefined) {
     return capturePhantom(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
   } else {
     return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
   }
 }
+
 function capturePhantom (imageName, width, height, misMatchPercentageMargin, assert, browserDirectory) {
   return new Promise(function (resolve, reject) {
     if (window.callPhantom === undefined) {
