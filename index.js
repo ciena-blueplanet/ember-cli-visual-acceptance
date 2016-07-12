@@ -512,10 +512,12 @@ module.exports = {
                     })
                  })
                } else {
-                 return buildReport(params).then(buildReport, function (params) {
-                   throw new Error('Exit 1')
-                 })
+                 return buildReport(params)
                }
+             }, function (params) {
+               return buildReport(params).then(function (params) {
+                 throw new Error('Exit 1')
+               })
              })
           } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
             return runCommand('ember', ['br']).then(buildReport, function (params) {
