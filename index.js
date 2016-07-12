@@ -94,7 +94,6 @@ function mkdirpSync (dirpath) {
 }
 
 function appendToReport (req, res, options) {
-  console.log('JSON path: ' + process.env.REPORT_JSON_PATH)
   if (process.env.REPORT_JSON_PATH) {
     var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
     var imgurLinks = []
