@@ -1,4 +1,5 @@
 /*global XMLHttpRequest,$,,chai,resemble */
+/*eslint no-unused-vars: ["error", { "varsIgnorePattern": "capture" }]*/
 function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
@@ -7,12 +8,14 @@ function httpGet (theUrl) {
 }
 
 function capture (imageName, width, height, misMatchPercentageMargin, assert) {
-  if (misMatchPercentageMargin == null) { misMatchPercentageMargin = 0.00 }
+  if (misMatchPercentageMargin == null) {
+    misMatchPercentageMargin = 0.00
+  }
 
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
   if (istargetbrowser === false) {
-    return new Promise(function (resolve, reject) {
+    return new Promise(function (resolve) {
       resolve('Does not match target browser')
     })
   }
@@ -42,7 +45,7 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
   // })
 
   return new Promise(function (resolve, reject) {
-    if (window.callPhantom === undefined){
+    if (window.callPhantom === undefined) {
       resolve('Not on PhantomJS')
     }
     // Get test dummy image
@@ -50,7 +53,7 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
       id: 'ember-testing-container'
     })
     image = 'data:image/png;base64,' + image
-    // console.log(image)
+      // console.log(image)
     if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
       var visualAcceptanceContainer
       visualAcceptanceContainer = document.createElement('div')
@@ -59,9 +62,8 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
       document.body.appendChild(visualAcceptanceContainer)
     }
     var node = document.createElement('div')
-    var markdown = ''
     var images = []
-      // Get passed image
+    // Get passed image
     var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
     if (res.error === 'File does not exist') {
       // Save image as passed if no existing passed image
@@ -76,7 +78,7 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
       })
       $(document.getElementById('ember-testing')).removeAttr('style')
       $(document.getElementById('ember-testing-container')).removeAttr('style')
-      node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
+      node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
       images.push(image)
       $.ajax({
         type: 'POST',
@@ -93,7 +95,7 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
       // Passed image exists so compare to current
       res.image = 'data:image/png;base64,' + res.image
       return new Promise(function (resolve, reject) {
-        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {          
+        resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
           var result = false
           if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
             // Passed
@@ -107,9 +109,8 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
               }
             })
             result = true
-            node.innerHTML = '<div class="test pass"> <div class="list-name">  New: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="'+ image + '" /> </div>'
-            markdown = '## New: \n#### Addition Information: \n <img>\n'         
-        } else {
+            node.innerHTML = '<div class="test pass"> <div class="list-name">  New: ' + imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
+          } else {
             // Fail
             $.ajax({
               type: 'POST',
@@ -120,11 +121,11 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
                 name: browserDirectory + imageName + '.png'
               }
             })
-            node.innerHTML = '<div class="test fail"> <div class="list-name">  Changed: '+ imageName+' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="'+data.getImageDataUrl()+'" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="'+image+'" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="'+res.image+'" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
-  
+            node.innerHTML = '<div class="test fail"> <div class="list-name">  Changed: ' + imageName + ' </div> <div class="additional-info"> Addition Information: </div> <div class="images"> <div class="image"> <img class="diff" src="' + data.getImageDataUrl() + '" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="' + image + '" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="' + res.image + '" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
+
             images.push(data.getImageDataUrl())
             images.push(image)
-            images.push(res.image)                
+            images.push(res.image)
             $.ajax({
               type: 'POST',
               async: false,
@@ -132,10 +133,10 @@ function capture (imageName, width, height, misMatchPercentageMargin, assert) {
               data: {
                 type: 'Changed',
                 images: images,
-                name: imageName          
+                name: imageName
               }
-            })           
-        }
+            })
+          }
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(document.getElementById('ember-testing-container')).removeAttr('style')
           document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
