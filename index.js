@@ -511,6 +511,10 @@ module.exports = {
                       return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                     })
                  })
+               } else {
+                 return buildReport(params).then(function (params) {
+                   throw new Error('Exit 1')
+                 })
                }
              })
           } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
