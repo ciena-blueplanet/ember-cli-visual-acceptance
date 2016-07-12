@@ -3,4 +3,6 @@ dist/**/*
 node_modules/**/*
 tmp/**/*
 blueprints/**/vendor/*
-vendor/*
+vendor/html-to-image.js
+vendor/html2canvas.js
+vendor/jquery.min.js
