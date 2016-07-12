@@ -1,12 +1,20 @@
 /*global XMLHttpRequest,$,,chai,resemble, html2canvas, Image, XMLSerializer,btoa */
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "capture" }]*/
+/**
+ * Does httpGet on url synchronously
+ * @param {string} theUrl - url to do GET request on
+ * @returns {string} GET Response Text
+ */
 function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
   xmlHttp.send(null)
   return xmlHttp.responseText
 }
-
+/**
+ * Convert Svgs to canvas. In hopes of a more accurate rendering using html2canvas
+ * @returns Promise of all svg conversions
+ */
 function experimentalSvgCapture () {
   /* eslint-enable no-unused-vars */
   var items = Array.from(document.querySelectorAll('svg'))
@@ -30,7 +38,6 @@ function experimentalSvgCapture () {
        *
        */
       source.onload = function () {
-        debugger
         myCanvas.width = clientWidth
         myCanvas.height = clientHeight
         myCanvas.className = svg.className
@@ -44,7 +51,16 @@ function experimentalSvgCapture () {
 
   return Promise.all(promises)
 }
-
+/**
+ * Creates baseline imagesfor visual regression during standard Ember tests using html2Canvas and ResembleJS
+ * @param {string} imageName - Name of the image you wish to save
+ * @param {number} [width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {boolean} [experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
+ * @param {object} [assert=undefined] - Use only if using qunit
+ * @returns {Promise} ResembleJs return value
+ */
 function capture (imageName, width, height, misMatchPercentageMargin, experimentalSvgs, assert) {
   if (misMatchPercentageMargin == null) {
     misMatchPercentageMargin = 0.00
@@ -93,7 +109,16 @@ function capture (imageName, width, height, misMatchPercentageMargin, experiment
     }
   }
 }
-
+/**
+ * Use phantomJS/slimerjs callback to capture Image
+ * @param {string} imageName - Name of the image you wish to save
+ * @param {number} [width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {object} [assert=undefined] - Use only if using qunit
+ * @param {object} [browserDirectory=undefined] - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
+ * @returns {Promise} ResembleJs return value
+ */
 function capturePhantom (imageName, width, height, misMatchPercentageMargin, assert, browserDirectory) {
   return new Promise(function (resolve, reject) {
     if (window.callPhantom === undefined) {
@@ -108,7 +133,16 @@ function capturePhantom (imageName, width, height, misMatchPercentageMargin, ass
     return utilizeImage(imageName, width, height, misMatchPercentageMargin, assert, image, browserDirectory, resolve, reject)
   })
 }
-
+/**
+ * Use html2canvas to capture Image
+ * @param {string} imageName - Name of the image you wish to save
+ * @param {number} [width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {object} [assert=undefined] - Use only if using qunit
+ * @param {object} browserDirectory - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
+ * @returns {Promise} ResembleJs return value
+ */
 function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin, assert, browserDirectory) {
   return html2canvas(document.getElementById('ember-testing-container'), {
     timeout: 1000
@@ -120,7 +154,19 @@ function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin,
     })
   })
 }
-
+/**
+ * Use html2canvas to capture Image
+ * @param {string} imageName - Name of the image you wish to save
+ * @param {number} [width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {object} [assert=undefined] - Use only if using qunit
+ * @param {string} image - Base64 image produced from html2canvas or PhantomJS
+ * @param {object} browserDirectory - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
+ * @param {object} resolve - resolve from Promise
+ * @param {object} reject - reject from Promise
+ * @returns {Promise} ResembleJs return value
+ */
 function utilizeImage (imageName, width, height, misMatchPercentageMargin, assert, image, browserDirectory, resolve, reject) {
   if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
     var visualAcceptanceContainer
