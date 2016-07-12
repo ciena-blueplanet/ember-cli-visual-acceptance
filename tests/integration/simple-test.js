@@ -35,6 +35,7 @@ describeComponent(
       })
     })
     it('renders svg', function (done) {
+      /* eslint-disable max-len */
       this.render(hbs `<svg id="mySVG"xmlns="http://www.w3.org/2000/svg" viewBox="-350 -250 700 500">
       <style type="text/css" media="screen">
         svg { background:#fff; }
@@ -45,6 +46,7 @@ describeComponent(
       <circle cx="-60" cy="-50" r="20" fill="#000"/>
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
+    /* eslint-enable max-len */
       capture('svg').then(function (data) {
         console.log(arguments)
         done()
@@ -54,6 +56,7 @@ describeComponent(
     })
 
     it('renders svg experimental', function (done) {
+      /* eslint-disable max-len */
       this.render(hbs `<svg id="mySVG"xmlns="http://www.w3.org/2000/svg" viewBox="-350 -250 700 500">
       <style type="text/css" media="screen">
         svg { background:#fff; }
@@ -64,6 +67,7 @@ describeComponent(
       <circle cx="-60" cy="-50" r="20" fill="#000"/>
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
+    /* eslint-enable max-len */
       capture('svg-experimental', null, null, null, true).then(function (data) {
         console.log(arguments)
         done()

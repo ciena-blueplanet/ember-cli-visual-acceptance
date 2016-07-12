@@ -104,7 +104,10 @@ function appendToReport (req, res, options) {
       markdownReport.new += '\n#### ' + req.body.name + '\n <img src="' + imgurLinks[0] + '" height="160">\n'
     } else if (req.body.type === 'Changed') {
       markdownReport.changed += '\n### ' + req.body.name + '\n <table>'
-      markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] + '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] + '" height="160">' + '</td> </tr>'
+      markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] +
+       '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] +
+        '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] +
+         '" height="160">' + '</td> </tr>'
       markdownReport.changed += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'
       markdownReport.changed += '</table>'
     }
@@ -117,7 +120,9 @@ function isTargetBrowser (req, res, targetBrowsers) {
   if (targetBrowsers.length > 0) {
     var result = false
     for (var i = 0; i < targetBrowsers.length; i++) {
-      if (req.query.browser === targetBrowsers[i].browser && compareVersions(req.query.version, targetBrowsers[i].version) && req.query.os === targetBrowsers[i].os && compareVersions(req.query.osversion, targetBrowsers[i].osversion)) {
+      if (req.query.browser === targetBrowsers[i].browser &&
+       compareVersions(req.query.version, targetBrowsers[i].version) && req.query.os === targetBrowsers[i].os &&
+       compareVersions(req.query.osversion, targetBrowsers[i].osversion)) {
         result = true
         break
       }
@@ -205,7 +210,8 @@ function buildReport (params) {
         'Authorization': 'token ' + process.env.VISUAL_ACCEPTANCE_TOKEN
       }
     }
-    var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' + process.env.TRAVIS_PULL_REQUEST + '/comments'
+    var url = 'https://api.github.com/repos/' + process.env.TRAVIS_REPO_SLUG + '/issues/' +
+     process.env.TRAVIS_PULL_REQUEST + '/comments'
     var response = request('GET', url, githubApiGetOptions)
     var bodyJSON = JSON.parse(response.getBody().toString())
     for (var i = 0; i < bodyJSON.length; i++) {
@@ -220,62 +226,64 @@ function buildReport (params) {
 }
 
 function buildTeamcityBitbucketReport (params, options, prNumber) {
-  return runCommand('phantomjs', ['vendor/html-to-image.js', 'visual-acceptance-report/report.html']).then(function (params) {
-    console.log('Sending to github')
-    var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
+  return runCommand('phantomjs', ['vendor/html-to-image.js',
+   'visual-acceptance-report/report.html']).then(function (params) {
+     console.log('Sending to github')
+     var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
 
-    function uploadToExpress (url, image, name) {
-      var apiOptions = {
-        'headers': {
-          'Content-Type': 'application/json'
-        },
-        'json': {
-          'name': name,
-          'data': image.replace('data:image\/\w+;base64,', '')
-        }
+     function uploadToExpress (url, image, name) {
+       var apiOptions = {
+         'headers': {
+           'Content-Type': 'application/json'
+         },
+         'json': {
+           'name': name,
+           'data': image.replace('data:image\/\w+;base64,', '')
+         }
 
-      }
-      var response = request('POST', url + 'api/upload/image', apiOptions)
-      return response.getBody()
-    }
-    var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
-    uploadToExpress(options.apiUrl, image, filename)
-    var githubApiPostOptions = {
-      'headers': {
-        'user-agent': 'visual-acceptance',
-        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
-      },
-      'json': {
-        'text': '![PR ember-cli-visual-acceptance Report](' + options.apiUrl + filename + ')'
-      }
-    }
-    var githubApiGetOptions = {
-      'headers': {
-        'user-agent': 'visual-acceptance',
-        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
-      }
-    }
-    var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
-    var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/activities'
-    var response = request('GET', urlGet, githubApiGetOptions)
-    var bodyJSON = JSON.parse(response.getBody().toString())
-    var existingComment = false
-    for (var i = 0; i < bodyJSON.values.length; i++) {
-      if (bodyJSON.values[i].action === 'COMMENTED' && bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
-        existingComment = true
-        break
-      }
-    }
-    if (existingComment) {
-      response = {
-        error: 'Comment already exists. Just updating image'
-      }
-      console.log('Comment already exists. Just updating image')
-    } else {
-      response = request('POST', url, githubApiPostOptions)
-    }
-    return response
-  })
+       }
+       var response = request('POST', url + 'api/upload/image', apiOptions)
+       return response.getBody()
+     }
+     var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
+     uploadToExpress(options.apiUrl, image, filename)
+     var githubApiPostOptions = {
+       'headers': {
+         'user-agent': 'visual-acceptance',
+         'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+       },
+       'json': {
+         'text': '![PR ember-cli-visual-acceptance Report](' + options.apiUrl + filename + ')'
+       }
+     }
+     var githubApiGetOptions = {
+       'headers': {
+         'user-agent': 'visual-acceptance',
+         'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+       }
+     }
+     var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
+     var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/activities'
+     var response = request('GET', urlGet, githubApiGetOptions)
+     var bodyJSON = JSON.parse(response.getBody().toString())
+     var existingComment = false
+     for (var i = 0; i < bodyJSON.values.length; i++) {
+       if (bodyJSON.values[i].action === 'COMMENTED' &&
+        bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+         existingComment = true
+         break
+       }
+     }
+     if (existingComment) {
+       response = {
+         error: 'Comment already exists. Just updating image'
+       }
+       console.log('Comment already exists. Just updating image')
+     } else {
+       response = request('POST', url, githubApiPostOptions)
+     }
+     return response
+   })
 }
 module.exports = {
   name: 'ember-cli-visual-acceptance',
@@ -490,18 +498,20 @@ module.exports = {
           var travisMessage = res.body
           if (/\#new\-baseline\#/.exec(travisMessage)) {
             console.log('Creating new baseline')
-            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory, '--build-report=true']).then(function (params) {
-              if (prNumber === false) {
-                console.log('Git add')
-                return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
-                  console.log('Git commit')
-                  return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
-                    console.log('Git push')
-                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
-                  })
-                })
-              }
-            })
+            return runCommand('ember', ['new-baseline', '--image-directory=' +
+             options.imageDirectory, '--build-report=true']).then(function (params) {
+               if (prNumber === false) {
+                 console.log('Git add')
+                 return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+                   console.log('Git commit')
+                   return runCommand('git', ['commit', '-m',
+                    '"Adding new baseline images [ci skip]"']).then(function (params) {
+                      console.log('Git push')
+                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                    })
+                 })
+               }
+             })
           } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
             return runCommand('ember', ['br']).then(buildReport, function (params) {
               return buildReport(params).then(function (params) {
@@ -515,16 +525,18 @@ module.exports = {
               })
             })
           } else if (prNumber === false || prNumber === 'false') {
-            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
-              console.log('Git add')
-              return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
-                console.log('Git commit')
-                return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
-                  console.log('Git push')
-                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
-                })
-              })
-            })
+            return runCommand('ember', ['new-baseline', '--image-directory=' +
+             options.imageDirectory]).then(function (params) {
+               console.log('Git add')
+               return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+                 console.log('Git commit')
+                 return runCommand('git', ['commit', '-m',
+                  '"Adding new baseline images [ci skip]"']).then(function (params) {
+                    console.log('Git push')
+                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                  })
+               })
+             })
           }
         }
       },
@@ -575,8 +587,10 @@ module.exports = {
           description: 'Url of api server to save and host images. https://gitlab.com/EWhite613/express-reports'
         }],
         run: function (options, rawArgs) {
-          if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 || options.project.length === 0 || options.repo.length === 0 || options.apiUrl.length === 0) {
-            console.log('Need to supply a user, password, domain, project, repo, and express-url . Sorry the bitbucket api sucks. \n Just running ember test')
+          if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 ||
+           options.project.length === 0 || options.repo.length === 0 || options.apiUrl.length === 0) {
+            console.log('Need to supply a user, password, domain, project, repo, and express-url .' +
+             ' Sorry the bitbucket api sucks. \n Just running ember test')
             return runCommand('ember', ['test'])
           }
 
@@ -590,18 +604,20 @@ module.exports = {
           var PrDescription = JSON.parse(res.body).description
           if (PrDescription && /\#new\-baseline\#/.exec(PrDescription)) {
             console.log('Creating new baseline')
-            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
-              if (prNumber === false) {
-                console.log('Git add')
-                return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
-                  console.log('Git commit')
-                  return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
-                    console.log('Git push')
-                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
-                  })
-                })
-              }
-            })
+            return runCommand('ember', ['new-baseline', '--image-directory=' +
+             options.imageDirectory]).then(function (params) {
+               if (prNumber === false) {
+                 console.log('Git add')
+                 return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+                   console.log('Git commit')
+                   return runCommand('git', ['commit', '-m',
+                    '"Adding new baseline images [ci skip]"']).then(function (params) {
+                      console.log('Git push')
+                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                    })
+                 })
+               }
+             })
           } else if (prNumber !== false) {
             return runCommand('ember', ['br']).then(function (params) {
               return buildTeamcityBitbucketReport(params, options, prNumber)
@@ -611,16 +627,18 @@ module.exports = {
               })
             })
           } else if (prNumber === false) {
-            return runCommand('ember', ['new-baseline', '--image-directory=' + options.imageDirectory]).then(function (params) {
-              console.log('Git add')
-              return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
-                console.log('Git commit')
-                return runCommand('git', ['commit', '-m', '"Adding new baseline images [ci skip]"']).then(function (params) {
-                  console.log('Git push')
-                  return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
-                })
-              })
-            })
+            return runCommand('ember', ['new-baseline', '--image-directory=' +
+             options.imageDirectory]).then(function (params) {
+               console.log('Git add')
+               return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+                 console.log('Git commit')
+                 return runCommand('git', ['commit', '-m',
+                  '"Adding new baseline images [ci skip]"']).then(function (params) {
+                    console.log('Git push')
+                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                  })
+               })
+             })
           }
         }
       }
