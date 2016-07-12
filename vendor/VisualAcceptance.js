@@ -13,7 +13,7 @@ function httpGet (theUrl) {
 }
 /**
  * Convert Svgs to canvas. In hopes of a more accurate rendering using html2canvas
- * @returns Promise of all svg conversions
+ * @returns {Promise} Promise of all svg conversions
  */
 function experimentalSvgCapture () {
   /* eslint-enable no-unused-vars */
