@@ -94,6 +94,7 @@ function mkdirpSync (dirpath) {
 }
 
 function appendToReport (req, res, options) {
+  console.log('JSON path: ' + process.env.REPORT_JSON_PATH)
   if (process.env.REPORT_JSON_PATH) {
     var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
     var imgurLinks = []
@@ -101,9 +102,9 @@ function appendToReport (req, res, options) {
       imgurLinks.push(uploadToImgur(req.body.images[i]))
     }
     if (req.body.type === 'New') {
-      markdownReport.new += '\n#### ' + req.body.name + '\n <img src="' + imgurLinks[0] + '" height="160">\n'
+      markdownReport.new += '\n#### ' + req.body.browser + ':' + req.body.name + '\n <img src="' + imgurLinks[0] + '" height="160">\n'
     } else if (req.body.type === 'Changed') {
-      markdownReport.changed += '\n### ' + req.body.name + '\n <table>'
+      markdownReport.changed += '\n### ' + req.body.browser + ': ' + req.body.name + '\n <table>'
       markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] +
        '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] +
         '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] +

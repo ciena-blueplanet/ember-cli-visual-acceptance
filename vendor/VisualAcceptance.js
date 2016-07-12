@@ -201,7 +201,8 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, asser
       data: {
         type: 'New',
         images: images,
-        name: imageName
+        name: imageName,
+        browser: window.ui.browser
       }
     })
     resolve('No passed image. Saving current test as base')
@@ -247,7 +248,8 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, asser
             data: {
               type: 'Changed',
               images: images,
-              name: imageName
+              name: imageName,
+              browser: window.ui.browser
             }
           })
         }
