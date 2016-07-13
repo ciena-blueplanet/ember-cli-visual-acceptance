@@ -102,7 +102,6 @@ function capture (imageName, width, height, misMatchPercentageMargin, experiment
   } else {
     if (experimentalSvgs === true) {
       return experimentalSvgCapture().then(function () {
-        debugger
         return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
       })
     } else {
