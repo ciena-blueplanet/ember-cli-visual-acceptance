@@ -101,7 +101,7 @@ function appendToReport (req, res, options) {
       imgurLinks.push(uploadToImgur(req.body.images[i]))
     }
     if (req.body.type === 'New') {
-      markdownReport.new += '\n#### ' + req.body.browser + ':' + req.body.name +
+      markdownReport.new += '\n#### ' + req.body.browser + ': ' + req.body.name +
        '\n <img src="' + imgurLinks[0] + '" height="160">\n'
     } else if (req.body.type === 'Changed') {
       markdownReport.changed += '\n### ' + req.body.browser + ': ' + req.body.name + '\n <table>'
