@@ -20,8 +20,8 @@ function experimentalSvgCapture () {
   var items = Array.from(document.querySelectorAll('svg'))
   var promises = items.map(function (svg) {
     return new Promise(resolve => {
-      var clientWidth = svg.clientWidth || svg.parentNode.clientWidth
-      var clientHeight = svg.clientHeight || svg.parentNode.clientHeight
+      var clientWidth = $(svg).width() || $(svg.parentNode).width()
+      var clientHeight = $(svg).height() || $(svg.parentNode).height()
       svg.setAttribute('width', clientWidth)
       svg.setAttribute('height', clientWidth)
       var myCanvas = document.createElement('canvas')
