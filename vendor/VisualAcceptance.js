@@ -40,7 +40,7 @@ function experimentalSvgCapture () {
       source.onload = function () {
         myCanvas.width = clientWidth
         myCanvas.height = clientHeight
-        myCanvas.className = svg.className
+        myCanvas.className = svg.className.baseVal
         myCanvas.id = svg.id
         myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
         $(svg).replaceWith(myCanvas)
