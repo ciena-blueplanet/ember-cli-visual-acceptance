@@ -1,9 +1,3 @@
-@import url(https://fonts.googleapis.com/css?family=Noticia+Text);
-* {
-    font-size: 20pt !important;
-    font-family: 'Noticia Text', serif !important;
-    text-rendering: geometricPrecision;
-}
 #test {
   height:30pt;
   width: 50pt;
@@ -37,17 +31,18 @@
   color: #929497;
   padding-bottom: 20px;
 }
-.images {
+
+.visual-acceptance-container.images {
   text-align:center;
   margin:50px auto;
 }
 
-.images .image{
+.visual-acceptance-container.images.image{
     margin:0px 20px;
     display:inline-block;
     text-decoration:none;
 }
-img {
+.visual-acceptance-container img {
   width: 160px;
   height: 160px;
   padding-right: 10px;
