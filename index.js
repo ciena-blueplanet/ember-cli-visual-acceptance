@@ -101,9 +101,10 @@ function appendToReport (req, res, options) {
       imgurLinks.push(uploadToImgur(req.body.images[i]))
     }
     if (req.body.type === 'New') {
-      markdownReport.new += '\n#### ' + req.body.name + '\n <img src="' + imgurLinks[0] + '" height="160">\n'
+      markdownReport.new += '\n#### ' + req.body.browser + ': ' + req.body.name +
+       '\n <img src="' + imgurLinks[0] + '" height="160">\n'
     } else if (req.body.type === 'Changed') {
-      markdownReport.changed += '\n### ' + req.body.name + '\n <table>'
+      markdownReport.changed += '\n### ' + req.body.browser + ': ' + req.body.name + '\n <table>'
       markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] +
        '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] +
         '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] +
@@ -510,7 +511,13 @@ module.exports = {
                       return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
                     })
                  })
+               } else {
+                 return buildReport(params)
                }
+             }, function (params) {
+               return buildReport(params).then(function (params) {
+                 throw new Error('Exit 1')
+               })
              })
           } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
             return runCommand('ember', ['br']).then(buildReport, function (params) {
