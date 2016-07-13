@@ -40,7 +40,7 @@ function experimentalSvgCapture () {
       source.onload = function () {
         myCanvas.width = clientWidth
         myCanvas.height = clientHeight
-        myCanvas.className = svg.className
+        myCanvas.className = svg.className.baseVal
         myCanvas.id = svg.id
         myCanvasContext.drawImage(source, 0, 0, clientWidth, clientHeight)
         $(svg).replaceWith(myCanvas)
@@ -102,6 +102,7 @@ function capture (imageName, width, height, misMatchPercentageMargin, experiment
   } else {
     if (experimentalSvgs === true) {
       return experimentalSvgCapture().then(function () {
+        debugger
         return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, assert, browserDirectory)
       })
     } else {
