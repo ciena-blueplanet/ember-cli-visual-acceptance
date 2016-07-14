@@ -68,7 +68,7 @@ describeComponent(
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
     /* eslint-enable max-len */
-      capture('svg-experimental', null, null, null, true).then(function (data) {
+      capture('svg-experimental', null, null, null, null, true).then(function (data) {
         console.log(arguments)
         done()
       }).catch(function (err) {

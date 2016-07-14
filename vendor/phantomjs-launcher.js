@@ -36,9 +36,9 @@ setTimeout(function () {
     }
     console.log('CALLBACK: ' + JSON.stringify(data))
       // Prints 'CALLBACK: { "hello": "world" }'
-    var bb = page.evaluate(function () {
-      return document.getElementById('ember-testing-container').getBoundingClientRect()
-    })
+    var bb = page.evaluate(function (id) {
+      return document.getElementById(id).getBoundingClientRect()
+    }, data.id)
     console.log(bb)
     page.clipRect = {
       top: bb.top,
