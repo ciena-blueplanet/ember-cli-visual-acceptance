@@ -1,3 +1,7 @@
+# 1.2.0
+* Added the enhancement https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/55 
+  * Added option to provide DOM Element to target 
+
 # 1.1.6
 No CHANGELOG section found in Pull Request description.
 Use a `# CHANGELOG` section in your Pull Request description to auto-populate the `CHANGELOG.md`
