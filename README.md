@@ -1,4 +1,4 @@
- # Ember-cli-visual-acceptance
+# ember-cli-visual-acceptance
 
 [ci-img]: https://img.shields.io/travis/ciena-frost/ember-cli-visual-acceptance.svg "Travis CI Build Status"
 [ci-url]: https://travis-ci.org/ciena-frost/ember-cli-visual-acceptance
