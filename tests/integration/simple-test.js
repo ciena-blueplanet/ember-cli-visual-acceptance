@@ -68,12 +68,35 @@ describeComponent(
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
     /* eslint-enable max-len */
-      capture('svg-experimental', null, null, null, true).then(function (data) {
+      capture('svg-experimental', null, null, null, null, true).then(function (data) {
         console.log(arguments)
         done()
       }).catch(function (err) {
         done(err)
       })
+    })
+
+    it('captures target', function (done) {
+      /* eslint-disable max-len */
+      this.render(hbs `<div class="outer">
+    <div class="innerdivs left">
+        Left Div
+    </div>
+    <div class="innerdivs right">
+        Center Div
+    </div>
+    <div class="innerdivs center">
+        Right Div
+    </div>
+</div>`)
+    /* eslint-enable max-len */
+      capture('capture right', null, null, 0.00,
+       document.getElementsByClassName('innerdivs')[2]).then(function (data) {
+         console.log(arguments)
+         done()
+       }).catch(function (err) {
+         done(err)
+       })
     })
   }
 )
