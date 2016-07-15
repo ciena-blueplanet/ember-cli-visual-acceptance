@@ -95,7 +95,7 @@ capture (imageName, width, height, misMatchPercentageMargin, targetElement, expe
 | imageName                | string | required            | Name of the image you wish to save    |
 | width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the targetElement.   |
 | height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the targetElement. |
-| misMatch                 | float  | 1.00                | The maximum percentage ResembleJs is allowed to misMatch. |
+| misMatch                 | float  | 0.00                | The maximum percentage ResembleJs is allowed to misMatch. |
 | targetElement            | HTMLElement | ember-testing-container       | DOM element to capture (Most likely want to set `height` and `width` to null, so we don't overwrite the element's height and width )|
 | experimentalSvgs         | boolean  | undefined                | Set to true in order try experimental rendering of svgs using html2canvas.|
 | assert                   | object  | undefined                | Only use to pass in **Qunit** `assert` object.|
