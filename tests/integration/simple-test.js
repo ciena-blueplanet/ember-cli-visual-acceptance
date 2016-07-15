@@ -68,7 +68,7 @@ describeComponent(
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
     /* eslint-enable max-len */
-      capture('svg-experimental', null, null, null, null, true).then(function (data) {
+      capture('svg-experimental', {experimentalSvgs: true}).then(function (data) {
         console.log(arguments)
         done()
       }).catch(function (err) {
@@ -90,13 +90,13 @@ describeComponent(
     </div>
 </div>`)
     /* eslint-enable max-len */
-      capture('capture right', null, null, 0.00,
-       document.getElementsByClassName('innerdivs')[2]).then(function (data) {
-         console.log(arguments)
-         done()
-       }).catch(function (err) {
-         done(err)
-       })
+      capture('capture right', {
+        targetElement: document.getElementsByClassName('innerdivs')[2]}).then(function (data) {
+          console.log(arguments)
+          done()
+        }).catch(function (err) {
+          done(err)
+        })
     })
   }
 )

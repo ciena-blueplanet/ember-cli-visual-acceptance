@@ -48,26 +48,27 @@ function experimentalSvgCapture () {
       }
     })
   })
-
   return Promise.all(promises)
 }
 /**
  * Creates baseline imagesfor visual regression during standard Ember tests using html2Canvas and ResembleJS
  * @param {string} imageName - Name of the image you wish to save
- * @param {number} [width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
- * @param {number} [height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
- * @param {float} [misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
- * @param {HTMLElement} [targetElement=ember-testing-container] - DOM element to capture
- * @param {boolean} [experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
- * @param {object} [assert=undefined] - Use only if using qunit
+ * @param {object} options - Options for capture
+ * @param {number} [options.width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [options.height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [options.misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {HTMLElement} [options.targetElement=ember-testing-container] - DOM element to capture
+ * @param {boolean} [options.experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
+ * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {Promise} ResembleJs return value
  */
-function capture (imageName, width, height, misMatchPercentageMargin, targetElement, experimentalSvgs, assert) {
-  if (misMatchPercentageMargin == null) {
-    misMatchPercentageMargin = 0.00
+function capture (imageName, options) {
+  options = options || {}
+  if (options.misMatchPercentageMargin == null) {
+    options.misMatchPercentageMargin = 0.00
   }
-  if (targetElement == null) {
-    targetElement = document.getElementById('ember-testing-container')
+  if (options.targetElement == null) {
+    options.targetElement = document.getElementById('ember-testing-container')
   }
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
@@ -89,28 +90,31 @@ function capture (imageName, width, height, misMatchPercentageMargin, targetElem
     browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
   }
 
-  if (height && width) {
-    $(targetElement).css('width', width + 'px')
-    $(targetElement).css('height', height + 'px')
-    browserDirectory += width + 'x' + height + '/'
+  if (options.height && options.width) {
+    $(options.targetElement).css('width', options.width + 'px')
+    $(options.targetElement).css('height', options.height + 'px')
+    browserDirectory += options.width + 'x' + options.height + '/'
   } else {
     // default mocha window size
-    browserDirectory += targetElement.clientWidth + 'x' + targetElement.clientHeight + '/'
+    browserDirectory += options.targetElement.clientWidth + 'x' + options.targetElement.clientHeight + '/'
   }
   // resemble.outputSettings({
   //   largeImageThreshold: 0
   // })
   if (window.callPhantom !== undefined) {
-    return capturePhantom(imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory)
+    return capturePhantom(imageName, options.width, options.height,
+     options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else {
-    if (experimentalSvgs === true) {
+    if (options.experimentalSvgs === true) {
       return experimentalSvgCapture().then(function () {
-        return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, targetElement,
-         assert, browserDirectory)
+        return captureHtml2Canvas(imageName, options.width, options.height,
+         options.misMatchPercentageMargin, options.targetElement,
+         options.assert, browserDirectory)
       })
     } else {
-      return captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, targetElement,
-       assert, browserDirectory)
+      return captureHtml2Canvas(imageName, options.width, options.height,
+       options.misMatchPercentageMargin, options.targetElement,
+       options.assert, browserDirectory)
     }
   }
 }
