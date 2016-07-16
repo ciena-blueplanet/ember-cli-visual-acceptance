@@ -86,19 +86,20 @@ You can also omit the `osversion` and `version` if not needed.
 ## API
 
 ```javascript
-capture (imageName, width, height, misMatchPercentageMargin, targetElement, experimentalSvgs, assert)
+capture (imageName, options)
 ```
 
 
 |           Name           | Type   | Default             | Description                           |
 |--------------------------|--------|---------------------|---------------------------------------|
 | imageName                | string | required            | Name of the image you wish to save    |
-| width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the targetElement.   |
-| height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the targetElement. |
-| misMatch                 | float  | 0.00                | The maximum percentage ResembleJs is allowed to misMatch. |
-| targetElement            | HTMLElement | ember-testing-container       | DOM element to capture (Most likely want to set `height` and `width` to null, so we don't overwrite the element's height and width )|
-| experimentalSvgs         | boolean  | undefined                | Set to true in order try experimental rendering of svgs using html2canvas.|
-| assert                   | object  | undefined                | Only use to pass in **Qunit** `assert` object.|
+| options                   | object | {} | Object that holds all the options for the capture |
+| options.width                    | number | null                | Define the width of the canvas in pixels. If null, renders with full width of the targetElement.   |
+| options.height                   | number | null                | Define the height of the canvas in pixels. If null, renders with full height of the targetElement. |
+| options.misMatchPercentageMargin                 | float  | 0.00                | The maximum percentage ResembleJs is allowed to misMatch. |
+| options.targetElement            | HTMLElement | ember-testing-container       | DOM element to capture (Most likely want to set `height` and `width` to null, so we don't overwrite the element's height and width )|
+| options.experimentalSvgs         | boolean  | undefined                | Set to true in order try experimental rendering of svgs using html2canvas.|
+| options.assert                   | object  | undefined                | Only use to pass in **Qunit** `assert` object.|
 
 
 ## Usage
@@ -132,7 +133,7 @@ capture (imageName, width, height, misMatchPercentageMargin, targetElement, expe
 
   * Otherwise just return the promise
 ```javascript
-return capture('placeholder', null, null, 0.00)
+return capture('placeholder',{ misMatchPercentageMargin: 0.00 })
 ```
   * Run `ember test -s`
 
@@ -163,7 +164,7 @@ ember-cli-visual-acceptance only uses the `.scaleToSameSize()` option for Resemb
 it('supports placeholder', function () {
   const $input = this.$('.frost-select input')
   expect($input.attr('placeholder')).to.eql('Select something already')
-  return visualAcceptance('placeholder')
+  return capture('placeholder')
 })
 ```
 
@@ -177,7 +178,7 @@ it('selects the hovered item when enter is pressed', function (done) {
     let dropDownInput = this.$('.frost-select input')
     let value = dropDownInput.val()
     expect(value).to.eql(props.data[0].label)
-    capture('Boston', 1920, 1080, 5.00).then(function (data) {
+    capture('Boston', { width: 1920, height: 1080, misMatchPercentageMargin: 5.00}).then(function (data) {
       done()
     }).catch(function (err) {
       done(err)
