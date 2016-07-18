@@ -503,7 +503,7 @@ module.exports = {
              options.imageDirectory, '--build-report=true']).then(function (params) {
                if (prNumber === false) {
                  console.log('Git add')
-                 return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+                 return runCommand('git', ['add', '-f', '-A', options.imageDirectory]).then(function (params) {
                    console.log('Git commit')
                    return runCommand('git', ['commit', '-m',
                     '"Adding new baseline images [ci skip]"']).then(function (params) {
@@ -535,7 +535,7 @@ module.exports = {
             return runCommand('ember', ['new-baseline', '--image-directory=' +
              options.imageDirectory]).then(function (params) {
                console.log('Git add')
-               return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+               return runCommand('git', ['add', '-f', '-A', options.imageDirectory]).then(function (params) {
                  console.log('Git commit')
                  return runCommand('git', ['commit', '-m',
                   '"Adding new baseline images [ci skip]"']).then(function (params) {
@@ -615,7 +615,7 @@ module.exports = {
              options.imageDirectory]).then(function (params) {
                if (prNumber === false) {
                  console.log('Git add')
-                 return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+                 return runCommand('git', ['add', '-f', '-A', options.imageDirectory]).then(function (params) {
                    console.log('Git commit')
                    return runCommand('git', ['commit', '-m',
                     '"Adding new baseline images [ci skip]"']).then(function (params) {
@@ -637,7 +637,7 @@ module.exports = {
             return runCommand('ember', ['new-baseline', '--image-directory=' +
              options.imageDirectory]).then(function (params) {
                console.log('Git add')
-               return runCommand('git', ['add', '-A', options.imageDirectory]).then(function (params) {
+               return runCommand('git', ['add', '-f', '-A', options.imageDirectory]).then(function (params) {
                  console.log('Git commit')
                  return runCommand('git', ['commit', '-m',
                   '"Adding new baseline images [ci skip]"']).then(function (params) {
