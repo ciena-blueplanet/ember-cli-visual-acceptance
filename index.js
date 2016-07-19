@@ -34,16 +34,16 @@ function runCommand (command, args, ignoreStdError) {
       console.log(data.toString())
     })
     child.stderr.on('data', function (data) {
-      if (ignoreStdError || data.toString().indexOf('fs: re-evaluating native module sources is not supported.') > -1) {
-        // Use ignoreStdError only to get around this issue https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/25
-        console.log(data.toString())
-      } else {
-        reject(data.toString())
-      }
+      console.error(data.toString())
     })
 
     child.on('exit', function (code) {
-      resolve()
+      console.log('Exit with code ' + code)
+      if (code === 0) {
+        resolve()
+      } else {
+        reject()
+      }
     })
   })
 }
