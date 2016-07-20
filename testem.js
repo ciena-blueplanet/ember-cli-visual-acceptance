@@ -4,7 +4,8 @@ module.exports = {
   'disable_watching': true,
   'launch_in_ci': [
     'Firefox',
-    'SlimerJsVisualAcceptance'
+    'SlimerJsVisualAcceptance',
+    'PhantomJsVisualAcceptance'
   ],
   'launch_in_dev': [
     'Firefox'

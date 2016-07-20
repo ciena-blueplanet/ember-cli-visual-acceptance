@@ -107,7 +107,7 @@ function appendToReport (req, res, options) {
     var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
     var imgurLinks = []
     for (var i = 0; i < req.body.images.length; i++) {
-      if (process.env.TEAMCITY_API_URL.length > 0) {
+      if (process.env.TEAMCITY_API_URL && process.env.TEAMCITY_API_URL.length > 0) {
         imgurLinks.push(uploadToExpress(process.env.TEAMCITY_API_URL, req.body.images[i], req.body.name + '-' + i +
          '.png').link)
       } else {
@@ -116,14 +116,14 @@ function appendToReport (req, res, options) {
     }
     if (req.body.type === 'New') {
       markdownReport.new += '\n#### ' + req.body.browser + ': ' + req.body.name
-      if (process.env.TEAMCITY_API_URL.length > 0) {
+      if (process.env.TEAMCITY_API_URL && process.env.TEAMCITY_API_URL.length) {
         markdownReport.new += '\n ![](' + imgurLinks[0] + ')\n'
       } else {
         markdownReport.new += '\n <img src="' + imgurLinks[0] + '" height="160">\n'
       }
     } else if (req.body.type === 'Changed') {
       markdownReport.changed += '\n### ' + req.body.browser + ': ' + req.body.name + '\n'
-      if (process.env.TEAMCITY_API_URL.length > 0) {
+      if (process.env.TEAMCITY_API_URL && process.env.TEAMCITY_API_URL.length) {
         markdownReport.changed += '\nDiff:\n![Diff](' + imgurLinks[0] + ')'
         markdownReport.changed += '\nCurrent:\n![Current](' + imgurLinks[1] + ')'
         markdownReport.changed += '\nBaseline:\n![Baseline](' + imgurLinks[2] + ')'
