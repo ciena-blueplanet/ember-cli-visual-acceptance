@@ -25,6 +25,24 @@ function uploadToImgur (image, reportPath) {
   return reportID.data.link
 }
 
+function uploadToExpress (url, image, name) {
+  console.log('Express post')
+  var apiOptions = {
+    'headers': {
+      'Content-Type': 'application/json'
+    },
+    'json': {
+      'name': name,
+      'data': image.replace(/^data:image\/\w+;base64,/, '')
+    }
+
+  }
+  console.log(apiOptions)
+  var response = request('POST', url + 'api/upload/image', apiOptions)
+  response.link = url + name
+  return response
+}
+
 function runCommand (command, args, ignoreStdError) {
   return new RSVP.Promise(function (resolve, reject) {
     var child = spawn(command, args, {
@@ -94,12 +112,21 @@ function mkdirpSync (dirpath) {
 }
 
 function appendToReport (req, res, options) {
+  console.log(process.env.REPORT_JSON_PATH)
+  console.log(req.body.type)
   if (process.env.REPORT_JSON_PATH) {
     var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
     var imgurLinks = []
     for (var i = 0; i < req.body.images.length; i++) {
-      imgurLinks.push(uploadToImgur(req.body.images[i]))
+      if (process.env.TEAMCITY_API_URL.length > 0) {
+        console.log('Using express')
+        imgurLinks.push(uploadToExpress(process.env.TEAMCITY_API_URL, req.body.images[i], req.body.name + '-' + i +
+         '.png').link)
+      } else {
+        imgurLinks.push(uploadToImgur(req.body.images[i]))
+      }
     }
+    console.log(imgurLinks)
     if (req.body.type === 'New') {
       markdownReport.new += '\n#### ' + req.body.browser + ': ' + req.body.name +
        '\n <img src="' + imgurLinks[0] + '" height="160">\n'
@@ -227,64 +254,67 @@ function buildReport (params) {
 }
 
 function buildTeamcityBitbucketReport (params, options, prNumber) {
-  return runCommand('phantomjs', ['vendor/html-to-image.js',
-   'visual-acceptance-report/report.html']).then(function (params) {
-     console.log('Sending to github')
-     var image = base64Encode('images/output.png').replace('data:image\/\w+;base64,', '')
-
-     function uploadToExpress (url, image, name) {
-       var apiOptions = {
-         'headers': {
-           'Content-Type': 'application/json'
-         },
-         'json': {
-           'name': name,
-           'data': image.replace('data:image\/\w+;base64,', '')
-         }
-
-       }
-       var response = request('POST', url + 'api/upload/image', apiOptions)
-       return response.getBody()
-     }
-     var filename = options.project + '-' + options.repo + '-' + prNumber + '.png'
-     uploadToExpress(options.apiUrl, image, filename)
-     var githubApiPostOptions = {
-       'headers': {
-         'user-agent': 'visual-acceptance',
-         'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
-       },
-       'json': {
-         'text': '![PR ember-cli-visual-acceptance Report](' + options.apiUrl + filename + ')'
-       }
-     }
-     var githubApiGetOptions = {
-       'headers': {
-         'user-agent': 'visual-acceptance',
-         'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
-       }
-     }
-     var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/comments'
-     var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber + '/activities'
-     var response = request('GET', urlGet, githubApiGetOptions)
-     var bodyJSON = JSON.parse(response.getBody().toString())
-     var existingComment = false
-     for (var i = 0; i < bodyJSON.values.length; i++) {
-       if (bodyJSON.values[i].action === 'COMMENTED' &&
+  return new Promise(function (resolve, reject) {
+    console.log('Sending to bitbucket')
+    var markdownReport = JSON.parse(fs.readFileSync('visual-acceptance-report/report.json'))
+    var markdownBody = '# Visual Acceptance tests:\n'
+    if (markdownReport.new !== '## New\n') {
+      markdownBody += markdownReport.new + '\n'
+    }
+    if (markdownReport.changed !== '## Changed\n') {
+      markdownBody += markdownReport.changed
+    }
+    if (markdownReport.changed === '## Changed\n' && markdownReport.new === '## New\n') {
+      markdownBody += '### No changes\n'
+    }
+    try {
+      if (process.env.REPORT_MARKDOWN_PATH) {
+        fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdownBody)
+      }
+    } catch (e) {
+      console.log(e)
+    }
+    var githubApiPostOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+      },
+      'json': {
+        'text': markdownBody
+      }
+    }
+    var githubApiGetOptions = {
+      'headers': {
+        'user-agent': 'visual-acceptance',
+        'Authorization': 'Basic ' + new Buffer(options.user + ':' + options.password, 'ascii').toString('base64')
+      }
+    }
+    var url = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' +
+     options.repo + '/pull-requests/' + prNumber + '/comments'
+    var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' +
+     options.repo + '/pull-requests/' + prNumber + '/activities'
+    console.log(url)
+    console.log(urlGet)
+    var response = request('GET', urlGet, githubApiGetOptions)
+    var bodyJSON = JSON.parse(response.getBody().toString())
+    var existingComment = false
+    for (var i = 0; i < bodyJSON.values.length; i++) {
+      if (bodyJSON.values[i].action === 'COMMENTED' &&
         bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
-         existingComment = true
-         break
-       }
-     }
-     if (existingComment) {
-       response = {
-         error: 'Comment already exists. Just updating image'
-       }
-       console.log('Comment already exists. Just updating image')
-     } else {
-       response = request('POST', url, githubApiPostOptions)
-     }
-     return response
-   })
+        existingComment = true
+        break
+      }
+    }
+    if (existingComment) {
+      response = {
+        error: 'Comment already exists. Just updating image'
+      }
+      console.log('Comment already exists. Just updating image')
+    } else {
+      response = request('POST', url, githubApiPostOptions)
+    }
+    return response
+  })
 }
 module.exports = {
   name: 'ember-cli-visual-acceptance',
@@ -596,7 +626,7 @@ module.exports = {
         run: function (options, rawArgs) {
           if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 ||
            options.project.length === 0 || options.repo.length === 0 || options.apiUrl.length === 0) {
-            console.log('Need to supply a user, password, domain, project, repo, and express-url .' +
+            console.log('Need to supply a user, password, domain, project, repo, and api-url .' +
              ' Sorry the bitbucket api sucks. \n Just running ember test')
             return runCommand('ember', ['test'])
           }
@@ -605,6 +635,7 @@ module.exports = {
             console.log('No Teamcity found. Just running ember test')
             return runCommand('ember', ['test'])
           }
+          process.env.TEAMCITY_API_URL = options.apiUrl
           var prNumber = process.env.TEAMCITY_PULL_REQUEST
           var baseUrl = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber
           var res = request('GET', baseUrl)
