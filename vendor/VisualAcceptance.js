@@ -19,7 +19,7 @@ function experimentalSvgCapture () {
   /* eslint-enable no-unused-vars */
   var items = Array.from(document.querySelectorAll('svg'))
   var promises = items.map(function (svg) {
-    return new Promise(resolve => {
+    return new Promise(function (resolve) {
       var clientWidth = $(svg).width() || $(svg.parentNode).width()
       var clientHeight = $(svg).height() || $(svg.parentNode).height()
       svg.setAttribute('width', clientWidth)
