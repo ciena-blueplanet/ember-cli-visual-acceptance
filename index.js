@@ -121,16 +121,27 @@ function appendToReport (req, res, options) {
       }
     }
     if (req.body.type === 'New') {
-      markdownReport.new += '\n#### ' + req.body.browser + ': ' + req.body.name +
-       '\n <img src="' + imgurLinks[0] + '" height="160">\n'
+      markdownReport.new += '\n#### ' + req.body.browser + ': ' + req.body.name
+      if (process.env.TEAMCITY_API_URL.length > 0) {
+        markdownReport.new += '\n ![](' + imgurLinks[0] + ')\n'
+      } else {
+        markdownReport.new += '\n <img src="' + imgurLinks[0] + '" height="160">\n'
+      }
     } else if (req.body.type === 'Changed') {
-      markdownReport.changed += '\n### ' + req.body.browser + ': ' + req.body.name + '\n <table>'
-      markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] +
+      markdownReport.changed += '\n### ' + req.body.browser + ': ' + req.body.name + '\n'
+      if (process.env.TEAMCITY_API_URL.length > 0) {
+        markdownReport.changed += '\nDiff:\n![Diff](' + imgurLinks[0] + ')'
+        markdownReport.changed += '\nCurrent:\n![Current](' + imgurLinks[1] + ')'
+        markdownReport.changed += '\nBaseline:\n![Baseline](' + imgurLinks[2] + ')'
+      } else {
+        markdownReport.changed += '<table>'
+        markdownReport.changed += '<tr> <td>' + '<img src="' + imgurLinks[0] +
        '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[1] +
         '" height="160">' + '</td> <td>' + '<img src="' + imgurLinks[2] +
          '" height="160">' + '</td> </tr>'
-      markdownReport.changed += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'
-      markdownReport.changed += '</table>'
+        markdownReport.changed += '<tr> <td>Diff</td> <td>Current</td> <td>Baseline</td> </tr>'
+        markdownReport.changed += '</table>'
+      }
     }
     fs.writeFileSync(process.env.REPORT_JSON_PATH, JSON.stringify(markdownReport))
   }
@@ -260,7 +271,6 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
     if (markdownReport.changed === '## Changed\n' && markdownReport.new === '## New\n') {
       markdownBody += '### No changes\n'
     }
-    markdownBody = markdownBody.replace(/<img src="([\w\W]+)" [\w\W]+>/ig, '![]($1)')
     try {
       if (process.env.REPORT_MARKDOWN_PATH) {
         fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdownBody)
