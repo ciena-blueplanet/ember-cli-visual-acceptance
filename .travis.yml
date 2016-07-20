@@ -6,7 +6,7 @@ branches:
   except:
   - /^v[0-9\.]+/
 before_install:
-- npm install -g coveralls pr-bumper slimerjs
+- npm install -g coveralls pr-bumper slimerjs phantomjs
 - pr-bumper check
 - slimerjs -v
 before_script:
