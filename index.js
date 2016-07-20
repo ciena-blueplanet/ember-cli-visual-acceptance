@@ -6,6 +6,7 @@ var path = require('path')
 var spawn = require('child_process').spawn
 var RSVP = require('rsvp')
 var request = require('sync-request')
+var chalk = require('chalk')
 
 function uploadToImgur (image, reportPath) {
   var imgurClientID = 'e39f00905b80937'
@@ -34,7 +35,7 @@ function runCommand (command, args, ignoreStdError) {
       console.log(data.toString())
     })
     child.stderr.on('data', function (data) {
-      console.error(data.toString())
+      console.error(chalk.bold.red(data.toString()))
     })
 
     child.on('exit', function (code) {
