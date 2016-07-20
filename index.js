@@ -26,7 +26,6 @@ function uploadToImgur (image, reportPath) {
 }
 
 function uploadToExpress (url, image, name) {
-  console.log('Express post')
   var apiOptions = {
     'headers': {
       'Content-Type': 'application/json'
@@ -35,9 +34,7 @@ function uploadToExpress (url, image, name) {
       'name': name,
       'data': image.replace(/^data:image\/\w+;base64,/, '')
     }
-
   }
-  console.log(apiOptions)
   var response = request('POST', url + 'api/upload/image', apiOptions)
   response.link = url + name
   return response
@@ -112,21 +109,17 @@ function mkdirpSync (dirpath) {
 }
 
 function appendToReport (req, res, options) {
-  console.log(process.env.REPORT_JSON_PATH)
-  console.log(req.body.type)
   if (process.env.REPORT_JSON_PATH) {
     var markdownReport = JSON.parse(fs.readFileSync(process.env.REPORT_JSON_PATH))
     var imgurLinks = []
     for (var i = 0; i < req.body.images.length; i++) {
       if (process.env.TEAMCITY_API_URL.length > 0) {
-        console.log('Using express')
         imgurLinks.push(uploadToExpress(process.env.TEAMCITY_API_URL, req.body.images[i], req.body.name + '-' + i +
          '.png').link)
       } else {
         imgurLinks.push(uploadToImgur(req.body.images[i]))
       }
     }
-    console.log(imgurLinks)
     if (req.body.type === 'New') {
       markdownReport.new += '\n#### ' + req.body.browser + ': ' + req.body.name +
        '\n <img src="' + imgurLinks[0] + '" height="160">\n'
@@ -267,6 +260,7 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
     if (markdownReport.changed === '## Changed\n' && markdownReport.new === '## New\n') {
       markdownBody += '### No changes\n'
     }
+    markdownBody = markdownBody.replace(/<img src="([\w\W]+)" [\w\W]+>/ig, '![]($1)')
     try {
       if (process.env.REPORT_MARKDOWN_PATH) {
         fs.writeFileSync(process.env.REPORT_MARKDOWN_PATH, markdownBody)
@@ -293,23 +287,20 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
      options.repo + '/pull-requests/' + prNumber + '/comments'
     var urlGet = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' +
      options.repo + '/pull-requests/' + prNumber + '/activities'
-    console.log(url)
-    console.log(urlGet)
     var response = request('GET', urlGet, githubApiGetOptions)
     var bodyJSON = JSON.parse(response.getBody().toString())
     var existingComment = false
     for (var i = 0; i < bodyJSON.values.length; i++) {
       if (bodyJSON.values[i].action === 'COMMENTED' &&
-        bodyJSON.values[i].comment.text.indexOf('![PR ember-cli-visual-acceptance Report]') > -1) {
+        bodyJSON.values[i].comment.text.indexOf('# Visual Acceptance tests:') > -1) {
+        url += '/' + bodyJSON.values[i].comment.id
+        githubApiPostOptions.json.version = bodyJSON.values[i].comment.version
         existingComment = true
         break
       }
     }
     if (existingComment) {
-      response = {
-        error: 'Comment already exists. Just updating image'
-      }
-      console.log('Comment already exists. Just updating image')
+      response = request('PUT', url, githubApiPostOptions)
     } else {
       response = request('POST', url, githubApiPostOptions)
     }
