@@ -96,7 +96,7 @@ function capture (imageName, options) {
     browserDirectory += options.width + 'x' + options.height + '/'
   } else {
     // default mocha window size
-    browserDirectory += options.targetElement.clientWidth + 'x' + options.targetElement.clientHeight + '/'
+    browserDirectory += 'default/'
   }
   // resemble.outputSettings({
   //   largeImageThreshold: 0
