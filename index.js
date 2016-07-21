@@ -308,7 +308,7 @@ function buildTeamcityBitbucketReport (params, options, prNumber) {
     } else {
       response = request('POST', url, githubApiPostOptions)
     }
-    return response
+    resolve(response)
   })
 }
 module.exports = {
