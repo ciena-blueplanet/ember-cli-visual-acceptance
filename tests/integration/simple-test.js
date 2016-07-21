@@ -36,6 +36,7 @@ describeComponent(
       })
     })
     it('renders svg', function (done) {
+      this.timeout(5000)
       /* eslint-disable max-len */
       this.render(hbs `<svg id="mySVG"xmlns="http://www.w3.org/2000/svg" viewBox="-350 -250 700 500">
       <style type="text/css" media="screen">
@@ -57,6 +58,7 @@ describeComponent(
     })
 
     it('renders svg experimental', function (done) {
+      this.timeout(5000)
       /* eslint-disable max-len */
       this.render(hbs `<svg id="mySVG"xmlns="http://www.w3.org/2000/svg" viewBox="-350 -250 700 500">
       <style type="text/css" media="screen">
