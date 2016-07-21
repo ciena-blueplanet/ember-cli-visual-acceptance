@@ -5,7 +5,8 @@ module.exports = {
   'launch_in_ci': [
     'Firefox',
     'SlimerJsVisualAcceptance',
-    'PhantomJsVisualAcceptance'
+    'PhantomJsVisualAcceptance',
+    'Chromium'
   ],
   'launch_in_dev': [
     'Firefox'

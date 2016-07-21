@@ -105,7 +105,7 @@ function capture (imageName, options) {
     return capturePhantom(imageName, options.width, options.height,
      options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else {
-    if (options.experimentalSvgs === true) {
+    if (options.experimentalSvgs === true && browser.browser !== 'Chrome') {
       return experimentalSvgCapture().then(function () {
         return captureHtml2Canvas(imageName, options.width, options.height,
          options.misMatchPercentageMargin, options.targetElement,
@@ -300,6 +300,8 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
       })
     }).then(function (data) {
       data ? resolve(data) : reject(data)
+    }).catch(function (err) {
+      reject(err)
     })
   }
 }
