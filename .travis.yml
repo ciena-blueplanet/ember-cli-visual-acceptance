@@ -6,8 +6,7 @@ branches:
   except:
   - /^v[0-9\.]+/
 before_install:
-- export CHROME_BIN=chromium-browser
-- npm install -g coveralls pr-bumper slimerjs phantomjs testem
+- npm install -g coveralls pr-bumper slimerjs phantomjs
 - pr-bumper check
 - slimerjs -v
 before_script:
@@ -21,8 +20,6 @@ before_script:
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
 script:
-- echo $CHROME_BIN
-- testem launchers
 - npm run lint && ember tva
 install:
 - npm install
