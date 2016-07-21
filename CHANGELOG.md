@@ -1,3 +1,7 @@
+# 1.3.6
+No CHANGELOG section found in Pull Request description.
+Use a `# CHANGELOG` section in your Pull Request description to auto-populate the `CHANGELOG.md`
+
 # 1.3.5
 * Make the directory `default/` rather than '`<element-width>x<element-height>/`. This does not affect elements where the size is specified.
   * This will help scenarios where targeted element show up as `New` rather than `Changed` simply b/c the size of the target changed.
