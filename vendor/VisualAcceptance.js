@@ -13,7 +13,7 @@ function httpGet (theUrl) {
 }
 
 function resolvePositionFixed () {
-  var fixedElements = $('*').filter(function () { return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' })
+  var fixedElements = $('*').filter(function () { return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container' })
   for (var i = 0; i < fixedElements.length; i++) {
     var element = fixedElements[i]
     $(element).css('position', 'absolute')
@@ -90,9 +90,8 @@ function capture (imageName, options) {
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
-  if (browser.browser === 'PhantomJS') {
-    $(document.getElementById('ember-testing-container')).css('position', 'initial')
-  }
+  $(document.getElementById('ember-testing-container')).css('position', 'relative')
+
   var browserDirectory
   if (browser.osversion === undefined) {
     browserDirectory = browser.os + '/' + browser.browser + '/'
@@ -112,7 +111,6 @@ function capture (imageName, options) {
   //   largeImageThreshold: 0
   // })
   resolvePositionFixed()
-
   if (window.callPhantom !== undefined) {
     return capturePhantom(imageName, options.width, options.height,
      options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)

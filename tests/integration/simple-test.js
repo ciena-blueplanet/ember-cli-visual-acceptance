@@ -92,7 +92,7 @@ describeComponent(
         Center Div
     </div>
     <div class="innerdivs center">
-        Right Div
+        Right Shiv
     </div>
 </div>`)
     /* eslint-enable max-len */
@@ -124,6 +124,12 @@ describeComponent(
     <br />Scroll
 </div>`)
       capture('fixed-more').then(function () {
+        console.log(arguments)
+      }).catch(function (err) {
+        done(err)
+      })
+
+      capture('fixed-more', {width: 1920, height: 1080}).then(function () {
         console.log(arguments)
         done()
       }).catch(function (err) {
