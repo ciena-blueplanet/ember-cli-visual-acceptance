@@ -19,7 +19,7 @@ describeComponent(
       this.timeout(5000)
       this.render(hbs `<div id='test'>Test</div>`)
       expect(this.$()).to.have.length(1)
-      capture('Simple').then(function (data) {
+      capture('Simple').then(function () {
         console.log(arguments)
         done()
       }).catch(function (err) {
@@ -30,7 +30,7 @@ describeComponent(
       this.timeout(5000)
       this.render(hbs `<div id='test'>Test Else</div>`)
       expect(this.$()).to.have.length(1)
-      capture('Error').then(function (data) {
+      capture('Error').then(function () {
         console.log(arguments)
         done()
       }).catch(function (err) {
@@ -51,7 +51,7 @@ describeComponent(
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
     /* eslint-enable max-len */
-      capture('svg').then(function (data) {
+      capture('svg').then(function () {
         console.log(arguments)
         done()
       }).catch(function (err) {
@@ -73,7 +73,7 @@ describeComponent(
       <circle cx="60" cy="-50" r="20" fill="#000"/>
     </svg>`)
     /* eslint-enable max-len */
-      capture('svg-experimental', {experimentalSvgs: true}).then(function (data) {
+      capture('svg-experimental', {experimentalSvgs: true}).then(function () {
         console.log(arguments)
         done()
       }).catch(function (err) {
@@ -97,7 +97,7 @@ describeComponent(
 </div>`)
     /* eslint-enable max-len */
       capture('capture right', {
-        targetElement: document.getElementsByClassName('innerdivs')[2]}).then(function (data) {
+        targetElement: document.getElementsByClassName('innerdivs')[2]}).then(function () {
           console.log(arguments)
           done()
         }).catch(function (err) {
@@ -105,8 +105,8 @@ describeComponent(
         })
     })
 
-    it ('fixed div', function (done) {
-      this.render( hbs `<div class="fixed">Wherever you go, I will find you!</div>`)
+    it('fixed div', function (done) {
+      this.render(hbs `<div class="fixed">Wherever you go, I will find you!</div>`)
       capture('fixed').then(function () {
         console.log(arguments)
         done()
@@ -115,7 +115,7 @@ describeComponent(
       })
     })
 
-    it ('more fixed', function (done) {
+    it('more fixed', function (done) {
       this.render(hbs `<div id="left">Side menu</div>
 <div id="right">Scroll
     <br />Scroll
