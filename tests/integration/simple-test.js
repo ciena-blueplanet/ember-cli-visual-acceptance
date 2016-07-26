@@ -92,7 +92,7 @@ describeComponent(
         Center Div
     </div>
     <div class="innerdivs center">
-        Right Shiv
+        Right Div
     </div>
 </div>`)
     /* eslint-enable max-len */
