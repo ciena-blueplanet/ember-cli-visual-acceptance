@@ -12,11 +12,11 @@ function httpGet (theUrl) {
   return xmlHttp.responseText
 }
 
-function resolvePositionFixed(){
-  var fixedElements = $('*').filter(function () { return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME'})
-  for (var i = 0; i < fixedElements.length; i++){ 
+function resolvePositionFixed () {
+  var fixedElements = $('*').filter(function () { return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' })
+  for (var i = 0; i < fixedElements.length; i++) {
     var element = fixedElements[i]
-    $(element).css('position','absolute')
+    $(element).css('position', 'absolute')
   }
 }
 /**
@@ -90,6 +90,9 @@ function capture (imageName, options) {
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
+  if (browser.browser === 'PhantomJS') {
+    $(document.getElementById('ember-testing-container')).css('position', 'initial')
+  }
   var browserDirectory
   if (browser.osversion === undefined) {
     browserDirectory = browser.os + '/' + browser.browser + '/'
