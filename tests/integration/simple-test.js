@@ -103,5 +103,29 @@ describeComponent(
           done(err)
         })
     })
+
+    it ('fixed div', function (done) {
+      this.render( hbs `<div class="fixed">Wherever you go, I will find you!</div>`)
+      capture('fixed').then(function () {
+        console.log(arguments)
+        done()
+      }).catch(function (err) {
+        done(err)
+      })
+    })
+
+    it ('more fixed', function (done) {
+      this.render(hbs `<div id="left">Side menu</div>
+<div id="right">Scroll
+    <br />Scroll
+    <br />Scroll
+</div>`)
+      capture('fixed-more').then(function () {
+        console.log(arguments)
+        done()
+      }).catch(function (err) {
+        done(err)
+      })
+    })
   }
 )
