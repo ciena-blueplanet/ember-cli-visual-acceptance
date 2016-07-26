@@ -106,6 +106,7 @@ describeComponent(
     })
 
     it('fixed div', function (done) {
+      this.timeout(5000)
       this.render(hbs `<div class="fixed">Wherever you go, I will find you!</div>`)
       capture('fixed').then(function () {
         console.log(arguments)
@@ -116,6 +117,7 @@ describeComponent(
     })
 
     it('more fixed', function (done) {
+      this.timeout(5000)
       this.render(hbs `<div id="left">Side menu</div>
 <div id="right">Scroll
     <br />Scroll
