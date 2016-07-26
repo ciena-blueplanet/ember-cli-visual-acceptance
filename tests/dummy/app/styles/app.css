@@ -34,3 +34,28 @@
 .center {
   background-color: yellow;
 }
+.fixed {
+  position: fixed;
+  top: 2%;
+  right: 2%;
+  padding: 10px;
+  font-family: Arial;
+  background: #fffea1;
+  border: 1px solid #fc0;
+}
+
+#left {
+    width: 20%;
+    height: 100%;
+    position: fixed;
+    outline: 1px solid;
+    background: red;
+}
+#right {
+    width: 80%;
+    height: auto;
+    outline: 1px solid;
+    position: absolute;
+    right: 0;
+    background: blue;
+}
