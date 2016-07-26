@@ -1,3 +1,7 @@
+# 1.3.9
+No CHANGELOG section found in Pull Request description.
+Use a `# CHANGELOG` section in your Pull Request description to auto-populate the `CHANGELOG.md`
+
 # 1.3.8
 * Update README experimentalSvgs default to be false
 
