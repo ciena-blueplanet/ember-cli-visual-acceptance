@@ -651,7 +651,7 @@ module.exports = {
                  })
                }
              })
-          } else if (prNumber !== false) {
+          } else if (prNumber !== false && prNumber !== 'false') {
             return runCommand('ember', ['br']).then(function (params) {
               return buildTeamcityBitbucketReport(params, options, prNumber)
             }, function (params) {
@@ -659,7 +659,7 @@ module.exports = {
                 throw new Error('Exit 1')
               })
             })
-          } else if (prNumber === false) {
+          } else if (prNumber === false || prNumber === 'false') {
             return runCommand('ember', ['new-baseline', '--image-directory=' +
              options.imageDirectory]).then(function (params) {
                console.log('Git add')
