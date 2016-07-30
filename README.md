@@ -1,11 +1,14 @@
-# ember-cli-visual-acceptance
-
-[ci-img]: https://img.shields.io/travis/ciena-frost/ember-cli-visual-acceptance.svg "Travis CI Build Status"
+[ci-img]: https://travis-ci.org/ciena-blueplanet/ember-cli-visual-acceptance.svg?branch=master "Travis CI Build Status"
 [ci-url]: https://travis-ci.org/ciena-frost/ember-cli-visual-acceptance
 [cov-img]: https://img.shields.io/coveralls/ciena-frost/ember-cli-visual-acceptance.svg "Coveralls Code Coverage"
 [cov-url]: https://coveralls.io/github/ciena-frost/ember-cli-visual-acceptance
 [npm-img]: https://img.shields.io/npm/v/ember-cli-visual-acceptance.svg "NPM Version"
 [npm-url]: https://www.npmjs.com/package/ember-cli-visual-acceptance
+[observer-img]: https://emberobserver.com/badges/ember-cli-visual-acceptance.svg "Ember Observer Score"
+[observer-url]: https://emberobserver.com/addons/ember-cli-visual-acceptance
+[![Observer][observer-img]][observer-url] [![Travis][ci-img]][ci-url] [![NPM][npm-img]][npm-url]
+
+# ember-cli-visual-acceptance
 
 Create baseline images and test for CSS regression during standard Ember tests using html2Canvas and ResembleJS
 
