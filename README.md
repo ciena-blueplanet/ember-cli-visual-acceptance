@@ -193,4 +193,4 @@ it('selects the hovered item when enter is pressed', function (done) {
 ember-cli-visual-acceptance makes api calls to it's own testem middleware. So in order for the tests to work you must have `this.passthrough()`, or list the paths explicitly in `this.passthrough('/image','/passed','/fail','/report','/istargetbrowser')` in your mirage `config.js`.
 
 ## Setting up Travis
-The details to setup Travis can be found [here](https://ewhite613.github.io/frost-blog/using-visual-acceptance/). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
+The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
