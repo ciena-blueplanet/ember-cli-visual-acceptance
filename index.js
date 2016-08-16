@@ -322,9 +322,6 @@ module.exports = {
       app.import(app.bowerDirectory + '/es6-promise/es6-promise.js', {
         type: 'test'
       })
-      app.import(path.join('vendor', 'jquery.min.js'), {
-        type: 'test'
-      })
       app.import(path.join('vendor', 'html2canvas.js'), {
         type: 'test'
       })
