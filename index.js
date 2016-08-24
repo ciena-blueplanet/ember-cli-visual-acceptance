@@ -176,7 +176,13 @@ function savePassedImage (req, res, options) {
   fs.writeFileSync(options.imageDirectory + '/' + req.body.name.replace(/\.([^\.]*)$/, '-passed.$1'), buff)
   res.send('')
 }
-
+function shouldAssert (req, res, options) {
+  if (process.env.NO_ASSERT) {
+    res.send(false)
+  } else {
+    res.send(true)
+  }
+}
 function misMatchImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
@@ -377,6 +383,10 @@ module.exports = {
     app.get('/visual-acceptance', function (req, res) {
       res.sendfile('visual-acceptance-report/report.html')
     })
+
+    app.get('/should-assert', function (req, res) {
+      shouldAssert(req, res)
+    })
   },
   testemMiddleware: function (app) {
     this.middleware(app, {
@@ -513,6 +523,7 @@ module.exports = {
             console.log('No github token found or Travis found. Just running ember test')
             return runCommand('ember', ['test'])
           }
+          process.env.NO_ASSERT = true
           var repoSlug = process.env.TRAVIS_REPO_SLUG
 
           var prNumber = process.env.TRAVIS_PULL_REQUEST
@@ -621,6 +632,7 @@ module.exports = {
             console.log('No Teamcity found. Just running ember test')
             return runCommand('ember', ['test'])
           }
+          process.env.NO_ASSERT = true
           process.env.TEAMCITY_API_URL = options.apiUrl
           var prNumber = process.env.TEAMCITY_PULL_REQUEST
           var baseUrl = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber
