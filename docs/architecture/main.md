@@ -42,6 +42,6 @@ The following sequence diagram shows the flow of creating new baselines.
 *__Figure 3:__ Sequence diagram Create New Baseline*
 
 ### Run CI Visual Acceptance
-The following sequence diagram shows the sequence of `ember travis-visual-acceptance`. Focusing on creating environment variable `REPORT_JSON_PATH` that [Run Acceptance Tests](#run-acceptance-tests) makes use of to build a report ([Run Acceptance Tests](#run-acceptance-tests) skips building the report if the environment variable is not present). Additionally, it shows the workflow in the case of a PR is merged or is a regular PR build. 
+The following sequence diagram shows the sequence of `ember travis-visual-acceptance`. Focusing on creating environment variable `REPORT_JSON_PATH` that [Run Acceptance Tests](#run-acceptance-tests-1) makes use of to build a report ([Run Acceptance Tests](#run-acceptance-tests-1) skips building the report if the environment variable is not present). Additionally, it shows the workflow in the case of a PR is merged or is a regular PR build. 
 ![Sequence diagram Run Contionus Integration Visual Acceptance](images/SequenceDiagramRunCiVisualAcceptance.png)
 *__Figure 4:__ Sequence diagram Run Contionus Integration Visual Acceptance*
