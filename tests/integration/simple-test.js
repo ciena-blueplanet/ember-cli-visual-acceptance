@@ -117,7 +117,7 @@ describeComponent(
     })
 
     it('more fixed', function (done) {
-      this.timeout(5000)
+      this.timeout(10000)
       this.render(hbs `<div id="left">Side menu</div>
 <div id="right">Top Menu
     <br />Top Menu
