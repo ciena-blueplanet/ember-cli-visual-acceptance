@@ -123,11 +123,6 @@ describeComponent(
     <br />Top Menu
     <br />Top Menu
 </div>`)
-      capture('fixed-more').then(function () {
-        console.log(arguments)
-      }).catch(function (err) {
-        done(err)
-      })
 
       capture('fixed-more', {width: 1920, height: 1080}).then(function () {
         console.log(arguments)
