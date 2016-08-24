@@ -547,12 +547,6 @@ module.exports = {
                 throw new Error('Exit 1')
               })
             })
-          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
-            return runCommand('ember', ['br']).then(buildReport, function (params) {
-              return buildReport(params).then(function (params) {
-                throw new Error('Exit 1')
-              })
-            })
           } else if (prNumber === false || prNumber === 'false') {
             return runCommand('ember', ['new-baseline', '--image-directory=' +
              options.imageDirectory]).then(function (params) {
