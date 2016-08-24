@@ -56,3 +56,20 @@ The following sequence diagram shows the sequence of `ember travis-visual-accept
 ![Sequence diagram Run Contionus Integration Visual Acceptance](images/SequenceDiagramRunCiVisualAcceptance.png)
 *__Figure 4:__ Sequence diagram Run Contionus Integration Visual Acceptance*
 
+# Browser Systems
+
+## PhantomJS
+
+PhantomJS is a headless WebKit scriptable with a JavaScript API. PhantomJS Webkit is about a year behind Safari’s Webkit version. Resulting less accurate representations of your Application/Addon.
+
+## SlimerJS
+It is a tool like PhantomJs, except that it runs Gecko instead of Webkit. And its version of Gecko matches the latest Firefox. Producing 1:1 images that are produced in Firefox. The only downside to this tool is that it an SVG that uses xlink:href will result in a segmentation fault if the image is not found. [There is a PR to resolve this issue](https://github.com/laurentj/slimerjs/pull/518) but has yet to be merged in.
+
+## Firefox
+Firefox makes use of [html2canvas](http://html2canvas.hertzen.com/) to render its image. The canvas support is inferior to Chrome's but with the use of [ember-cli-visual-acceptance](https://github.com/ciena-blueplanet/ember-cli-visual-acceptance)'s `experimentalSvgs` option it does make a good contender.
+
+## Chrome
+Chrome also makes use of [html2canvas](http://html2canvas.hertzen.com/) to render its image. Chrome's canvas support is by far the best amongst all web browsers, producing very accurate images.
+
+## Others Web browsers
+Other Web browsers such as Internet Explorer and Safari can be used but their accuracy depends on their canvas support and [html2canvas](http://html2canvas.hertzen.com/)'s ability to handle them.
