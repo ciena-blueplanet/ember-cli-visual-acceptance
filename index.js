@@ -500,6 +500,7 @@ module.exports = {
           type: String,
           default: 'master',
           description: 'branch to push to'
+        }, {
           name: 'push-condition-compare',
           type: String,
           default: 'true',
@@ -620,6 +621,7 @@ module.exports = {
           type: String,
           default: '',
           description: 'Url of api server to save and host images. https://gitlab.com/EWhite613/express-reports'
+        },{
           name: 'push-condition-compare',
           type: String,
           default: 'true',
