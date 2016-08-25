@@ -501,58 +501,25 @@ module.exports = {
           default: 'master',
           description: 'branch to push to'
         }, {
-          name: 'push-condition-compare',
+          name: 'pushVar',
           type: String,
           default: 'true',
-          description: 'String option that compares to push-condition-match to determine if it\'s okay to push'
+          description: 'Option that compares to pushOn to determine if it\'s okay to push'
         },
         {
-          name: 'push-condition-match',
+          name: 'pushOn',
           type: String,
           default: 'true',
-          description: 'String option that compares to push-condition-compare to determine if it\'s okay to push'
+          description: 'Option that compares to pushVar to determine if it\'s okay to push'
         }],
         run: function (options, rawArgs) {
-          let requestOptions = {
-            'headers': {
-              'user-agent': 'ciena-frost',
-              'Authorization': 'token ' + process.env.RO_GH_TOKEN
-            }
-          }
-
           if (!process.env.RO_GH_TOKEN || !process.env.TRAVIS_REPO_SLUG) {
             console.log('No github token found or Travis found. Just running ember test')
             return runCommand('ember', ['test'])
           }
-          var repoSlug = process.env.TRAVIS_REPO_SLUG
 
           var prNumber = process.env.TRAVIS_PULL_REQUEST
-          var url = 'https://api.github.com/repos/' + repoSlug + '/pulls/' + prNumber
-          var res = request('GET', url, requestOptions)
-          var travisMessage = res.body
-          if (/\#new\-baseline\#/.exec(travisMessage)) {
-            console.log('Creating new baseline')
-            return runCommand('ember', ['new-baseline', '--image-directory=' +
-             options.imageDirectory, '--build-report=true']).then(function (params) {
-               if (prNumber === false) {
-                 console.log('Git add')
-                 return runCommand('git', ['add', '-f', '-A', options.imageDirectory], true).then(function (params) {
-                   console.log('Git commit')
-                   return runCommand('git', ['commit', '-m',
-                    '"Adding new baseline images [ci skip]"'], true).then(function (params) {
-                      console.log('Git push')
-                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
-                    })
-                 })
-               } else {
-                 return buildReport(params)
-               }
-             }, function (params) {
-               return buildReport(params).then(function (params) {
-                 throw new Error('Exit 1')
-               })
-             })
-          } else if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
+          if (prNumber !== false && prNumber !== 'false' && process.env.VISUAL_ACCEPTANCE_TOKEN) {
             return runCommand('ember', ['br']).then(buildReport, function (params) {
               return buildReport(params).then(function (params) {
                 throw new Error('Exit 1')
@@ -561,13 +528,10 @@ module.exports = {
           } else if (prNumber === false || prNumber === 'false') {
             return runCommand('ember', ['new-baseline', '--image-directory=' +
              options.imageDirectory]).then(function (params) {
-               console.log('Git add')
                return runCommand('git', ['add', '-f', '-A', options.imageDirectory], true).then(function (params) {
-                 console.log('Git commit')
                  return runCommand('git', ['commit', '-m',
                   'Adding new baseline images [ci skip]'], true).then(function (params) {
-                    if (options.pushConditionCompare === options.pushConditionMatch) {
-                      console.log('Git push')
+                    if (options.pushVar === options.pushOn) {
                       return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
                     }
                   })
@@ -622,16 +586,16 @@ module.exports = {
           default: '',
           description: 'Url of api server to save and host images. https://gitlab.com/EWhite613/express-reports'
         }, {
-          name: 'push-condition-compare',
+          name: 'pushVar',
           type: String,
           default: 'true',
-          description: 'String option that compares to push-condition-match to determine if it\'s okay to push'
+          description: 'Option that compares to pushOn to determine if it\'s okay to push'
         },
         {
-          name: 'push-condition-match',
+          name: 'pushOn',
           type: String,
           default: 'true',
-          description: 'String option that compares to push-condition-compare to determine if it\'s okay to push'
+          description: 'Option that compares to pushVar to determine if it\'s okay to push'
         }],
         run: function (options, rawArgs) {
           if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 ||
@@ -647,26 +611,7 @@ module.exports = {
           }
           process.env.TEAMCITY_API_URL = options.apiUrl
           var prNumber = process.env.TEAMCITY_PULL_REQUEST
-          var baseUrl = 'http://' + options.domain + '/rest/api/1.0/projects/' + options.project + '/repos/' + options.repo + '/pull-requests/' + prNumber
-          var res = request('GET', baseUrl)
-          var PrDescription = JSON.parse(res.body).description
-          if (PrDescription && /\#new\-baseline\#/.exec(PrDescription)) {
-            console.log('Creating new baseline')
-            return runCommand('ember', ['new-baseline', '--image-directory=' +
-             options.imageDirectory]).then(function (params) {
-               if (prNumber === false) {
-                 console.log('Git add')
-                 return runCommand('git', ['add', '-f', '-A', options.imageDirectory], true).then(function (params) {
-                   console.log('Git commit')
-                   return runCommand('git', ['commit', '-m',
-                    '"Adding new baseline images [ci skip]"'], true).then(function (params) {
-                      console.log('Git push')
-                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
-                    })
-                 })
-               }
-             })
-          } else if (prNumber !== false && prNumber !== 'false') {
+          if (prNumber !== false && prNumber !== 'false') {
             return runCommand('ember', ['br']).then(function (params) {
               return buildTeamcityBitbucketReport(params, options, prNumber)
             }, function (params) {
@@ -677,13 +622,10 @@ module.exports = {
           } else if (prNumber === false || prNumber === 'false') {
             return runCommand('ember', ['new-baseline', '--image-directory=' +
              options.imageDirectory]).then(function (params) {
-               console.log('Git add')
                return runCommand('git', ['add', '-f', '-A', options.imageDirectory], true).then(function (params) {
-                 console.log('Git commit')
                  return runCommand('git', ['commit', '-m',
                   'Adding new baseline images [ci skip]'], true).then(function (params) {
-                    if (options.pushConditionCompare === options.pushConditionMatch) {
-                      console.log('Git push')
+                    if (options.pushVar === options.pushOn) {
                       return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
                     }
                   })
