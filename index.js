@@ -501,13 +501,13 @@ module.exports = {
           default: 'master',
           description: 'branch to push to'
         }, {
-          name: 'pushVar',
+          name: 'push-var',
           type: String,
           default: 'true',
           description: 'Option that compares to pushOn to determine if it\'s okay to push'
         },
         {
-          name: 'pushOn',
+          name: 'push-on',
           type: String,
           default: 'true',
           description: 'Option that compares to pushVar to determine if it\'s okay to push'
@@ -587,13 +587,13 @@ module.exports = {
           default: '',
           description: 'Url of api server to save and host images. https://gitlab.com/EWhite613/express-reports'
         }, {
-          name: 'pushVar',
+          name: 'push-var',
           type: String,
           default: 'true',
           description: 'Option that compares to pushOn to determine if it\'s okay to push'
         },
         {
-          name: 'pushOn',
+          name: 'push-on',
           type: String,
           default: 'true',
           description: 'Option that compares to pushVar to determine if it\'s okay to push'
