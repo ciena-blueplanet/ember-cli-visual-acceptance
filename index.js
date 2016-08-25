@@ -513,8 +513,9 @@ module.exports = {
           description: 'Option that compares to pushVar to determine if it\'s okay to push'
         }],
         run: function (options, rawArgs) {
-          if (!process.env.RO_GH_TOKEN || !process.env.TRAVIS_REPO_SLUG) {
-            console.log('No github token found or Travis found. Just running ember test')
+          if (!process.env.RO_GH_TOKEN || !process.env.TRAVIS_REPO_SLUG || !process.env.VISUAL_ACCEPTANCE_TOKEN) {
+            // eslint-disable-next-line max-len
+            console.log('No github token found (RO_GH_TOKEN), Travis found, or visual acceptance token (VISUAL_ACCEPTANCE_TOKEN) found. Just running ember test')
             return runCommand('ember', ['test'])
           }
 
