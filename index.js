@@ -500,6 +500,16 @@ module.exports = {
           type: String,
           default: 'master',
           description: 'branch to push to'
+          name: 'push-condition-compare',
+          type: String,
+          default: 'true',
+          description: 'String option that compares to push-condition-match to determine if it\'s okay to push'
+        },
+        {
+          name: 'push-condition-match',
+          type: String,
+          default: 'true',
+          description: 'String option that compares to push-condition-compare to determine if it\'s okay to push'
         }],
         run: function (options, rawArgs) {
           let requestOptions = {
@@ -554,9 +564,11 @@ module.exports = {
                return runCommand('git', ['add', '-f', '-A', options.imageDirectory], true).then(function (params) {
                  console.log('Git commit')
                  return runCommand('git', ['commit', '-m',
-                  '"Adding new baseline images [ci skip]"'], true).then(function (params) {
-                    console.log('Git push')
-                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                  'Adding new baseline images [ci skip]'], true).then(function (params) {
+                    if (options.pushConditionCompare === options.pushConditionMatch) {
+                      console.log('Git push')
+                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
+                    }
                   })
                })
              })
@@ -608,6 +620,16 @@ module.exports = {
           type: String,
           default: '',
           description: 'Url of api server to save and host images. https://gitlab.com/EWhite613/express-reports'
+          name: 'push-condition-compare',
+          type: String,
+          default: 'true',
+          description: 'String option that compares to push-condition-match to determine if it\'s okay to push'
+        },
+        {
+          name: 'push-condition-match',
+          type: String,
+          default: 'true',
+          description: 'String option that compares to push-condition-compare to determine if it\'s okay to push'
         }],
         run: function (options, rawArgs) {
           if (options.user.length === 0 || options.password.length === 0 || options.domain.length === 0 ||
@@ -657,9 +679,11 @@ module.exports = {
                return runCommand('git', ['add', '-f', '-A', options.imageDirectory], true).then(function (params) {
                  console.log('Git commit')
                  return runCommand('git', ['commit', '-m',
-                  '"Adding new baseline images [ci skip]"'], true).then(function (params) {
-                    console.log('Git push')
-                    return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch], true)
+                  'Adding new baseline images [ci skip]'], true).then(function (params) {
+                    if (options.pushConditionCompare === options.pushConditionMatch) {
+                      console.log('Git push')
+                      return runCommand('git', ['push', 'origin', 'HEAD:' + options.branch])
+                    }
                   })
                })
              })
