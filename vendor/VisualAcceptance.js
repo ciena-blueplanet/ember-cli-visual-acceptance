@@ -303,9 +303,12 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
         $(document.getElementById('ember-testing')).removeAttr('style')
         $(targetElement).removeAttr('style')
         document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
-        assert = assert === undefined ? chai.assert : assert
-        assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +
+        var shouldAssert = JSON.parse(httpGet('/should-assert'))
+        if (shouldAssert) {
+          assert = assert === undefined ? chai.assert : assert
+          assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +
          ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
+        }
         data ? resolve(data) : reject(data)
       })
     }).then(function (data) {

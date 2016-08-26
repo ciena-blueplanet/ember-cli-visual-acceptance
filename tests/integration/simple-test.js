@@ -117,17 +117,12 @@ describeComponent(
     })
 
     it('more fixed', function (done) {
-      this.timeout(5000)
+      this.timeout(10000)
       this.render(hbs `<div id="left">Side menu</div>
-<div id="right">Scroll
-    <br />Scroll
-    <br />Scroll
+<div id="right">Top Menu
+    <br />Top Menu
+    <br />Top Menu
 </div>`)
-      capture('fixed-more').then(function () {
-        console.log(arguments)
-      }).catch(function (err) {
-        done(err)
-      })
 
       capture('fixed-more', {width: 1920, height: 1080}).then(function () {
         console.log(arguments)
