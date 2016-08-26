@@ -20,7 +20,11 @@ module.exports = {
     // Perform extra work here.
     var that = this
     return this.addBowerPackageToProject('es6-promise').then(function (params) {
-      return that.addBowerPackageToProject('resemblejs')
+      return that.addBowerPackageToProject('resemblejs').then(function (params) {
+        return that.insertIntoFile('.gitignore', '/visual-acceptance').then(function (params) {
+          return that.insertIntoFile('.npmignore', '/visual-acceptance')
+        })
+      })
     })
   }
 }
