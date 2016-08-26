@@ -14,4 +14,3 @@ bower.json
 ember-cli-build.js
 testem.js
 /visual-acceptance
-!/blueprints/ember-cli-visual-acceptance/files/.gitignore
