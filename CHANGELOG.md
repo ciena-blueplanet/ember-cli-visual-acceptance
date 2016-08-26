@@ -1,3 +1,6 @@
+# 1.3.16
+* Don't assert error when running  CI tests 
+
 # 1.3.15
 - Add options that allows CI to only push when `push-var` and `push-on` are equal
 
