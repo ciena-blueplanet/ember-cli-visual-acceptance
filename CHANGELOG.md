@@ -1,3 +1,7 @@
+# 1.3.16
+No CHANGELOG section found in Pull Request description.
+Use a `# CHANGELOG` section in your Pull Request description to auto-populate the `CHANGELOG.md`
+
 # 1.3.15
 - Add options that allows CI to only push when `push-var` and `push-on` are equal
 
