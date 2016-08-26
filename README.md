@@ -192,5 +192,18 @@ it('selects the hovered item when enter is pressed', function (done) {
 ## Working with Mirage
 ember-cli-visual-acceptance makes api calls to it's own testem middleware. So in order for the tests to work you must have `this.passthrough()`, or list the paths explicitly in `this.passthrough('/image','/passed','/fail','/report','/istargetbrowser','/should-assert')` in your mirage `config.js`.
 
+## [Svg4everybody](https://github.com/jonathantneal/svg4everybody) and `<use>` tags
+Currently there is no canvas support for svg `<use>` tags. As a result visual acceptance will produce a blank canvas in the place of those svgs.
+
+### Ember-Frost-Core
+If your svgs are coming from [`ember-frost-core`](https://github.com/ciena-frost/ember-frost-core) you can utilize the [inline svg rendering config option](https://github.com/ciena-frost/ember-frost-core/blob/master/docs/frost-icons.md#inline-svg-rendering) in your `tests/dummy/config/environment.js`. If using visual acceptance in an integration test you must import the `svg-use-polyfill` instance initializer and run it beforeEach test. You can import the intializer via `import {initialize as initializeSvgUse} from 'ember-frost-core/instance-initializers/svg-use-polyfill'` and make use of it in the beforeEach hook by doing 
+
+```javascript
+beforeEach(function () {
+  initializeSvgUse()
+})
+```
+ 
+
 ## Setting up Travis
 The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
