@@ -37,7 +37,6 @@
     "ember-load-initializers": "^0.5.1",
     "ember-resolver": "^2.0.3",
     "ember-sinon": "0.5.1",
-    "ember-try": "^0.2.2",
     "eslint": "^2.10.2",
     "eslint-config-frost-standard": "^2.0.0",
     "loader.js": "^4.0.1"
