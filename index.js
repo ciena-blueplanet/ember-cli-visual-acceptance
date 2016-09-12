@@ -122,18 +122,19 @@ function isTargetBrowser (req, res, targetBrowsers) {
 function saveImage (req, res, options) {
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
-  fs.writeFileSync(options.imageDirectory + '/' + req.body.name, buff)
+  fs.writeFileSync(path.join(options.imageDirectory, '/', req.body.name), buff)
   res.send('')
 }
 
 function savePassedImage (req, res, options) {
-  var imageDirectory = options.imageDirectory + '/' + req.body.name.substring(0, req.body.name.lastIndexOf('\/') + 1)
+  var imageDirectory = path.join(options.imageDirectory, '/',
+   req.body.name.substring(0, req.body.name.lastIndexOf('\/') + 1))
   if (!fs.existsSync(imageDirectory)) {
     mkdirpSync(imageDirectory)
   }
   req.body.image = req.body.image.replace(/^data:image\/\w+;base64,/, '')
   var buff = new Buffer(req.body.image, 'base64')
-  fs.writeFileSync(options.imageDirectory + '/' + req.body.name.replace(/\.([^\.]*)$/, '-passed.$1'), buff)
+  fs.writeFileSync(path.join(options.imageDirectory, '/', req.body.name.replace(/\.([^\.]*)$/, '-passed.$1')), buff)
   res.send('')
 }
 function shouldAssert (req, res, options) {
