@@ -13,7 +13,7 @@
 Create baseline images and test for CSS regression during standard Ember tests using html2Canvas and ResembleJS
 
 ## Installation
-sss
+ssssss
 `ember install ember-cli-visual-acceptance`
 ### Configuration
 
