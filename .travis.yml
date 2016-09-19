@@ -20,6 +20,8 @@ before_script:
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
 script:
+- git status
+- git --no-pager log -n 5
 - npm run lint && ember tva --push-var='false'
 install:
 - npm install
