@@ -28,7 +28,7 @@ describeComponent(
     })
     it('renders something else', function (done) {
       this.timeout(5000)
-      this.render(hbs `<div id='test'>Test hello</div>`)
+      this.render(hbs `<div id='test'>Test Else</div>`)
       expect(this.$()).to.have.length(1)
       capture('Error').then(function () {
         console.log(arguments)
