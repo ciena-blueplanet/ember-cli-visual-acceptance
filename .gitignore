@@ -18,3 +18,4 @@ testem.log
 
 # ember-cli-visual-acceptance
 /visual-acceptance
+/typings
