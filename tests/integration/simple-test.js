@@ -37,18 +37,6 @@ describeComponent(
         done(err)
       })
     })
-    it('new test for issue 90', function (done) {
-      this.timeout(5000)
-      this.render(hbs `<div id='test'>Reproduce?</div>`)
-      expect(this.$()).to.have.length(1)
-      capture('Reproduce').then(function () {
-        console.log(arguments)
-        done()
-      }).catch(function (err) {
-        done(err)
-      })
-    })
-
     it('renders svg', function (done) {
       this.timeout(5000)
       /* eslint-disable max-len */
