@@ -20,7 +20,7 @@ before_script:
 - "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
 script:
-- npm run lint && ember tva --push-var='false' --msg-var=$EMBER_TRY_SCENARIO
+- npm run lint && ember tva --push-var='false'
 install:
 - npm install
 - bower install
