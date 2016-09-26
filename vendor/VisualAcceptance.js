@@ -61,6 +61,7 @@ function experimentalSvgCapture () {
 /**
  * Creates baseline imagesfor visual regression during standard Ember tests using html2Canvas and ResembleJS
  * @param {string} imageName - Name of the image you wish to save
+ * @param {function} done done callback function
  * @param {object} options - Options for capture
  * @param {number} [options.width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
  * @param {number} [options.height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
@@ -70,7 +71,39 @@ function experimentalSvgCapture () {
  * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {Promise} ResembleJs return value
  */
-function capture (imageName, options) {
+function capture (imageName, done, options) {
+  var captureOptions = getOptions(options)
+  var targetElement = captureOptions.targetElement
+
+  if (targetElement) {
+    $(targetElement).ready(function () {
+      return _capture(imageName, captureOptions)
+        .then(function () {
+          if (typeof done === 'function') {
+            done()
+          }
+        }).catch(function (err) {
+          console.log(err)
+          if (typeof done === 'function') {
+            done(err)
+          }
+        })
+    })
+  }
+}
+
+/**
+ * Get the the options if the option is not set we will initalize it will the default value.
+ * @param {object} options - Options for capture
+ * @param {number} [options.width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [options.height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [options.misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {HTMLElement} [options.targetElement=ember-testing-container] - DOM element to capture
+ * @param {boolean} [options.experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
+ * @param {object} [options.assert=undefined] - Use only if using qunit
+ * @returns {object} the options
+ */
+function getOptions (options) {
   options = options || {}
   if (options.misMatchPercentageMargin == null) {
     options.misMatchPercentageMargin = 0.00
@@ -78,6 +111,22 @@ function capture (imageName, options) {
   if (options.targetElement == null) {
     options.targetElement = document.getElementById('ember-testing-container')
   }
+  return options
+}
+
+/**
+ * Creates baseline imagesfor visual regression during standard Ember tests using html2Canvas and ResembleJS
+ * @param {string} imageName - Name of the image you wish to save
+ * @param {object} options - Options for capture
+ * @param {number} [options.width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [options.height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [options.misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {HTMLElement} [options.targetElement=ember-testing-container] - DOM element to capture
+ * @param {boolean} [options.experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
+ * @param {object} [options.assert=undefined] - Use only if using qunit
+ * @returns {Promise} ResembleJs return value
+ */
+function _capture (imageName, options) {
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
   if (istargetbrowser === false) {
