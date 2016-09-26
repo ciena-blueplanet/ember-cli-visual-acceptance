@@ -76,13 +76,13 @@ function capture (imageName, done, options) {
   var targetElement = captureOptions.targetElement
 
   if (targetElement) {
-    $(targetElement).ready(() => {
+    $(targetElement).ready(function () {
       return _capture(imageName, captureOptions)
-        .then(() => {
+        .then(function () {
           if (typeof done === 'function') {
             done()
           }
-        }).catch((err) => {
+        }).catch(function (err) {
           console.log(err)
           if (typeof done === 'function') {
             done(err)
