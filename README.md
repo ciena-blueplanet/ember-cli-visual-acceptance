@@ -122,22 +122,10 @@ capture (imageName, options)
         size='small'
         text='Text'
       }}`)
-    capture('primary-small-button').then(function (data) {
-      console.log(arguments)
-      console.log(data)
-      done()
-    }).catch(function (err) {
-      done(err)
-      })
+    capture('primary-small-button', done)
   })
   ```
-
-  * When executing asynchronous tests with an explicit done() you must use a `.catch` to handle image assertion failures
-
-  * Otherwise just return the promise
-```javascript
-return capture('placeholder',{ misMatchPercentageMargin: 0.00 })
-```
+  
   * Run `ember test -s`
 
 ### Baseline
@@ -181,11 +169,7 @@ it('selects the hovered item when enter is pressed', function (done) {
     let dropDownInput = this.$('.frost-select input')
     let value = dropDownInput.val()
     expect(value).to.eql(props.data[0].label)
-    capture('Boston', { width: 1920, height: 1080, misMatchPercentageMargin: 5.00}).then(function (data) {
-      done()
-    }).catch(function (err) {
-      done(err)
-    })
+    capture('Boston', done, { width: 1920, height: 1080, misMatchPercentageMargin: 5.00})
   })
 })
 ```
