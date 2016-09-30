@@ -1,3 +1,7 @@
+# 2.0.1
+* Update README file to match with 2.0.0
+* Pin ResembleJS to 2.2.0 to avoid breaking change in 2.2.2
+
 # 2.0.0
 No CHANGELOG section found in Pull Request description.
 Use a `# CHANGELOG` section in your Pull Request description to auto-populate the `CHANGELOG.md`
