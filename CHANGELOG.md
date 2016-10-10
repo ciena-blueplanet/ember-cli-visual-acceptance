@@ -1,3 +1,9 @@
+# 2.1.0
+* Rather than deleting the entire folder when doing `ember new-baseline`, now only deletes current OS
+  * `--delete-all` option added to delete entire  visual acceptance folder
+  * This will help when doing Multi-OS https://docs.travis-ci.com/user/multi-os/
+    * Although user will have to pull before they run `ember tva` in this scenario (since Linux will push. Than Mac will push) Fun race conditions
+
 # 2.0.1
 * Update README file to match with 2.0.0
 * Pin ResembleJS to 2.2.0 to avoid breaking change in 2.2.2
