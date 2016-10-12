@@ -175,18 +175,27 @@ module.exports = {
 
   options: {
     nodeAssets: {
-      resemblejs: {
-        import: ['resemble.js']
+      resemblejs: function () {
+        return {
+          enabled: this.app.env !== 'production',
+          import: ['resemble.js']
+        }
       },
-      'es6-promise': {
-        srcDir: 'dist',
-        import: ['es6-promise.js']
+      'es6-promise': function () {
+        return {
+          enabled: this.app.env !== 'production',
+          srcDir: 'dist',
+          import: ['es6-promise.min.js']
+        }
       }
     }
   },
 
   included: function (app) {
     this._super.included.apply(this, arguments)
+
+    this.app = app
+
     if (app) {
       app.import(path.join('vendor', 'html2canvas.js'), {
         type: 'test'
