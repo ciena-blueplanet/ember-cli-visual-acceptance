@@ -175,18 +175,19 @@ module.exports = {
 
   options: {
     nodeAssets: {
-      resemblejs: function () {
-        return {
-          enabled: this.app.env !== 'production',
-          import: ['resemble.js']
-        }
+      resemblejs: {
+        import: [{
+          path: 'resemble.js',
+          type: 'test'
+        }]
       },
-      'es6-promise': function () {
-        return {
-          enabled: this.app.env !== 'production',
-          srcDir: 'dist',
-          import: ['es6-promise.min.js']
-        }
+      'es6-promise': {
+        srcDir: 'dist',
+        import: [{
+          path: 'es6-promise.js',
+          sourceMap: 'es6-promise.map',
+          type: 'test'
+        }]
       }
     }
   },
