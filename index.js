@@ -168,15 +168,36 @@ function getImage (req, res, options) {
 
 module.exports = {
   name: 'ember-cli-visual-acceptance',
+
+  imageDirectory: 'visual-acceptance',
+
+  targetBrowsers: [],
+
+  options: {
+    nodeAssets: {
+      resemblejs: {
+        import: [{
+          path: 'resemble.js',
+          type: 'test'
+        }]
+      },
+      'es6-promise': {
+        srcDir: 'dist',
+        import: [{
+          path: 'es6-promise.js',
+          sourceMap: 'es6-promise.map',
+          type: 'test'
+        }]
+      }
+    }
+  },
+
   included: function (app) {
-    this._super.included(app)
+    this._super.included.apply(this, arguments)
+
+    this.app = app
+
     if (app) {
-      app.import(app.bowerDirectory + '/resemblejs/resemble.js', {
-        type: 'test'
-      })
-      app.import(app.bowerDirectory + '/es6-promise/es6-promise.js', {
-        type: 'test'
-      })
       app.import(path.join('vendor', 'html2canvas.js'), {
         type: 'test'
       })
@@ -196,8 +217,7 @@ module.exports = {
       this.targetBrowsers = app.options.visualAcceptanceOptions.targetBrowsers || []
     }
   },
-  imageDirectory: 'visual-acceptance',
-  targetBrowsers: [],
+
   middleware: function (app, options) {
     app.use(bodyParser.urlencoded({
       limit: '50mb',
