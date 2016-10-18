@@ -1,3 +1,7 @@
+# 2.2.0
+
+* Replaced resemble and es6-promise bower dependencies with npm dependencies
+
 # 2.1.0
 * Rather than deleting the entire folder when doing `ember new-baseline`, now only deletes current OS
   * `--delete-all` option added to delete entire  visual acceptance folder
