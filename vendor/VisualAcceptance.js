@@ -2,18 +2,38 @@
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "capture" }]*/
 /**
  * Does httpGet on url synchronously
- * @param {string} theUrl - url to do GET request on
+ * @param {string} url - url to do GET request on
  * @returns {string} GET Response Text
  */
-function httpGet (theUrl) {
-  var xmlHttp = new XMLHttpRequest()
-  xmlHttp.open('GET', theUrl, false) // false for synchronous request
-  xmlHttp.send(null)
-  return xmlHttp.responseText
+function httpGet (url) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', url)
+    xhr.onload = function () {
+      if (this.status >= 200 && this.status < 300) {
+        resolve(xhr.response)
+      } else {
+        reject({
+          status: this.status,
+          statusText: xhr.statusText
+        })
+      }
+    }
+    xhr.onerror = function () {
+      reject({
+        status: this.status,
+        statusText: xhr.statusText
+      })
+    }
+    xhr.send()
+  })
 }
 
 function resolvePositionFixed () {
-  var fixedElements = $('*').filter(function () { return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container' })
+  var fixedElements = $('*').filter(function () {
+    return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' &&
+     this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container'
+  })
   for (var i = 0; i < fixedElements.length; i++) {
     var element = fixedElements[i]
     $(element).css('position', 'absolute')
@@ -36,12 +56,12 @@ function experimentalSvgCapture () {
 
       // Get drawing context for the Canvas
       var myCanvasContext = myCanvas.getContext('2d')
-        // Load up our image.
+      // Load up our image.
       var source = new Image()
       var xml = new XMLSerializer().serializeToString(svg)
       var data = 'data:image/svg+xml;base64,' + btoa(xml)
       source.src = data
-        // Render our SVG image to the canvas once it loads.
+      // Render our SVG image to the canvas once it loads.
       /**
        *
        */
@@ -69,7 +89,7 @@ function experimentalSvgCapture () {
  * @param {HTMLElement} [options.targetElement=ember-testing-container] - DOM element to capture
  * @param {boolean} [options.experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
  * @param {object} [options.assert=undefined] - Use only if using qunit
- * @returns {Promise} ResembleJs return value
+ * @returns {Promise} Promise of capture
  */
 function capture (imageName, done, options) {
   var captureOptions = getOptions(options)
@@ -77,17 +97,22 @@ function capture (imageName, done, options) {
 
   if (targetElement) {
     $(targetElement).ready(function () {
-      return _capture(imageName, captureOptions)
-        .then(function () {
-          if (typeof done === 'function') {
-            done()
-          }
-        }).catch(function (err) {
-          console.log(err)
-          if (typeof done === 'function') {
-            done(err)
-          }
-        })
+      return _capture(imageName, captureOptions).then(function () {
+        if (typeof done === 'function') {
+          done()
+        }
+      }).catch(function (err) {
+        if (typeof done === 'function') {
+          done(err)
+        }
+      })
+    })
+  } else {
+    return new Promise(function (resolve, reject) {
+      if (typeof done === 'function') {
+        done('Target element not defined')
+      }
+      reject('Target element not defined')
     })
   }
 }
@@ -124,58 +149,60 @@ function getOptions (options) {
  * @param {HTMLElement} [options.targetElement=ember-testing-container] - DOM element to capture
  * @param {boolean} [options.experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
  * @param {object} [options.assert=undefined] - Use only if using qunit
- * @returns {Promise} ResembleJs return value
+ * @returns {Promise} Promise of capture
  */
 function _capture (imageName, options) {
   var browser = window.ui
-  var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
-  if (istargetbrowser === false) {
-    return new Promise(function (resolve) {
-      resolve('Does not match target browser')
-    })
-  }
-
-  $(document.getElementById('ember-testing')).css('zoom', 'initial')
-  $(document.getElementById('ember-testing')).css('width', '100%')
-  $(document.getElementById('ember-testing')).css('height', '100%')
-  $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
-  $(document.getElementById('ember-testing-container')).css('position', 'relative')
-
-  var browserDirectory
-  if (browser.osversion === undefined) {
-    browserDirectory = browser.os + '/' + browser.browser + '/'
-  } else {
-    browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
-  }
-
-  if (options.height && options.width) {
-    $(options.targetElement).css('width', options.width + 'px')
-    $(options.targetElement).css('height', options.height + 'px')
-    browserDirectory += options.width + 'x' + options.height + '/'
-  } else {
-    // default mocha window size
-    browserDirectory += 'default/'
-  }
-  // resemble.outputSettings({
-  //   largeImageThreshold: 0
-  // })
-  resolvePositionFixed()
-  if (window.callPhantom !== undefined) {
-    return capturePhantom(imageName, options.width, options.height,
-     options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
-  } else {
-    if (options.experimentalSvgs === true && browser.browser !== 'Chrome') {
-      return experimentalSvgCapture().then(function () {
-        return captureHtml2Canvas(imageName, options.width, options.height,
-         options.misMatchPercentageMargin, options.targetElement,
-         options.assert, browserDirectory)
+  return httpGet('/istargetbrowser?' + $.param(browser)).then(function (response) {
+    var istargetbrowser = JSON.parse(response)
+    if (istargetbrowser === false) {
+      return new Promise(function (resolve) {
+        resolve('Does not match target browser')
       })
-    } else {
-      return captureHtml2Canvas(imageName, options.width, options.height,
-       options.misMatchPercentageMargin, options.targetElement,
-       options.assert, browserDirectory)
     }
-  }
+
+    $(document.getElementById('ember-testing')).css('zoom', 'initial')
+    $(document.getElementById('ember-testing')).css('width', '100%')
+    $(document.getElementById('ember-testing')).css('height', '100%')
+    $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
+    $(document.getElementById('ember-testing-container')).css('position', 'relative')
+
+    var browserDirectory
+    if (browser.osversion === undefined) {
+      browserDirectory = browser.os + '/' + browser.browser + '/'
+    } else {
+      browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+    }
+
+    if (options.height && options.width) {
+      $(options.targetElement).css('width', options.width + 'px')
+      $(options.targetElement).css('height', options.height + 'px')
+      browserDirectory += options.width + 'x' + options.height + '/'
+    } else {
+      // default mocha window size
+      browserDirectory += 'default/'
+    }
+    // resemble.outputSettings({
+    //   largeImageThreshold: 0
+    // })
+    resolvePositionFixed()
+    if (window.callPhantom !== undefined) {
+      return capturePhantom(imageName, options.width, options.height,
+        options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
+    } else {
+      if (options.experimentalSvgs === true && browser.browser !== 'Chrome') {
+        return experimentalSvgCapture().then(function () {
+          return captureHtml2Canvas(imageName, options.width, options.height,
+            options.misMatchPercentageMargin, options.targetElement,
+            options.assert, browserDirectory)
+        })
+      } else {
+        return captureHtml2Canvas(imageName, options.width, options.height,
+          options.misMatchPercentageMargin, options.targetElement,
+          options.assert, browserDirectory)
+      }
+    }
+  })
 }
 /**
  * Use phantomJS/slimerjs callback to capture Image
@@ -209,10 +236,9 @@ function capturePhantom (imageName, width, height, misMatchPercentageMargin, tar
     // Get test dummy image
 
     image = 'data:image/png;base64,' + image
-      // console.log(image)
     return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
-     image, browserDirectory,
-     resolve, reject)
+      image, browserDirectory,
+      resolve, reject)
   })
 }
 /**
@@ -227,7 +253,7 @@ function capturePhantom (imageName, width, height, misMatchPercentageMargin, tar
  * @returns {Promise} ResembleJs return value
  */
 function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin, targetElement,
- assert, browserDirectory) {
+  assert, browserDirectory) {
   return html2canvas(targetElement, {
     timeout: 1000
   }).then(function (canvas) {
@@ -235,10 +261,11 @@ function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin,
     var image = canvas.toDataURL('image/png')
     return new Promise(function (resolve, reject) {
       return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
-       image, browserDirectory, resolve, reject)
+        image, browserDirectory, resolve, reject)
     })
   })
 }
+
 /**
  * Use html2canvas to capture Image
  * @param {string} imageName - Name of the image you wish to save
@@ -249,12 +276,12 @@ function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin,
  * @param {object} [assert=undefined] - Use only if using qunit
  * @param {string} image - Base64 image produced from html2canvas or PhantomJS
  * @param {object} browserDirectory - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
- * @param {object} resolve - resolve from Promise
- * @param {object} reject - reject from Promise
+ * @param {object} parentResolve - resolve from parent Promise
+ * @param {object} parentReject - reject from parent Promise
  * @returns {Promise} ResembleJs return value
  */
 function utilizeImage (imageName, width, height, misMatchPercentageMargin, targetElement, assert,
- image, browserDirectory, resolve, reject) {
+  image, browserDirectory, parentResolve, parentReject) {
   if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
     var visualAcceptanceContainer
     visualAcceptanceContainer = document.createElement('div')
@@ -265,105 +292,110 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
   }
   var node = document.createElement('div')
   var images = []
-    // Get passed image
-  var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
-  if (res.error === 'File does not exist') {
-    // Save image as passed if no existing passed image
-    $.ajax({
-      type: 'POST',
-      async: false,
-      url: '/passed',
-      data: {
-        image: image,
-        name: browserDirectory + imageName + '.png'
-      }
-    })
-    $(document.getElementById('ember-testing')).removeAttr('style')
-    $(targetElement).removeAttr('style')
-    node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' +
-     imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
-    images.push(image)
-    $.ajax({
-      type: 'POST',
-      async: false,
-      url: '/report',
-      data: {
-        type: 'New',
-        images: images,
-        name: imageName,
-        browser: window.ui.browser
-      }
-    })
-    resolve('No passed image. Saving current test as base')
-  } else {
-    // Passed image exists so compare to current
-    res.image = 'data:image/png;base64,' + res.image
-    return new Promise(function (resolve, reject) {
-      resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
-        var result = false
-        if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
-          // Passed
-          $.ajax({
-            type: 'POST',
-            async: false,
-            url: '/passed',
-            data: {
-              image: image,
-              name: browserDirectory + imageName + '.png'
-            }
-          })
-          result = true
-          node.innerHTML = '<div class="test pass"> <div class="list-name">  New: ' + imageName +
-           '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
-        } else {
-          // Fail
-          $.ajax({
-            type: 'POST',
-            async: false,
-            url: '/fail',
-            data: {
-              image: data.getImageDataUrl(),
-              name: browserDirectory + imageName + '.png'
-            }
-          })
-          node.innerHTML = '<div class="test fail"> <div class="list-name">  Changed: ' + imageName +
-           ' </div> <div class="additional-info"> Addition Information: </div> <div class="images">' +
-            '<div class="image"> <img class="diff" src="' + data.getImageDataUrl() +
-            '" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="' +
-             image +
-              '" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="' +
-               res.image + '" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
-
-          images.push(data.getImageDataUrl())
+  // Get passed image
+  return httpGet('/image?name=' +
+    encodeURIComponent(browserDirectory + imageName) + '-passed.png').then(function (response) {
+      var res = JSON.parse(response)
+      if (res.error === 'File does not exist') {
+      // Save image as passed if no existing passed image
+        return $.ajax({
+          type: 'POST',
+          url: '/passed',
+          data: {
+            image: image,
+            name: browserDirectory + imageName + '.png'
+          }
+        }).then(function () {
+          $(document.getElementById('ember-testing')).removeAttr('style')
+          $(targetElement).removeAttr('style')
+          // eslint-disable-next-line max-len
+          node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' +
+          imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' +
+          image + '" /> </div>'
           images.push(image)
-          images.push(res.image)
           $.ajax({
             type: 'POST',
-            async: false,
             url: '/report',
             data: {
-              type: 'Changed',
+              type: 'New',
               images: images,
               name: imageName,
               browser: window.ui.browser
             }
+          }).then(function () {
+            parentResolve('No passed image. Saving current test as base')
           })
-        }
-        $(document.getElementById('ember-testing')).removeAttr('style')
-        $(targetElement).removeAttr('style')
-        document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
-        var shouldAssert = JSON.parse(httpGet('/should-assert'))
-        if (shouldAssert) {
-          assert = assert === undefined ? chai.assert : assert
-          assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +
-         ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
-        }
-        data ? resolve(data) : reject(data)
-      })
-    }).then(function (data) {
-      data ? resolve(data) : reject(data)
-    }).catch(function (err) {
-      reject(err)
+        })
+      } else {
+      // Passed image exists so compare to current
+        res.image = 'data:image/png;base64,' + res.image
+        return new Promise(function (resolve, reject) {
+          resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
+            var result = false
+            if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
+            // Passed
+              $.ajax({
+                type: 'POST',
+                url: '/passed',
+                data: {
+                  image: image,
+                  name: browserDirectory + imageName + '.png'
+                }
+              })
+              result = true
+              node.innerHTML = '<div class="test pass"> <div class="list-name">  New: ' + imageName +
+              '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
+            } else {
+            // Fail
+              $.ajax({
+                type: 'POST',
+                url: '/fail',
+                data: {
+                  image: data.getImageDataUrl(),
+                  name: browserDirectory + imageName + '.png'
+                }
+              }).then(function () {
+                node.innerHTML = '<div class="test fail"> <div class="list-name">  Changed: ' + imageName +
+                ' </div> <div class="additional-info"> Addition Information: </div> <div class="images">' +
+                '<div class="image"> <img class="diff" src="' + data.getImageDataUrl() +
+                '" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="' +
+                image +
+                '" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="' +
+                res.image + '" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
+
+                images.push(data.getImageDataUrl())
+                images.push(image)
+                images.push(res.image)
+                $.ajax({
+                  type: 'POST',
+                  url: '/report',
+                  data: {
+                    type: 'Changed',
+                    images: images,
+                    name: imageName,
+                    browser: window.ui.browser
+                  }
+                })
+              })
+            }
+            $(document.getElementById('ember-testing')).removeAttr('style')
+            $(targetElement).removeAttr('style')
+            document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
+            httpGet('/should-assert').then(function (response) {
+              var shouldAssert = JSON.parse(response)
+              if (shouldAssert) {
+                assert = assert === undefined ? chai.assert : assert
+                assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +
+                ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
+              }
+              data ? resolve(data) : reject(data)
+            })
+          })
+        }).then(function (data) {
+          data ? parentResolve(data) : parentReject(data)
+        }).catch(function (err) {
+          parentReject(err)
+        })
+      }
     })
-  }
 }
