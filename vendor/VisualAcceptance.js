@@ -149,7 +149,7 @@ function getOptions (options) {
  * @param {HTMLElement} [options.targetElement=ember-testing-container] - DOM element to capture
  * @param {boolean} [options.experimentalSvgs=undefined] - Set to true in order try experimental rendering of svgs using html2canvas
  * @param {object} [options.assert=undefined] - Use only if using qunit
- * @returns {Promise} Promise of capture
+ * @returns {Promise} ResembleJs return value
  */
 function _capture (imageName, options) {
   var browser = window.ui
