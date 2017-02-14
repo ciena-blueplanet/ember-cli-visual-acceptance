@@ -1,3 +1,8 @@
+# 2.2.1
+- Fixes https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/103
+- Fix RSVP reference and switch to `var Promise = require('es6-promise').Promise`
+
+
 # 2.2.0
 
 * Replaced resemble and es6-promise bower dependencies with npm dependencies
