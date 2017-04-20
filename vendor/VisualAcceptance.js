@@ -282,7 +282,7 @@ function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin,
  */
 function utilizeImage (imageName, width, height, misMatchPercentageMargin, targetElement, assert,
   image, browserDirectory, parentResolve, parentReject) {
-  if (!document.getElementById('visual-acceptance') && $('.tabs').length === 0) {
+  if (!document.getElementById('visual-acceptance')) {
     var visualAcceptanceContainer
     visualAcceptanceContainer = document.createElement('div')
     visualAcceptanceContainer.setAttribute('id', 'visual-acceptance')
