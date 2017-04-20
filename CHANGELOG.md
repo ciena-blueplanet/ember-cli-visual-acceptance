@@ -1,3 +1,6 @@
+# 2.2.2 (2017-04-20)
+- Fixes issue with checking no longer used `.tabs` class, that conflicts with user apps that make use of this addon
+
 # 2.2.1
 - Fixes https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/103
 - Fix RSVP reference and switch to `var Promise = require('es6-promise').Promise`
