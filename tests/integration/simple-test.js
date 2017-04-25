@@ -17,15 +17,27 @@ describeComponent(
   function () {
     it('renders', function (done) {
       this.timeout(5000)
-      this.render(hbs `<div id='test'>Test</div>`)
+      this.render(hbs `<div id='test'>Foo</div>`)
       expect(this.$()).to.have.length(1)
       capture('Simple', done)
     })
     it('renders something else', function (done) {
       this.timeout(5000)
-      this.render(hbs `<div id='test'>Test Else</div>`)
+      this.render(hbs `<div id='test'>Foo Bar</div>`)
       expect(this.$()).to.have.length(1)
       capture('Error', done)
+    })
+
+    it('new test for issue 90', function (done) {
+      this.timeout(5000)
+      this.render(hbs `<div id='test'>Reproduce?</div>`)
+      expect(this.$()).to.have.length(1)
+      capture('Reproduce').then(function () {
+        console.log(arguments)
+        done()
+      }).catch(function (err) {
+        done(err)
+      })
     })
     it('renders svg', function (done) {
       this.timeout(5000)
