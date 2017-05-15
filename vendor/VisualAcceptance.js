@@ -32,7 +32,7 @@ function httpGet (url) {
 function resolvePositionFixed () {
   var fixedElements = $('*').filter(function () {
     return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' &&
-     this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container'
+      this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container'
   })
   for (var i = 0; i < fixedElements.length; i++) {
     var element = fixedElements[i]
@@ -104,6 +104,10 @@ function capture (imageName, done, options) {
       }).catch(function (err) {
         if (typeof done === 'function') {
           done(err)
+        } else {
+          return new Promise(function (resolve, reject) {
+            reject(err)
+          })
         }
       })
     })
@@ -308,7 +312,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
         }).then(function () {
           $(document.getElementById('ember-testing')).removeAttr('style')
           $(targetElement).removeAttr('style')
-          // eslint-disable-next-line max-len
+        // eslint-disable-next-line max-len
           node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' +
           imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' +
           image + '" /> </div>'
@@ -381,19 +385,28 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
             $(document.getElementById('ember-testing')).removeAttr('style')
             $(targetElement).removeAttr('style')
             document.getElementsByClassName('visual-acceptance-container')[0].appendChild(node)
-            httpGet('/should-assert').then(function (response) {
-              var shouldAssert = JSON.parse(response)
-              if (shouldAssert) {
-                assert = assert === undefined ? chai.assert : assert
-                assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +
-                ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
-              }
+            return httpGet('/should-assert').then(function (response) {
+              return new Promise(function (resolve, reject) {
+                var shouldAssert = JSON.parse(response)
+                if (shouldAssert) {
+                  assert = assert === undefined ? chai.assert : assert
+                  assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +
+                  ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
+                }
+                data ? resolve(data) : reject(data)
+              })
+            }).then(function () {
               data ? resolve(data) : reject(data)
+            }, function () {
+              reject(data)
             })
           })
         }).then(function (data) {
           data ? parentResolve(data) : parentReject(data)
+        }, function (data) {
+          parentReject(data)
         }).catch(function (err) {
+          console.log('caught')
           parentReject(err)
         })
       }
