@@ -6,10 +6,11 @@ module.exports = {
     'Firefox',
     'SlimerJsVisualAcceptance',
     'PhantomJsVisualAcceptance',
-    'Chromium'
+    'Chrome',
+    'NightmareJsVisualAcceptance'
   ],
   'launch_in_dev': [
-    'Firefox'
+    'NightmareJsVisualAcceptance'
   ],
 
   'launchers': {
@@ -19,6 +20,10 @@ module.exports = {
     },
     'SlimerJsVisualAcceptance': {
       'command': 'slimerjs --debug=true --error-log-file=error.log vendor/phantomjs-launcher.js <url>',
+      'protocol': 'browser'
+    },
+    'NightmareJsVisualAcceptance': {
+      'command': 'node vendor/nightmarejs-launcher.js <url>',
       'protocol': 'browser'
     }
   }
