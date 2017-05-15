@@ -3,10 +3,10 @@ module.exports = {
   'test_page': 'tests/index.html?hidepassed',
   'disable_watching': true,
   'launch_in_ci': [
-    'Firefox',
-    'SlimerJsVisualAcceptance',
-    'PhantomJsVisualAcceptance',
-    'Chrome',
+    // 'Firefox',
+    // 'SlimerJsVisualAcceptance',
+    // 'PhantomJsVisualAcceptance',
+    // 'Chrome',
     'NightmareJsVisualAcceptance'
   ],
   'launch_in_dev': [
@@ -23,7 +23,7 @@ module.exports = {
       'protocol': 'browser'
     },
     'NightmareJsVisualAcceptance': {
-      'command': 'node vendor/nightmarejs-launcher.js <url>',
+      'command': 'DEBUG=nightmare* node vendor/nightmarejs-launcher.js <url>',
       'protocol': 'browser'
     }
   }
