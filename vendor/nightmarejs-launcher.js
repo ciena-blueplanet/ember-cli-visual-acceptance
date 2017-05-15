@@ -1,9 +1,7 @@
-/*global  Testem*/
+/*global  Testem, win, arguments*/
 'use strict'
 var Nightmare = require('nightmare')
-var Electroe = require('electron')
 require('nightmare-custom-event')(Nightmare)
-console.log('Creating action')
 
 
 var nightmare = Nightmare({
@@ -13,11 +11,6 @@ var fs = require('fs')
 var url = process.argv[2]
 nightmare
   .goto(url)
-  .on('dom-ready', () => {
-    win.webContents.on('did-finish-load', () => {
-      win.webContents.send('ping', 'whoooooooh!')
-    })
-  })
   .on('capture-event', function () {
 // __nightmare.ipc.send('sample-event', 'sample', 3, {
 //   sample: 'sample'
