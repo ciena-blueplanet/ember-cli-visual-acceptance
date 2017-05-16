@@ -160,6 +160,9 @@ function _capture (imageName, options) {
   //   largeImageThreshold: 0
   // })
   resolvePositionFixed()
+  // TODO: if (window.__nightmare !== undefined){
+
+  // }else
   if (window.callPhantom !== undefined) {
     return capturePhantom(imageName, options.width, options.height,
      options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
@@ -176,6 +179,44 @@ function _capture (imageName, options) {
        options.assert, browserDirectory)
     }
   }
+}
+/**
+ * Use NightmareJS to perform capture
+ * @param {*} imageName 
+ * @param {*} width 
+ * @param {*} height 
+ * @param {*} misMatchPercentageMargin 
+ * @param {*} targetElement 
+ * @param {*} assert 
+ * @param {*} browserDirectory 
+ */
+function captureNightmare (imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
+  //TODO: implement nightmare capture
+  return new Promise(function (resolve, reject) {
+    if (window.__nightmare === undefined) {
+      resolve('Not on NightmareJS')
+    }
+    var image
+    if (targetElement.id !== '') {
+      image = window.callPhantom({
+        id: targetElement.id
+      })
+    } else {
+      var tempId = 'tempVisualAcceptanceId'
+      targetElement.id = tempId
+      image = window.callPhantom({
+        id: targetElement.id
+      })
+      targetElement.id = ''
+    }
+    // Get test dummy image
+
+    image = 'data:image/png;base64,' + image
+      // console.log(image)
+    return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+     image, browserDirectory,
+     resolve, reject)
+  })
 }
 /**
  * Use phantomJS/slimerjs callback to capture Image
