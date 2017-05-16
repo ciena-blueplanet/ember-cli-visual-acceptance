@@ -1,32 +1,27 @@
 /*global  Testem, win, arguments*/
 'use strict'
+const util = require('util')
 var Nightmare = require('nightmare')
 require('nightmare-custom-event')(Nightmare)
 
 Nightmare.action('sendImage',
   function (ns, options, parent, win, renderer, done) {
-    fs.appendFileSync('image-sent.log', 'Does this even get called?')
-    // parent.respondTo('sendImage', function () {
-    fs.appendFileSync('image-sent.log', 'Sending image')
-    win.webContents.send('return-image-event', 'boop').then(function () {
-      done()
-    }).catch(function (error) {
-      fs.appendFileSync('error-send-image.log', error + ' from action \n')
+    // fs.appendFileSync('image-sent.log', 'Does this even get called?')
+    parent.respondTo('sendImage', function () {
+      // fs.appendFileSync('image-sent.log', 'Sending image')
+      win.webContents.send('return-image-event', 'boop').then(function () {
+        done()
+      }).catch(function (error) {
+        fs.appendFileSync('error-send-image.log', error + ' from action \n')
+      })
     })
-    // })
     done()
   },
   function (image, done) {
     fs.appendFileSync('image-sent.log', 'I must be called right?\n' + image + '\n' + done)
     this.child.call('sendImage', done)
   })
-// Nightmare.prototype.sendImage = function(event, handler) {
-//   this.queue(function(done){
-//     this.child.on(event, handler);
-//     done();
-//   });
-//   return this;
-// };
+
 var nightmare = Nightmare({
   show: true
 })
@@ -74,5 +69,8 @@ nightmare
   })
   .catch(function (error) {
     console.error('Search failed:', error)
-    fs.appendFileSync('error.log', error.toString())
+    fs.appendFileSync('error.log', util.inspect(error, {
+      showHidden: false,
+      depth: null
+    }))
   })
