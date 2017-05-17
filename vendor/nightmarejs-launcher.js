@@ -26,14 +26,8 @@ nightmare
   .goto(url)
   .viewport(1920, 1080)
   .on('capture-event', function (data) {
-    // __nightmare.ipc.send('sample-event', 'sample', 3, {
-    //   sample: 'sample'
-    // });
-    console.log('got response')
-    fs.writeFileSync('feedback.txt', 'i got it\n' + JSON.stringify(data))
     try {
       nightmare.screenshot(undefined, data.rect).then(function (result) {
-        fs.writeFileSync('image.png', result.toString('base64'))
         var image = result.toString('base64')
         nightmare.sendImage(image).then(function (result) {
           // fs.appendFileSync('image-sent.log', 'sent image')
