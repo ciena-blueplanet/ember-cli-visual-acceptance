@@ -6,20 +6,17 @@ require('nightmare-custom-event')(Nightmare)
 
 Nightmare.action('sendImage',
   function (ns, options, parent, win, renderer, done) {
-    // fs.appendFileSync('image-sent.log', 'Does this even get called?')
-    parent.respondTo('sendImage', function () {
-      // fs.appendFileSync('image-sent.log', 'Sending image')
-      win.webContents.send('return-image-event', 'boop').then(function () {
-        done()
-      }).catch(function (error) {
+    parent.respondTo('sendImage', function (image, done) {
+      win.webContents.send('return-image-event', {image: image}).catch(function (error) {
         fs.appendFileSync('error-send-image.log', error + ' from action \n')
       })
+      done()
     })
     done()
   },
   function (image, done) {
     fs.appendFileSync('image-sent.log', 'I must be called right?\n' + image + '\n' + done)
-    this.child.call('sendImage', done)
+    this.child.call('sendImage', image, done)
   })
 
 var nightmare = Nightmare({
@@ -42,7 +39,7 @@ nightmare
         nightmare.sendImage(image).then(function (result) {
           fs.appendFileSync('image-sent.log', 'sent image')
         }).catch(function (error) {
-          fs.appendFileSync('error-send-image.log', error + 'calling action \n')
+          fs.appendFileSync('error-call-send-image.log', error + 'calling action \n')
         })
         nightmare.cookies.set('image', image)
       }).catch(function (error) {
