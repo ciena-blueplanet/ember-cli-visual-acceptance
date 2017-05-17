@@ -8,24 +8,23 @@ Nightmare.action('sendImage',
   function (ns, options, parent, win, renderer, done) {
     parent.respondTo('sendImage', function (image, done) {
       win.webContents.send('return-image-event', {image: image}).catch(function (error) {
-        fs.appendFileSync('error-send-image.log', error + ' from action \n')
+        // fs.appendFileSync('error-send-image.log', error + ' from action \n')
       })
       done()
     })
     done()
   },
   function (image, done) {
-    fs.appendFileSync('image-sent.log', 'I must be called right?\n' + image + '\n' + done)
+    // fs.appendFileSync('image-sent.log', 'I must be called right?\n' + image + '\n' + done)
     this.child.call('sendImage', image, done)
   })
 
-var nightmare = Nightmare({
-  show: true
-})
+var nightmare = Nightmare()
 var fs = require('fs')
 var url = process.argv[2]
 nightmare
   .goto(url)
+  .viewport(1920, 1080)
   .on('capture-event', function (data) {
     // __nightmare.ipc.send('sample-event', 'sample', 3, {
     //   sample: 'sample'
@@ -37,7 +36,7 @@ nightmare
         fs.writeFileSync('image.png', result.toString('base64'))
         var image = result.toString('base64')
         nightmare.sendImage(image).then(function (result) {
-          fs.appendFileSync('image-sent.log', 'sent image')
+          // fs.appendFileSync('image-sent.log', 'sent image')
         }).catch(function (error) {
           fs.appendFileSync('error-call-send-image.log', error + 'calling action \n')
         })

@@ -1,19 +1,42 @@
-/*global XMLHttpRequest,$,Promise,chai,resemble, html2canvas, Image, XMLSerializer,btoa */
+/*global XMLHttpRequest,$,Promise,chai,resemble, html2canvas, Image, XMLSerializer,btoa, __nightmare */
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "capture" }]*/
+function nightmareSendCaptureRequestAndRecieveImage(id) {
+  return new Promise(function (resolve, reject) {
+    __nightmare.ipc.once('return-image-event', function (event, result) {
+      resolve(result.image)
+    })
+    if (id === '') {
+      var tempId = 'tempVisualAcceptanceId'
+      id = tempId
+    }
+    var rect = document.getElementById(id).getBoundingClientRect()
+    var clip = {
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height
+    }
+    __nightmare.ipc.send('capture-event', {
+      rect: clip
+    })
+  })
+}
 /**
  * Does httpGet on url synchronously
  * @param {string} theUrl - url to do GET request on
  * @returns {string} GET Response Text
  */
-function httpGet (theUrl) {
+function httpGet(theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
   xmlHttp.send(null)
   return xmlHttp.responseText
 }
 
-function resolvePositionFixed () {
-  var fixedElements = $('*').filter(function () { return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container' })
+function resolvePositionFixed() {
+  var fixedElements = $('*').filter(function () {
+    return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container'
+  })
   for (var i = 0; i < fixedElements.length; i++) {
     var element = fixedElements[i]
     $(element).css('position', 'absolute')
@@ -23,7 +46,7 @@ function resolvePositionFixed () {
  * Convert Svgs to canvas. In hopes of a more accurate rendering using html2canvas
  * @returns {Promise} Promise of all svg conversions
  */
-function experimentalSvgCapture () {
+function experimentalSvgCapture() {
   /* eslint-enable no-unused-vars */
   var items = Array.from(document.querySelectorAll('svg'))
   var promises = items.map(function (svg) {
@@ -36,12 +59,12 @@ function experimentalSvgCapture () {
 
       // Get drawing context for the Canvas
       var myCanvasContext = myCanvas.getContext('2d')
-        // Load up our image.
+      // Load up our image.
       var source = new Image()
       var xml = new XMLSerializer().serializeToString(svg)
       var data = 'data:image/svg+xml;base64,' + btoa(xml)
       source.src = data
-        // Render our SVG image to the canvas once it loads.
+      // Render our SVG image to the canvas once it loads.
       /**
        *
        */
@@ -71,7 +94,7 @@ function experimentalSvgCapture () {
  * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {Promise} ResembleJs return value
  */
-function capture (imageName, done, options) {
+function capture(imageName, done, options) {
   var captureOptions = getOptions(options)
   var targetElement = captureOptions.targetElement
 
@@ -103,7 +126,7 @@ function capture (imageName, done, options) {
  * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {object} the options
  */
-function getOptions (options) {
+function getOptions(options) {
   options = options || {}
   if (options.misMatchPercentageMargin == null) {
     options.misMatchPercentageMargin = 0.00
@@ -126,7 +149,7 @@ function getOptions (options) {
  * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {Promise} ResembleJs return value
  */
-function _capture (imageName, options) {
+function _capture(imageName, options) {
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
   if (istargetbrowser === false) {
@@ -160,62 +183,51 @@ function _capture (imageName, options) {
   //   largeImageThreshold: 0
   // })
   resolvePositionFixed()
-  // TODO: if (window.__nightmare !== undefined){
-
-  // }else
-  if (window.callPhantom !== undefined) {
-    return capturePhantom(imageName, options.width, options.height,
+  if (window.__nightmare !== undefined) {
+    return captureNightmare(imageName, options.width, options.height,
      options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
+  } else if (window.callPhantom !== undefined) {
+    return capturePhantom(imageName, options.width, options.height,
+      options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else {
     if (options.experimentalSvgs === true && browser.browser !== 'Chrome') {
       return experimentalSvgCapture().then(function () {
         return captureHtml2Canvas(imageName, options.width, options.height,
-         options.misMatchPercentageMargin, options.targetElement,
-         options.assert, browserDirectory)
+          options.misMatchPercentageMargin, options.targetElement,
+          options.assert, browserDirectory)
       })
     } else {
       return captureHtml2Canvas(imageName, options.width, options.height,
-       options.misMatchPercentageMargin, options.targetElement,
-       options.assert, browserDirectory)
+        options.misMatchPercentageMargin, options.targetElement,
+        options.assert, browserDirectory)
     }
   }
 }
 /**
  * Use NightmareJS to perform capture
- * @param {*} imageName 
- * @param {*} width 
- * @param {*} height 
- * @param {*} misMatchPercentageMargin 
- * @param {*} targetElement 
- * @param {*} assert 
- * @param {*} browserDirectory 
+ * @param {*} imageName
+ * @param {*} width
+ * @param {*} height
+ * @param {*} misMatchPercentageMargin
+ * @param {*} targetElement
+ * @param {*} assert
+ * @param {*} browserDirectory
  */
-function captureNightmare (imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
-  //TODO: implement nightmare capture
+function captureNightmare(imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
+  // TODO: implement nightmare capture
+  browserDirectory += '-nightmareJS' 
   return new Promise(function (resolve, reject) {
     if (window.__nightmare === undefined) {
       resolve('Not on NightmareJS')
     }
-    var image
-    if (targetElement.id !== '') {
-      image = window.callPhantom({
-        id: targetElement.id
-      })
-    } else {
-      var tempId = 'tempVisualAcceptanceId'
-      targetElement.id = tempId
-      image = window.callPhantom({
-        id: targetElement.id
-      })
-      targetElement.id = ''
-    }
-    // Get test dummy image
-
-    image = 'data:image/png;base64,' + image
+    // Get test dummy image    
+    return nightmareSendCaptureRequestAndRecieveImage(targetElement.id).then(function (image) {
+      image = 'data:image/png;base64,' + image
       // console.log(image)
-    return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
-     image, browserDirectory,
-     resolve, reject)
+      return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+        image, browserDirectory,
+        resolve, reject)
+    })
   })
 }
 /**
@@ -229,7 +241,7 @@ function captureNightmare (imageName, width, height, misMatchPercentageMargin, t
  * @param {object} [browserDirectory=undefined] - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
  * @returns {Promise} ResembleJs return value
  */
-function capturePhantom (imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
+function capturePhantom(imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
   return new Promise(function (resolve, reject) {
     if (window.callPhantom === undefined) {
       resolve('Not on PhantomJS')
@@ -250,10 +262,10 @@ function capturePhantom (imageName, width, height, misMatchPercentageMargin, tar
     // Get test dummy image
 
     image = 'data:image/png;base64,' + image
-      // console.log(image)
+    // console.log(image)
     return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
-     image, browserDirectory,
-     resolve, reject)
+      image, browserDirectory,
+      resolve, reject)
   })
 }
 /**
@@ -267,8 +279,8 @@ function capturePhantom (imageName, width, height, misMatchPercentageMargin, tar
  * @param {object} browserDirectory - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
  * @returns {Promise} ResembleJs return value
  */
-function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin, targetElement,
- assert, browserDirectory) {
+function captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, targetElement,
+  assert, browserDirectory) {
   return html2canvas(targetElement, {
     timeout: 1000
   }).then(function (canvas) {
@@ -276,7 +288,7 @@ function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin,
     var image = canvas.toDataURL('image/png')
     return new Promise(function (resolve, reject) {
       return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
-       image, browserDirectory, resolve, reject)
+        image, browserDirectory, resolve, reject)
     })
   })
 }
@@ -294,8 +306,8 @@ function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin,
  * @param {object} reject - reject from Promise
  * @returns {Promise} ResembleJs return value
  */
-function utilizeImage (imageName, width, height, misMatchPercentageMargin, targetElement, assert,
- image, browserDirectory, resolve, reject) {
+function utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+  image, browserDirectory, resolve, reject) {
   if (!document.getElementById('visual-acceptance')) {
     var visualAcceptanceContainer
     visualAcceptanceContainer = document.createElement('div')
@@ -306,7 +318,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
   }
   var node = document.createElement('div')
   var images = []
-    // Get passed image
+  // Get passed image
   var res = JSON.parse(httpGet('/image?name=' + encodeURIComponent(browserDirectory + imageName) + '-passed.png'))
   if (res.error === 'File does not exist') {
     // Save image as passed if no existing passed image
@@ -322,7 +334,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
     $(document.getElementById('ember-testing')).removeAttr('style')
     $(targetElement).removeAttr('style')
     node.innerHTML = '<div class="test pass"> <div class="list-name"> No new image. Saving current as baseline: ' +
-     imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
+      imageName + '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
     images.push(image)
     $.ajax({
       type: 'POST',
@@ -355,7 +367,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
           })
           result = true
           node.innerHTML = '<div class="test pass"> <div class="list-name">  New: ' + imageName +
-           '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
+            '</div> <div class="additional-info"> Addition Information: </div> <img src="' + image + '" /> </div>'
         } else {
           // Fail
           $.ajax({
@@ -368,12 +380,12 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
             }
           })
           node.innerHTML = '<div class="test fail"> <div class="list-name">  Changed: ' + imageName +
-           ' </div> <div class="additional-info"> Addition Information: </div> <div class="images">' +
+            ' </div> <div class="additional-info"> Addition Information: </div> <div class="images">' +
             '<div class="image"> <img class="diff" src="' + data.getImageDataUrl() +
             '" /> <div class="caption">  Diff   </div> </div> <div class="image">  <img class="input" src="' +
-             image +
-              '" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="' +
-               res.image + '" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
+            image +
+            '" /> <div class="caption"> Current  </div> </div> <div class="image"> <img class="passed" src="' +
+            res.image + '" /> <div class="caption"> Baseline   </div> </div> </div> </div>'
 
           images.push(data.getImageDataUrl())
           images.push(image)
@@ -397,7 +409,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
         if (shouldAssert) {
           assert = assert === undefined ? chai.assert : assert
           assert.equal(result, true, 'Image mismatch percentage (' + data.misMatchPercentage +
-         ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
+            ') is above mismatch threshold(' + misMatchPercentageMargin + ').')
         }
         data ? resolve(data) : reject(data)
       })
