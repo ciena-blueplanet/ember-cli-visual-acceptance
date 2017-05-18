@@ -1,6 +1,5 @@
-/*global  Testem, win, arguments*/
+/*global  Testem, arguments*/
 'use strict'
-const util = require('util')
 var Nightmare = require('nightmare')
 require('nightmare-custom-event')(Nightmare)
 
@@ -10,14 +9,13 @@ Nightmare.action('sendImage',
       win.webContents.send('return-image-event', {
         image: image
       }).catch(function (error) {
-        // console.log('error-send-image.log', error + ' from action \n')
+        console.error('error-send-image', error)
       })
       done()
     })
     done()
   },
   function (image, done) {
-    // console.log('image-sent.log', 'I must be called right?\n' + image + '\n' + done)
     this.child.call('sendImage', image, done)
   })
 
@@ -31,27 +29,25 @@ var nightmare = Nightmare(
 )
 var url = process.argv[2]
 nightmare
-  .viewport(1920, 1080)
+  .viewport(3000, 4000)
   .wait(2000)
   .on('capture-event', function (data) {
     try {
       nightmare.screenshot(undefined, data.rect).then(function (result) {
         var image = result.toString('base64')
         nightmare.sendImage(image).then(function (result) {
-          // console.log('image-sent.log', 'sent image')
         }).catch(function (error) {
-          console.log('error-call-send-image.log', error + 'calling action \n')
+          console.error('error-call-send-image', error)
         })
       }).catch(function (error) {
         console.error('Search failed:', error)
-        console.log('error-night-screen.log', error)
       })
     } catch (error) {
-      console.log('error-capture.log', error)
+      console.error('error-capture', error)
     }
   })
   .bind('capture-event')
-  .goto(url)  
+  .goto(url)
   .evaluate(function () {
     Testem.afterTests(
       // Asynchronously
@@ -62,12 +58,9 @@ nightmare
     )
   })
   .then(function (result) {
-    console.log(result)
+    console.error(result)
   })
   .catch(function (error) {
     console.error('Search failed:', error)
-    console.log('error.log', util.inspect(error, {
-      showHidden: false,
-      depth: null
-    }))
+    console.error('error.error', error)
   })
