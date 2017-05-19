@@ -198,4 +198,4 @@ beforeEach(function () {
  
 
 ## Setting up Travis
-The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
+The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [visual-acceptance](https://github.com/visual-acceptance) will be able to attach reports to your Pull Requests.
