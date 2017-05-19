@@ -36,7 +36,8 @@ function httpGet (theUrl) {
 
 function resolvePositionFixed () {
   var fixedElements = $('*').filter(function () {
-    return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container'
+    return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' &&
+     this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container'
   })
   for (var i = 0; i < fixedElements.length; i++) {
     var element = fixedElements[i]
@@ -82,7 +83,7 @@ function experimentalSvgCapture () {
   })
   return Promise.all(promises)
 }
-
+// eslint-disable-next-line valid-jsdoc
 /**
  * Creates baseline imagesfor visual regression during standard Ember tests using html2Canvas and ResembleJS
  * @param {string} imageName - Name of the image you wish to save
@@ -100,21 +101,19 @@ function capture (imageName, done, options) {
   var captureOptions = getOptions(options)
   var targetElement = captureOptions.targetElement
 
-  if (targetElement) {
-    $(targetElement).ready(function () {
-      return _capture(imageName, captureOptions)
-        .then(function () {
-          if (typeof done === 'function') {
-            done()
-          }
-        }).catch(function (err) {
-          console.log(err)
-          if (typeof done === 'function') {
-            done(err)
-          }
-        })
-    })
-  }
+  $(targetElement).ready(function () {
+    return _capture(imageName, captureOptions)
+      .then(function () {
+        if (typeof done === 'function') {
+          done()
+        }
+      }).catch(function (err) {
+        console.log(err)
+        if (typeof done === 'function') {
+          done(err)
+        }
+      })
+  })
 }
 
 /**
@@ -186,8 +185,6 @@ function _capture (imageName, options) {
   // })
   resolvePositionFixed()
   if (window.__nightmare !== undefined) {
-
-    browserDirectory += 'nightmare'
     return captureNightmare(imageName, options.width, options.height,
         options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else if (window.callPhantom !== undefined) {
