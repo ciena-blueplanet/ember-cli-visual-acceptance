@@ -256,7 +256,8 @@ module.exports = {
     app.get('/should-assert', function (req, res) {
       shouldAssert(req, res)
     })
-    app.get(/[0-9]*\/tests\/assets\//, function (req, res, next){
+    app.get(/[0-9]*\/tests\/assets\//, function (req, res, next) {
+      // forward assets to proper url from testing container
       req.url = req.url.replace(/[0-9]*\/tests\/assets\//, 'assets/')
       next()
     })

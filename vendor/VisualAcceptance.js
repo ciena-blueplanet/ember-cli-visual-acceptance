@@ -210,15 +210,17 @@ function _capture (imageName, options) {
 }
 /**
  * Use NightmareJS to perform capture
- * @param {*} imageName
- * @param {*} width
- * @param {*} height
- * @param {*} misMatchPercentageMargin
- * @param {*} targetElement
- * @param {*} assert
- * @param {*} browserDirectory
+ * @param {string} imageName - Name of the image you wish to save
+ * @param {number} [width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {HTMLElement} targetElement - DOM element to capture
+ * @param {object} [assert=undefined] - Use only if using qunit
+ * @param {object} [browserDirectory=undefined] - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
+ * @returns {Promise} ResembleJs return value
  */
-function captureNightmare (imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
+function captureNightmare (imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+ browserDirectory) {
   // TODO: implement nightmare capture
   return new Promise(function (resolve, reject) {
     if (window.__nightmare === undefined) {
@@ -230,7 +232,6 @@ function captureNightmare (imageName, width, height, misMatchPercentageMargin, t
         targetElement.id = ''
       }
       image = 'data:image/png;base64,' + image
-      // console.log(image)
       return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
         image, browserDirectory,
         resolve, reject)
