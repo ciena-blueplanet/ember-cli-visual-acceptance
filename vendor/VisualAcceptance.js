@@ -48,7 +48,6 @@ function resolvePositionFixed () {
  * @returns {Promise} Promise of all svg conversions
  */
 function experimentalSvgCapture () {
-  console.log('Doing experimental')
   /* eslint-enable no-unused-vars */
   var items = Array.from(document.querySelectorAll('svg'))
   var promises = items.map(function (svg) {
