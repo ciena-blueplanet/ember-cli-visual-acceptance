@@ -28,7 +28,15 @@ visualAcceptanceOptions: {
 }
 ```
 
-### Browsers - html2canvas vs. PhantomJS render callback
+### Browsers - NightmareJS(Electron) html2canvas vs. PhantomJS render callback
+
+#### NightmareJS(Electron)
+
+NightmareJS is a new addition to `ember-cli-visual-acceptance`. NightmareJS is run on top of Electron, using Electron to take the capture. This capture should provide the most accurate representation of your app.
+
+##### Notes
+
+* If the image capture is an empty file or distorted image you should try extending the viewport in `vendor/nightmarejs-launcher.js` the viewport currently set to `.viewport(3000, 4000)` which should be ample room (but the more tests you have the longer the page will grow). The distortion/emptiness of the image is caused by the captured area not being visible on Electron.
 
 #### PhantomJS - SlimerJS
 
