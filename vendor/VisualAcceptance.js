@@ -1,7 +1,7 @@
 /*global XMLHttpRequest,$,Promise,chai,resemble, html2canvas, Image, XMLSerializer,btoa, __nightmare */
 /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "capture" }]*/
-function nightmareSendCaptureRequestAndRecieveImage(targetElement) {
-  return new Promise(function (resolve, reject) {
+function nightmareSendCaptureRequestAndRecieveImage (targetElement) {
+  return new Promise(function (resolve) {
     __nightmare.ipc.once('return-image-event', function (event, result) {
       resolve(result.image)
     })
@@ -27,14 +27,14 @@ function nightmareSendCaptureRequestAndRecieveImage(targetElement) {
  * @param {string} theUrl - url to do GET request on
  * @returns {string} GET Response Text
  */
-function httpGet(theUrl) {
+function httpGet (theUrl) {
   var xmlHttp = new XMLHttpRequest()
   xmlHttp.open('GET', theUrl, false) // false for synchronous request
   xmlHttp.send(null)
   return xmlHttp.responseText
 }
 
-function resolvePositionFixed() {
+function resolvePositionFixed () {
   var fixedElements = $('*').filter(function () {
     return window.getComputedStyle(this).position === 'fixed' && this.id !== 'mocha-stats' && this.nodeName !== 'IFRAME' && this.id !== 'ember-testing-container'
   })
@@ -47,7 +47,8 @@ function resolvePositionFixed() {
  * Convert Svgs to canvas. In hopes of a more accurate rendering using html2canvas
  * @returns {Promise} Promise of all svg conversions
  */
-function experimentalSvgCapture() {
+function experimentalSvgCapture () {
+  console.log('Doing experimental')
   /* eslint-enable no-unused-vars */
   var items = Array.from(document.querySelectorAll('svg'))
   var promises = items.map(function (svg) {
@@ -82,6 +83,7 @@ function experimentalSvgCapture() {
   })
   return Promise.all(promises)
 }
+
 /**
  * Creates baseline imagesfor visual regression during standard Ember tests using html2Canvas and ResembleJS
  * @param {string} imageName - Name of the image you wish to save
@@ -95,7 +97,7 @@ function experimentalSvgCapture() {
  * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {Promise} ResembleJs return value
  */
-function capture(imageName, done, options) {
+function capture (imageName, done, options) {
   var captureOptions = getOptions(options)
   var targetElement = captureOptions.targetElement
 
@@ -127,7 +129,7 @@ function capture(imageName, done, options) {
  * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {object} the options
  */
-function getOptions(options) {
+function getOptions (options) {
   options = options || {}
   if (options.misMatchPercentageMargin == null) {
     options.misMatchPercentageMargin = 0.00
@@ -150,7 +152,7 @@ function getOptions(options) {
  * @param {object} [options.assert=undefined] - Use only if using qunit
  * @returns {Promise} ResembleJs return value
  */
-function _capture(imageName, options) {
+function _capture (imageName, options) {
   var browser = window.ui
   var istargetbrowser = JSON.parse(httpGet('/istargetbrowser?' + $.param(browser)))
   if (istargetbrowser === false) {
@@ -185,8 +187,10 @@ function _capture(imageName, options) {
   // })
   resolvePositionFixed()
   if (window.__nightmare !== undefined) {
+
+    browserDirectory += 'nightmare'
     return captureNightmare(imageName, options.width, options.height,
-     options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
+        options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else if (window.callPhantom !== undefined) {
     return capturePhantom(imageName, options.width, options.height,
       options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
@@ -214,16 +218,15 @@ function _capture(imageName, options) {
  * @param {*} assert
  * @param {*} browserDirectory
  */
-function captureNightmare(imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
+function captureNightmare (imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
   // TODO: implement nightmare capture
-  browserDirectory += '-nightmareJS' 
   return new Promise(function (resolve, reject) {
     if (window.__nightmare === undefined) {
       resolve('Not on NightmareJS')
     }
-    // Get test dummy image    
+    // Get test dummy image
     return nightmareSendCaptureRequestAndRecieveImage(targetElement).then(function (image) {
-      if (targetElement.id === 'tempVisualAcceptanceId'){
+      if (targetElement.id === 'tempVisualAcceptanceId') {
         targetElement.id = ''
       }
       image = 'data:image/png;base64,' + image
@@ -245,7 +248,7 @@ function captureNightmare(imageName, width, height, misMatchPercentageMargin, ta
  * @param {object} [browserDirectory=undefined] - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
  * @returns {Promise} ResembleJs return value
  */
-function capturePhantom(imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
+function capturePhantom (imageName, width, height, misMatchPercentageMargin, targetElement, assert, browserDirectory) {
   return new Promise(function (resolve, reject) {
     if (window.callPhantom === undefined) {
       resolve('Not on PhantomJS')
@@ -283,7 +286,7 @@ function capturePhantom(imageName, width, height, misMatchPercentageMargin, targ
  * @param {object} browserDirectory - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
  * @returns {Promise} ResembleJs return value
  */
-function captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, targetElement,
+function captureHtml2Canvas (imageName, width, height, misMatchPercentageMargin, targetElement,
   assert, browserDirectory) {
   return html2canvas(targetElement, {
     timeout: 1000
@@ -310,7 +313,7 @@ function captureHtml2Canvas(imageName, width, height, misMatchPercentageMargin, 
  * @param {object} reject - reject from Promise
  * @returns {Promise} ResembleJs return value
  */
-function utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+function utilizeImage (imageName, width, height, misMatchPercentageMargin, targetElement, assert,
   image, browserDirectory, resolve, reject) {
   if (!document.getElementById('visual-acceptance')) {
     var visualAcceptanceContainer
