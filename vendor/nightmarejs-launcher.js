@@ -29,7 +29,7 @@ var nightmare = Nightmare(
 )
 var url = process.argv[2]
 nightmare
-  .viewport(3000, 4000)
+  .viewport(3000, 10000)
   .wait(2000)
   .on('capture-event', function (data) {
     try {
