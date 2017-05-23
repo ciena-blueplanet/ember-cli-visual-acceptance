@@ -18,7 +18,7 @@ module.exports = {
           {name: 'resemblejs', target: '2.2.0'},
           {name: 'sync-request', target: '^3.0.1'}
         ])
-      })
+      }.bind(this))
     }.bind(this))
   }
 }
