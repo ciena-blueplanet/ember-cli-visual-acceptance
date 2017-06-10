@@ -1,5 +1,5 @@
-/*global capture */
-/*eslint-disable no-console */
+/* global capture */
+/* eslint-disable no-console */
 import {
   expect
 } from 'chai'
