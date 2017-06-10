@@ -192,10 +192,17 @@ beforeEach(function () {
 ## Setting up Travis
 The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
 
-## Troubleshooting
-#### `'capture' is not defined` when running tests or generating baseline images
+## Linting
+
+#### ESLint
 Add the below line to the top of your test file:
 ```javascript
 /* global capture */
 ```
 as seen in [the sample integration test](/tests/integration/simple-test.js).
+
+#### JSHint
+Add the below line to the top of your test file:
+```javascript
+/* globals capture */
+```
