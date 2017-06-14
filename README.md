@@ -38,12 +38,12 @@ Personally I prefer SlimerJS. As PhantomJS's webkit version is behind the latest
 
 ##### Warning
 
-With certain repositories I've had trouble with SlimerJS having segmentation faults on both Linux and Mac. I've yet to resolve this issue. So I have re-included html2Canvas work. 
+With certain repositories I've had trouble with SlimerJS having segmentation faults on both Linux and Mac. I've yet to resolve this issue. So I have re-included html2Canvas work.
 
 #### Html2Canvas
 
 Html2Canvas is used when a browser does not have the function `window.callPhantom` (Only PhantomJS and SlimerJS have this defined). Html2Canvas is still in beta and as result you will see some issues.
-Html2Canvas relies on Canvas drawing support. I find Chrome has the best Canvas drawing support (miles ahead of their competitors), while Firefox has the second best Canvas drawing support. 
+Html2Canvas relies on Canvas drawing support. I find Chrome has the best Canvas drawing support (miles ahead of their competitors), while Firefox has the second best Canvas drawing support.
 
 ##### SVGs
 
@@ -125,7 +125,7 @@ capture (imageName, options)
     capture('primary-small-button', done)
   })
   ```
-  
+
   * Run `ember test -s`
 
 ### Baseline
@@ -180,14 +180,29 @@ ember-cli-visual-acceptance makes api calls to it's own testem middleware. So in
 Currently there is no canvas support for svg `<use>` tags. As a result visual acceptance will produce a blank canvas in the place of those svgs.
 
 ### Ember-Frost-Core
-If your svgs are coming from [`ember-frost-core`](https://github.com/ciena-frost/ember-frost-core) you can utilize the [inline svg rendering config option](https://github.com/ciena-frost/ember-frost-core/blob/master/docs/frost-icons.md#inline-svg-rendering) in your `tests/dummy/config/environment.js`. If using visual acceptance in an integration test you must import the `svg-use-polyfill` instance initializer and run it beforeEach test. You can import the intializer via `import {initialize as initializeSvgUse} from 'ember-frost-core/instance-initializers/svg-use-polyfill'` and make use of it in the beforeEach hook by doing 
+If your svgs are coming from [`ember-frost-core`](https://github.com/ciena-frost/ember-frost-core) you can utilize the [inline svg rendering config option](https://github.com/ciena-frost/ember-frost-core/blob/master/docs/frost-icons.md#inline-svg-rendering) in your `tests/dummy/config/environment.js`. If using visual acceptance in an integration test you must import the `svg-use-polyfill` instance initializer and run it beforeEach test. You can import the intializer via `import {initialize as initializeSvgUse} from 'ember-frost-core/instance-initializers/svg-use-polyfill'` and make use of it in the beforeEach hook by doing
 
 ```javascript
 beforeEach(function () {
   initializeSvgUse()
 })
 ```
- 
+
 
 ## Setting up Travis
 The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
+
+## Linting
+
+#### ESLint
+Add the below line to the top of your test file:
+```javascript
+/* global capture */
+```
+as seen in [the sample integration test](/tests/integration/simple-test.js).
+
+#### JSHint
+Add the below line to the top of your test file:
+```javascript
+/* globals capture */
+```
