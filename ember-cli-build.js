@@ -7,6 +7,12 @@ module.exports = function (defaults) {
     'ember-cli-mocha': {
       useLintTree: false
     }
+    // visualAcceptanceOptions: {
+    //   upload: function (image, req, options) {
+    //     console.log('We using me for images')
+    //     return 'foobar-image-url'
+    //   }
+    // }
   })
 
   app.import('bower_components/sinonjs/sinon.js')
