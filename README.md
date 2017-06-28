@@ -17,6 +17,21 @@ Create baseline images and test for CSS regression during standard Ember tests u
 `ember install ember-cli-visual-acceptance`
 ### Configuration
 
+#### Custom Image upload
+  There are many cases where you don't want to use Imgur (such as repo's on Github enterprise). So in your `ember-cli-build.js` you have the ability to utilize your own upload function.
+  ```javascript
+  upload: function (image, index,  req, options) {
+    let result = 'foobar-image-url'
+    console.log('We using me for images w/ result: ', result)
+    return result
+  }
+  ```
+  The return value should be the url where the image is hosted.
+  The parameters are as follows:
+  *  `image`: The base64 string of the image to upload
+  * `index`: The index of the current image that relates to (Diff, Current, Baseline)
+  * `req`: the request object from the middleware
+  * `options`: the `visualAcceptanceOptions` in `ember-cli-build.js`
 #### Location of saved images
 
   You can specify the location where the saved images will be stored (do not store under **`tests`** directory).  Include the following in your `ember-cli-build.js`:
