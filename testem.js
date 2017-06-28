@@ -4,12 +4,13 @@ module.exports = {
   'disable_watching': true,
   'launch_in_ci': [
     'Firefox',
-    'SlimerJsVisualAcceptance',
+    'NightmareJsVisualAcceptance',
     'PhantomJsVisualAcceptance',
+    'SlimerJsVisualAcceptance',
     'Chromium'
   ],
   'launch_in_dev': [
-    'Firefox'
+    'NightmareJsVisualAcceptance'
   ],
 
   'launchers': {
@@ -19,6 +20,10 @@ module.exports = {
     },
     'SlimerJsVisualAcceptance': {
       'command': 'slimerjs --debug=true --error-log-file=error.log vendor/phantomjs-launcher.js <url>',
+      'protocol': 'browser'
+    },
+    'NightmareJsVisualAcceptance': {
+      'command': 'DEBUG=nightmare* node vendor/nightmarejs-launcher.js <url>',
       'protocol': 'browser'
     }
   }

@@ -16,6 +16,9 @@
     if(/SlimerJS/.test(ua)){
       browser = 'SlimerJS'
       version = /SlimerJS\/([0-9|\.]+)/.exec(ua)[1]
+    }else if (/Electron/.test(ua)){
+      browser = 'Electron'
+      version = /Electron\/([0-9|\.]+)/.exec(ua)[1]
     }else if(/PhantomJS/.test(ua)){
       browser = 'PhantomJS'
       version = /PhantomJS\/([0-9|\.]+)/.exec(ua)[1]

@@ -28,7 +28,15 @@ visualAcceptanceOptions: {
 }
 ```
 
-### Browsers - html2canvas vs. PhantomJS render callback
+### Browsers - NightmareJS(Electron) html2canvas vs. PhantomJS render callback
+
+#### NightmareJS(Electron)
+
+NightmareJS is a new addition to `ember-cli-visual-acceptance`. NightmareJS is run on top of Electron, using Electron to take the capture. This capture should provide the most accurate representation of your app.
+
+##### Notes
+
+* If the image capture is an empty file or distorted image you should try extending the viewport in `vendor/nightmarejs-launcher.js` the viewport currently set to `.viewport(3000, 4000)` which should be ample room (but the more tests you have the longer the page will grow). The distortion/emptiness of the image is caused by the captured area not being visible on Electron.
 
 #### PhantomJS - SlimerJS
 
@@ -190,7 +198,7 @@ beforeEach(function () {
 
 
 ## Setting up Travis
-The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [ember-cli-visual-acceptance](https://github.com/ember-cli-visual-acceptance) will be able to attach reports to your Pull Requests.
+The details to setup Travis can be found [here](https://ciena-blueplanet.github.io/developers.blog/2016/07/18/Using-ember-cli-visual-acceptance.html). Once complete [visual-acceptance](https://github.com/visual-acceptance) will be able to attach reports to your Pull Requests.
 
 ## Linting
 
