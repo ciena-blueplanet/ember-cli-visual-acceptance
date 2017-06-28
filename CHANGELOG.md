@@ -1,3 +1,8 @@
+# 2.3.0 (2017-06-28)
+
+* custom upload specification in `ember-cli-build.js`. Also allow to specify github api endpoint (enterprise)
+
+
 # 2.2.3 (2017-06-28)
 
 * Update travis encrypted data
