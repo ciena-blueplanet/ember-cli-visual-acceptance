@@ -1,3 +1,8 @@
+# 2.2.3 (2017-06-28)
+
+* Update travis encrypted data
+
+
 # 2.2.2 (2017-04-20)
 - Fixes issue with checking no longer used `.tabs` class, that conflicts with user apps that make use of this addon
 
