@@ -1,3 +1,8 @@
+# 2.3.1 (2017-06-29)
+
+* Add index param for custom upload
+
+
 # 2.3.0 (2017-06-28)
 
 * custom upload specification in `ember-cli-build.js`. Also allow to specify github api endpoint (enterprise)
