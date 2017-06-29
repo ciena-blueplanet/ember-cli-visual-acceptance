@@ -1,3 +1,8 @@
+# 2.3.2 (2017-06-29)
+
+* Fixes https://github.com/ciena-blueplanet/ember-cli-visual-acceptance/issues/113
+
+
 # 2.3.1 (2017-06-29)
 
 * Add index param for custom upload
