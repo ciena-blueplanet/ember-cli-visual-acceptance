@@ -72,7 +72,7 @@ function appendToReport (req, res, options) {
         imgurLinks.push(uploadToExpress(process.env.TEAMCITY_API_URL, req.body.images[i], req.body.name + '-' + i +
          '.png').link)
       } else if (options.visualAcceptanceOptions && options.visualAcceptanceOptions.upload) {
-        imgurLinks.push(options.visualAcceptanceOptions.upload(req.body.images[i], req, options))
+        imgurLinks.push(options.visualAcceptanceOptions.upload(req.body.images[i], i, req, options))
       } else {
         imgurLinks.push(uploadToImgur(req.body.images[i]))
       }
