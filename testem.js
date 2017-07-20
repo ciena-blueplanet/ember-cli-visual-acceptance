@@ -10,7 +10,7 @@ module.exports = {
     'Chromium'
   ],
   'launch_in_dev': [
-    'NightmareJsVisualAcceptance'
+    'Electron'
   ],
 
   'launchers': {
@@ -24,6 +24,10 @@ module.exports = {
     },
     'NightmareJsVisualAcceptance': {
       'command': 'DEBUG=nightmare* node vendor/nightmarejs-launcher.js <url>',
+      'protocol': 'browser'
+    },
+    'Electron': {
+      'command': 'electron vendor/electron-launcher.js <url>',      
       'protocol': 'browser'
     }
   }

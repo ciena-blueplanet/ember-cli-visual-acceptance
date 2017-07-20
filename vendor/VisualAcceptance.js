@@ -22,6 +22,33 @@ function nightmareSendCaptureRequestAndRecieveImage (targetElement) {
     })
   })
 }
+
+function electronSendCaptureRequestAndRecieveImage (targetElement) {
+  const {ipcRenderer} = window.nodeRequire('electron')
+  return new Promise(function (resolve) {
+    ipcRenderer.once('return-image-event', function (event, result) {
+      console.log('Electron recieved image')
+      resolve(result.image)
+    })
+
+    if (targetElement.id === '') {
+      var tempId = 'tempVisualAcceptanceId'
+      targetElement.id = tempId
+    }
+    var rect = document.getElementById(targetElement.id).getBoundingClientRect()
+    var clip = {
+      x: rect.left,
+      y: rect.top,
+      width: rect.width,
+      height: rect.height
+    }
+    console.log('Electron send image')
+    
+    ipcRenderer.send('capture-event', {
+      rect: clip
+    })
+  })
+}
 /**
  * Does httpGet on url synchronously
  * @param {string} theUrl - url to do GET request on
@@ -167,9 +194,10 @@ function _capture (imageName, options) {
 
   var browserDirectory
   if (browser.osversion === undefined) {
-    browserDirectory = browser.os + '/' + browser.browser + '/'
+    browserDirectory = browser.os + '/' + window.__nightmare === undefined ? browser.browser : 'NightmareJS' + '/'
   } else {
-    browserDirectory = browser.os + '/' + browser.osversion + '/' + browser.browser + '/'
+    browserDirectory = browser.os + '/' + browser.osversion + '/' +
+     window.__nightmare === undefined ? browser.browser : 'NightmareJS' + '/'
   }
 
   if (options.height && options.width) {
@@ -186,6 +214,10 @@ function _capture (imageName, options) {
   resolvePositionFixed()
   if (window.__nightmare !== undefined) {
     return captureNightmare(imageName, options.width, options.height,
+        options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
+  } else if (window.ui.browser === 'Electron') {
+    console.log('Doing Electron capture')
+    return captureElectron(imageName, options.width, options.height,
         options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else if (window.callPhantom !== undefined) {
     return capturePhantom(imageName, options.width, options.height,
@@ -234,6 +266,36 @@ function captureNightmare (imageName, width, height, misMatchPercentageMargin, t
     })
   })
 }
+/**
+ * Use NightmareJS to perform capture
+ * @param {string} imageName - Name of the image you wish to save
+ * @param {number} [width=null] - Define the width of the canvas in pixels. If null, renders with full width of the container(640px).
+ * @param {number} [height=null] - Define the height of the canvas in pixels. If null, renders with full height of the window.(384px).
+ * @param {float} [misMatchPercentageMargin=0.00] - The maximum percentage ResembleJs is allowed to misMatch.
+ * @param {HTMLElement} targetElement - DOM element to capture
+ * @param {object} [assert=undefined] - Use only if using qunit
+ * @param {object} [browserDirectory=undefined] - visual acceptance image path based off window.ui (holds browser info) and size of ember-testing-container
+ * @returns {Promise} ResembleJs return value
+ */
+function captureElectron (imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+  browserDirectory) {
+   // TODO: implement nightmare capture
+   return new Promise(function (resolve, reject) {
+    if (window.nodeRequire === undefined) {
+      resolve('Electron doesn\'t have nodeRequire')
+    }
+     // Get test dummy image
+     return electronSendCaptureRequestAndRecieveImage(targetElement).then(function (image) {
+       if (targetElement.id === 'tempVisualAcceptanceId') {
+         targetElement.id = ''
+       }
+       image = 'data:image/png;base64,' + image
+       return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+         image, browserDirectory,
+         resolve, reject)
+     })
+   })
+ }
 /**
  * Use phantomJS/slimerjs callback to capture Image
  * @param {string} imageName - Name of the image you wish to save
