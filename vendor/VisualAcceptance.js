@@ -193,11 +193,11 @@ function _capture (imageName, options) {
   $(document.getElementById('ember-testing-container')).css('position', 'relative')
 
   var browserDirectory
+  let browserPath = window.__nightmare === undefined ? browser.browser : 'NightmareJS'
   if (browser.osversion === undefined) {
-    browserDirectory = browser.os + '/' + window.__nightmare === undefined ? browser.browser : 'NightmareJS' + '/'
+    browserDirectory = browser.os + '/' + browserPath + '/'
   } else {
-    browserDirectory = browser.os + '/' + browser.osversion + '/' +
-     window.__nightmare === undefined ? browser.browser : 'NightmareJS' + '/'
+    browserDirectory = browser.os + '/' + browser.osversion + '/' + browserPath + '/'
   }
 
   if (options.height && options.width) {
