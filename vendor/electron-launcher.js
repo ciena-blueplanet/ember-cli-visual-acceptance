@@ -2,8 +2,8 @@ const electron = require('electron')
 const app = electron.app  // Module to control application life.
 const BrowserWindow = electron.BrowserWindow  // Module to create native browser window.
 const ipcMain = electron.ipcMain
-const timeoutFromResize = 100
-
+const timeoutFromResize = 400
+const fs = require('fs')
 // var url = process.argv[2]
 // Report crashes to our server.
 // electron.crashReporter.start();
@@ -28,18 +28,32 @@ function sendImage (win, image) {
 // initialization and is ready to create browser windows.
 app.on('ready', function () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 800, offscreen: true, show: false, 'enable-larger-than-screen': true})
+  mainWindow = new BrowserWindow({width: 800, height: 800, offscreen: true, show: false, 'enable-larger-than-screen': true, useContentSize: true})
   console.log('Setting ipcMain')
 
   ipcMain.on('capture-event', function (event, data) {
     mainWindow.webContents.executeJavaScript(
-      '[document.documentElement.scrollWidth, document.documentElement.scrollHeight]',
+      "[document.getElementById('ember-testing-container').scrollIntoView(true), document.getElementById('ember-testing-container').scrollWidth, document.getElementById('ember-testing-container').scrollHeight]",
       false, result => {
-        mainWindow.setContentSize(result[0], result[1])
+        mainWindow.setContentSize(result[1] + 200, result[2] + 200)
+        fs.appendFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/error.log', `sized to ${document.getElementById('ember-testing-container').scrollWidth} ${document.getElementById('ember-testing-container').scrollHeight} \n`)
+
         setTimeout(() => {
-          mainWindow.capturePage(data.rect, function (result) {
-            var image = Buffer.from(result.toPNG()).toString('base64')
-            sendImage(mainWindow, image)
+          mainWindow.webContents.executeJavaScript(`[JSON.stringify(document.getElementById('${data.targetId}').getBoundingClientRect(), ["top", "left", "width", 
+          "height"])]`, false, res => {
+            let rect = JSON.parse(res[0])
+            var clip = {
+              x: rect.left,
+              y: rect.top,
+              width: rect.width,
+              height: rect.height
+            }
+            fs.appendFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/error.log', `captureing ${data.targetId} with: \n ${JSON.stringify(clip, null, 4)}  \n`)
+            mainWindow.capturePage(clip, function (imageResult) {
+              fs.writeFileSync(data.targetId + '-image.png', imageResult.toPNG())
+              var image = Buffer.from(imageResult.toPNG()).toString('base64')
+              sendImage(mainWindow, image)
+            })
           })
         }, timeoutFromResize)
       }
@@ -54,7 +68,7 @@ app.on('ready', function () {
   mainWindow.loadURL('http://localhost:7357/')
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools({mode: 'detach'})
 
   // mainWindow.webContents.executeJavaScript(`
   // Testem.afterTests(

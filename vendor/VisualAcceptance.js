@@ -45,7 +45,8 @@ function electronSendCaptureRequestAndRecieveImage (targetElement) {
     console.log('Electron send image')
     
     ipcRenderer.send('capture-event', {
-      rect: clip
+      rect: clip,
+      targetId: targetElement.id
     })
   })
 }
