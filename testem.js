@@ -3,11 +3,12 @@ module.exports = {
   'test_page': 'tests/index.html?hidepassed',
   'disable_watching': true,
   'launch_in_ci': [
-    'Firefox',
-    'NightmareJsVisualAcceptance',
-    'PhantomJsVisualAcceptance',
-    'SlimerJsVisualAcceptance',
-    'Chromium'
+    'Electron'
+    // 'Firefox',
+    // 'NightmareJsVisualAcceptance',
+    // 'PhantomJsVisualAcceptance',
+    // 'SlimerJsVisualAcceptance',
+    // 'Chromium'
   ],
   'launch_in_dev': [
     'Electron'
@@ -27,8 +28,13 @@ module.exports = {
       'protocol': 'browser'
     },
     'Electron': {
-      'command': 'electron vendor/electron-launcher.js <url>',      
+      'command': 'electron -i vendor/electron-launcher.js <url>',      
       'protocol': 'browser'
+    },
+    "cli": {
+      "exe": "node",
+      "args": [ "--inspect", "--debug-brk", "./runtests.js", "<baseUrl>", "<testPage>", "<id>" ],
+      "protocol": "browser"
     }
   }
 }
