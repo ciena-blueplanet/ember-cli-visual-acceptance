@@ -52,7 +52,7 @@ app.on('ready', function () {
             fs.appendFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/error.log', `captureing ${data.targetId} with: \n ${JSON.stringify(clip, null, 4)}  \n`)
 
             mainWindow.capturePage(clip, function (imageResult) {
-              fs.writeFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/electron-images/' + uuidv4() + '-image.png', imageResult.toPNG())
+              // fs.writeFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/electron-images/' + uuidv4() + '-image.png', imageResult.toPNG())
               var image = Buffer.from(imageResult.toPNG()).toString('base64')
               sendImage(mainWindow, image)
             })

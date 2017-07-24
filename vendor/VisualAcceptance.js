@@ -27,7 +27,6 @@ function electronSendCaptureRequestAndRecieveImage (targetElement) {
   const {ipcRenderer} = window.nodeRequire('electron')
   return new Promise(function (resolve) {
     ipcRenderer.once('return-image-event', function (event, result) {
-      console.log('Electron recieved image')
       resolve(result.image)
     })
 
@@ -42,7 +41,6 @@ function electronSendCaptureRequestAndRecieveImage (targetElement) {
       width: rect.width,
       height: rect.height
     }
-    console.log('Electron send image')
     
     ipcRenderer.send('capture-event', {
       rect: clip,
@@ -219,7 +217,6 @@ function _capture (imageName, options) {
     return captureNightmare(imageName, options.width, options.height,
         options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else if (window.ui.browser === 'Electron') {
-    console.log('Doing Electron capture')
     return captureElectron(imageName, options.width, options.height,
         options.misMatchPercentageMargin, options.targetElement, options.assert, browserDirectory)
   } else if (window.callPhantom !== undefined) {
