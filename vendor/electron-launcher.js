@@ -29,7 +29,7 @@ function sendImage (win, image) {
 // initialization and is ready to create browser windows.
 app.on('ready', function () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 800, offscreen: true, show: true, 'enable-larger-than-screen': true, useContentSize: true})
+  mainWindow = new BrowserWindow({width: 800, height: 800, offscreen: true, show: false, 'enable-larger-than-screen': true, useContentSize: true})
   console.log('Setting ipcMain')
 
   ipcMain.on('capture-event', function (event, data) {
@@ -50,10 +50,7 @@ app.on('ready', function () {
               height: rect.height
             }
             fs.appendFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/error.log', `captureing ${data.targetId} with: \n ${JSON.stringify(clip, null, 4)}  \n`)
-            var didFinishLoad = new Promise(function (resolve) {
-              mainWindow.webContents.once('did-finish-load', resolve)
-            })
-            
+
             mainWindow.capturePage(clip, function (imageResult) {
               fs.writeFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/electron-images/' + uuidv4() + '-image.png', imageResult.toPNG())
               var image = Buffer.from(imageResult.toPNG()).toString('base64')
@@ -73,24 +70,7 @@ app.on('ready', function () {
   mainWindow.loadURL('http://localhost:7357/')
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools({mode: 'detach'})
-
-  // mainWindow.webContents.executeJavaScript(`
-  // Testem.afterTests(
-  //   // Asynchronously
-  //   function (config, data, callback) {
-  //     callback(null)
-  //     // Set time to wait for callback to finish its work. Then close launcher (Issue Testem: fails to close custom launcher on Linux) https://github.com/testem/testem/issues/915
-  //     setTimeout(function (params) {
-  //       const {ipcRenderer} = window.nodeRequire('electron')
-  //       ipcRenderer.send('exit-event', {
-  //         exit: true
-  //       })
-  //     }, 2000)
-  //     // Set time to wait for callback to finish its work. Then close launcher (Issue Testem: fails to close custom launcher on Linux) https://github.com/testem/testem/issues/915
-  //   }
-  // )
-  // `)
+  // mainWindow.webContents.openDevTools({mode: 'detach'})
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
