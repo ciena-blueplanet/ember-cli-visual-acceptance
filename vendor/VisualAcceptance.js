@@ -191,7 +191,9 @@ function _capture (imageName, options) {
   $(document.getElementById('ember-testing')).css('width', '100%')
   $(document.getElementById('ember-testing')).css('height', '100%')
   $(document.getElementById('ember-testing-container')).css('overflow', 'visible')
-  $(document.getElementById('ember-testing-container')).css('position', 'relative')
+  $(document.getElementById('ember-testing-container')).css('position', 'absolute')
+  $(document.getElementById('ember-testing-container')).css('top', '0px')
+  $(document.getElementById('ember-testing-container')).css('left', '0px')
 
   var browserDirectory
   let browserPath = window.__nightmare === undefined ? browser.browser : 'NightmareJS'
@@ -421,6 +423,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
     return new Promise(function (resolve, reject) {
       resemble(res.image).compareTo(image).scaleToSameSize().onComplete(function (data) {
         var result = false
+        // debugger
         if (parseFloat(data.misMatchPercentage) <= misMatchPercentageMargin) {
           // Passed
           $.ajax({

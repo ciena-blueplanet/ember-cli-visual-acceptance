@@ -20,6 +20,11 @@
     "NightmareJsVisualAcceptance": {
       "command": "node vendor/nightmarejs-launcher.js <url>",
       "protocol": "browser"
+    },
+    "Electron": {
+      "exe": "node",
+      "args": [ "vendor/electron-launcher.js", "<baseUrl>", "<testPage>", "<id>"],
+      "protocol": "browser"
     }
   }
 }
