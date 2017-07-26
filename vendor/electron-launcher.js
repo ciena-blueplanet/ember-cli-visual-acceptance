@@ -34,7 +34,7 @@ app.on('ready', function () {
   mainWindow = new BrowserWindow({width: 800, height: 800, offscreen: true, show: false, 'enable-larger-than-screen': true, useContentSize: true})
   console.log('Setting ipcMain')
   mainWindow.webContents.executeJavaScript(`
-  const {ipcRenderer} = window.nodeRequire('electron')
+  const ipcRenderer = window.nodeRequire('electron').ipcRenderer
   Testem.afterTests(
     // Asynchronously
     function (config, data, callback) {

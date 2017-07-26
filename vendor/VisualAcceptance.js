@@ -24,7 +24,7 @@ function nightmareSendCaptureRequestAndRecieveImage (targetElement) {
 }
 
 function electronSendCaptureRequestAndRecieveImage (targetElement) {
-  const {ipcRenderer} = window.nodeRequire('electron')
+  const ipcRenderer = window.nodeRequire('electron').ipcRenderer
   return new Promise(function (resolve) {
     ipcRenderer.once('return-image-event', function (event, result) {
       resolve(result.image)
@@ -194,7 +194,7 @@ function _capture (imageName, options) {
   $(document.getElementById('ember-testing-container')).css('left', '0px')
 
   var browserDirectory
-  let browserPath = window.__nightmare === undefined ? browser.browser : 'NightmareJS'
+  var browserPath = window.__nightmare === undefined ? browser.browser : 'NightmareJS'
   if (browser.osversion === undefined) {
     browserDirectory = browser.os + '/' + browserPath + '/'
   } else {
