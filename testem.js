@@ -28,7 +28,7 @@ module.exports = {
       'protocol': 'browser'
     },
     'Electron': {
-      'command': 'electron -i vendor/electron-launcher.js <url>',      
+      'command': 'electron -i vendor/electron-launcher.js <url>',
       'protocol': 'browser'
     }
   }
