@@ -1,10 +1,10 @@
+/* eslint-disable max-len */
 const electron = require('electron')
-const app = electron.app  // Module to control application life.
-const BrowserWindow = electron.BrowserWindow  // Module to create native browser window.
+const app = electron.app // Module to control application life.
+const BrowserWindow = electron.BrowserWindow // Module to create native browser window.
 const ipcMain = electron.ipcMain
 const timeoutFromResize = 1500
 const fs = require('fs')
-const uuidv4 = require('uuid/v4')
 var url = process.argv[3]
 
 // var url = process.argv[2]
@@ -22,6 +22,7 @@ app.on('window-all-closed', function () {
   app.quit()
   // }
 })
+
 function sendImage (win, image) {
   win.webContents.send('return-image-event', {
     image: image
@@ -31,7 +32,14 @@ function sendImage (win, image) {
 // initialization and is ready to create browser windows.
 app.on('ready', function () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 800, offscreen: true, show: false, 'enable-larger-than-screen': true, useContentSize: true})
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 800,
+    offscreen: true,
+    show: false,
+    'enable-larger-than-screen': true,
+    useContentSize: true
+  })
   console.log('Setting ipcMain')
   mainWindow.webContents.executeJavaScript(`
   const ipcRenderer = window.nodeRequire('electron').ipcRenderer

@@ -41,7 +41,7 @@ function electronSendCaptureRequestAndRecieveImage (targetElement) {
       width: rect.width,
       height: rect.height
     }
-    
+
     ipcRenderer.send('capture-event', {
       rect: clip,
       targetId: targetElement.id
@@ -280,22 +280,22 @@ function captureNightmare (imageName, width, height, misMatchPercentageMargin, t
 function captureElectron (imageName, width, height, misMatchPercentageMargin, targetElement, assert,
   browserDirectory) {
    // TODO: implement nightmare capture
-   return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve, reject) {
     if (window.nodeRequire === undefined) {
       resolve('Electron doesn\'t have nodeRequire')
     }
      // Get test dummy image
-     return electronSendCaptureRequestAndRecieveImage(targetElement).then(function (image) {
-       if (targetElement.id === 'tempVisualAcceptanceId') {
-         targetElement.id = ''
-       }
-       image = 'data:image/png;base64,' + image
-       return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
+    return electronSendCaptureRequestAndRecieveImage(targetElement).then(function (image) {
+      if (targetElement.id === 'tempVisualAcceptanceId') {
+        targetElement.id = ''
+      }
+      image = 'data:image/png;base64,' + image
+      return utilizeImage(imageName, width, height, misMatchPercentageMargin, targetElement, assert,
          image, browserDirectory,
          resolve, reject)
-     })
-   })
- }
+    })
+  })
+}
 /**
  * Use phantomJS/slimerjs callback to capture Image
  * @param {string} imageName - Name of the image you wish to save

@@ -10,7 +10,7 @@
     "build": "ember build",
     "start": "ember server",
     "test": "npm run lint && ember test",
-    "lint": "eslint *.js addon app blueprints config tests"
+    "lint": "eslint *.js addon app blueprints config tests vendor/VisualAcceptance.js vendor/*-launcher.js"
   },
   "repository": "https://github.com/ciena-blueplanet/ember-cli-visual-acceptance.git",
   "engines": {
@@ -19,6 +19,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
     "broccoli-asset-rev": "^2.4.2",
     "ember-ajax": "0.7.1",
     "ember-cli": "2.4.3",
@@ -47,7 +48,7 @@
   "dependencies": {
     "body-parser": "^1.15.1",
     "chalk": "^1.1.3",
-    "electron": "^1.6.11",    
+    "electron": "^1.6.11",
     "ember-cli-babel": "^5.1.6",
     "ember-cli-node-assets": "^0.1.4",
     "es6-promise": "^3.2.2",
