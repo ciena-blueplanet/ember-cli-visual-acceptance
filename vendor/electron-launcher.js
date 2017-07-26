@@ -5,6 +5,8 @@ const ipcMain = electron.ipcMain
 const timeoutFromResize = 1500
 const fs = require('fs')
 const uuidv4 = require('uuid/v4')
+var url = process.argv[3]
+
 // var url = process.argv[2]
 // Report crashes to our server.
 // electron.crashReporter.start();
@@ -67,7 +69,7 @@ app.on('ready', function () {
   })
 
   // and load the index.html of the app.
-  mainWindow.loadURL('http://localhost:7357/')
+  mainWindow.loadURL(url)
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools({mode: 'detach'})
