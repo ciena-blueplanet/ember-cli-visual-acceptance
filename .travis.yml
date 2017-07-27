@@ -1,8 +1,8 @@
 language: node_js
 sudo: true
-dist: precise
+dist: trusty
 node_js:
-- '5.3'
+- '6.9.1'
 branches:
   except:
   - /^v[0-9\.]+/
@@ -30,12 +30,14 @@ after_success:
   && rm -f coverage/lcov.info--
 - cat coverage/lcov.info | coveralls
 addons:
-  chrome: stable
   apt:
     sources:
-    - ubuntu-toolchain-r-test
+      - google-chrome
+      - ubuntu-toolchain-r-test
     packages:
-    - g++-4.8
+      - google-chrome-stable
+      - g++-4.8
+  firefox: 'latest-esr'
 env:
   matrix:
   - CXX=g++-4.8
