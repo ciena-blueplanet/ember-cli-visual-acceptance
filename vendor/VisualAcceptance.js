@@ -410,7 +410,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
         type: 'New',
         images: images,
         name: imageName,
-        browser: window.ui.browser
+        browser: window.__nightmare === undefined ? window.ui.browser : 'NightmareJS'
       }
     })
     resolve('No passed image. Saving current test as base')
@@ -465,7 +465,7 @@ function utilizeImage (imageName, width, height, misMatchPercentageMargin, targe
               type: 'Changed',
               images: images,
               name: imageName,
-              browser: window.ui.browser
+              browser: window.__nightmare === undefined ? window.ui.browser : 'NightmareJS'
             }
           })
         }
