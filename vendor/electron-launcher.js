@@ -4,7 +4,6 @@ const app = electron.app // Module to control application life.
 const BrowserWindow = electron.BrowserWindow // Module to create native browser window.
 const ipcMain = electron.ipcMain
 const timeoutFromResize = 1500
-const fs = require('fs')
 var url = process.argv[3]
 
 // var url = process.argv[2]
@@ -62,7 +61,6 @@ app.on('ready', function () {
       "[document.getElementById('ember-testing-container').scrollWidth, document.getElementById('ember-testing-container').scrollHeight]",
       false, result => {
         mainWindow.setContentSize(result[0] + 200, result[1] + 200)
-        fs.appendFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/error.log', `sized to ${result[1]} ${result[2]} \n`)
 
         setTimeout(() => {
           mainWindow.webContents.executeJavaScript(`[window.scrollTo(0,0), JSON.stringify(document.getElementById('${data.targetId}').getBoundingClientRect(), ["top", "left", "width", 
@@ -74,7 +72,6 @@ app.on('ready', function () {
               width: rect.width,
               height: rect.height
             }
-            fs.appendFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/error.log', `captureing ${data.targetId} with: \n ${JSON.stringify(clip, null, 4)}  \n`)
 
             mainWindow.capturePage(clip, function (imageResult) {
               // fs.writeFileSync('/Users/ewhite/workspace/ember-cli-visual-acceptance/electron-images/' + uuidv4() + '-image.png', imageResult.toPNG())
