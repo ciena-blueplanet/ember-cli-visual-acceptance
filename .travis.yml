@@ -23,6 +23,7 @@ before_script:
 script:
 - npm run lint && ember tva --push-var='false'
 install:
+- Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 - npm install
 - bower install
 after_success:
@@ -37,6 +38,7 @@ addons:
     packages:
       - google-chrome-stable
       - g++-4.8
+      - xvfb
   firefox: 'latest-esr'
 env:
   matrix:
