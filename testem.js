@@ -3,6 +3,7 @@ module.exports = {
   'test_page': 'tests/index.html?hidepassed',
   'disable_watching': true,
   'launch_in_ci': [
+    'Electron',
     'Firefox',
     'NightmareJsVisualAcceptance',
     'PhantomJsVisualAcceptance',
@@ -10,7 +11,7 @@ module.exports = {
     'Chromium'
   ],
   'launch_in_dev': [
-    'NightmareJsVisualAcceptance'
+    'Electron'
   ],
 
   'launchers': {
@@ -24,6 +25,10 @@ module.exports = {
     },
     'NightmareJsVisualAcceptance': {
       'command': 'DEBUG=nightmare* node vendor/nightmarejs-launcher.js <url>',
+      'protocol': 'browser'
+    },
+    'Electron': {
+      'command': 'electron vendor/electron-launcher.js <url>',
       'protocol': 'browser'
     }
   }
