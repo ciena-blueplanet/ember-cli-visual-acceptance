@@ -4,7 +4,7 @@ const app = electron.app // Module to control application life.
 const BrowserWindow = electron.BrowserWindow // Module to create native browser window.
 const ipcMain = electron.ipcMain
 const timeoutFromResize = 1500
-var url = process.argv[3]
+var url = process.argv[2]
 
 // var url = process.argv[2]
 // Report crashes to our server.
